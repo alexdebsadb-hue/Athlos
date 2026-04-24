@@ -3413,8 +3413,79 @@ function downloadTemplate() {
 }
 
 function importCSV(file) { parseImportFile(file); }
-
 function openImport() { openImportModal(); }
+
+function switchImportTab(tab) {
+  const isPaste = tab === 'paste';
+  document.getElementById('imp-panel-paste').style.display = isPaste ? 'block' : 'none';
+  document.getElementById('imp-panel-csv').style.display   = isPaste ? 'none'  : 'block';
+  const tPaste = document.getElementById('imp-tab-paste');
+  const tCsv   = document.getElementById('imp-tab-csv');
+  tPaste.style.borderBottomColor = isPaste ? 'var(--accent)' : 'transparent';
+  tPaste.style.color = isPaste ? 'var(--accent)' : 'var(--text3)';
+  tPaste.style.fontWeight = isPaste ? '700' : '400';
+  tCsv.style.borderBottomColor = !isPaste ? 'var(--accent)' : 'transparent';
+  tCsv.style.color = !isPaste ? 'var(--accent)' : 'var(--text3)';
+  tCsv.style.fontWeight = !isPaste ? '700' : '400';
+}
+
+function onPasteAreaChange(text) {
+  const lines = text.split('\n').filter(l => l.trim() && !l.trim().startsWith('Sport'));
+  const count = lines.length;
+  const countEl = document.getElementById('paste-count');
+  if (countEl) countEl.textContent = count > 0 ? count + ' righe rilevate' : '';
+  if (count > 0) {
+    // Parse automatico e mostra preview
+    parsePastedData(text);
+  } else {
+    // Nascondi preview
+    document.getElementById('import-preview').style.display = 'none';
+    document.getElementById('import-confirm-btn').style.display = 'none';
+  }
+}
+
+function parsePastedData(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (!lines.length) return;
+  // Salta riga header se presente
+  const start = lines[0].toLowerCase().includes('sport') || lines[0].toLowerCase().includes('tipo') ? 1 : 0;
+  const gareEsistenti = getGare();
+  const esistenti = new Set(gareEsistenti.map(g => (g.nome + '|' + g.data).toLowerCase()));
+  importPreviewData = [];
+  let errCount = 0;
+  for (let i = start; i < lines.length; i++) {
+    const raw = lines[i].trim();
+    if (!raw) continue;
+    // Supporta TAB (da Excel) o virgola
+    const sep = raw.includes('	') ? '	' : ',';
+    const cols = raw.split(sep).map(c => c.trim().replace(/^"|"$/g,''));
+    if (cols.length < 3) { errCount++; continue; }
+    try {
+      const parsed = parseStandardRow(cols);
+      if (!parsed || !parsed.nome) { errCount++; continue; }
+      const chiave = (parsed.nome + '|' + parsed.data).toLowerCase();
+      parsed.isDuplicate = esistenti.has(chiave);
+      parsed.selected = !parsed.isDuplicate;
+      importPreviewData.push(parsed);
+    } catch(e) { errCount++; }
+  }
+  renderImportPreview(errCount, 'incollato');
+}
+
+function downloadExcelTemplate() {
+  // Crea un TSV (apre come Excel) con intestazioni e righe di esempio
+  const header = ['Sport','Tipo gara','Data','Luogo','Regione','Km','Tempo','Esito','Note'].join('	');
+  const ex1    = ['Corsa','Maratona (42,2 km)','16/03/2025','Roma','Lazio','42.2','3:25:00','finisher','Ottima gara'].join('	');
+  const ex2    = ['Trail','Trail 30 km','18/05/2025','Visso','Marche','35','4:12:00','finisher','Dislivello impegnativo'].join('	');
+  const ex3    = ['Triathlon','Triathlon Olimpico (51,5 km)','01/06/2025','Riccione','Emilia-Romagna','51.5','','finisher',''].join('	');
+  const tsv    = [header, ex1, ex2, ex3].join('\n');
+  const blob   = new Blob(['﻿' + tsv], { type: 'text/tab-separated-values;charset=utf-8;' });
+  const url    = URL.createObjectURL(blob);
+  const a      = document.createElement('a');
+  a.href = url; a.download = 'irun_template_gare.xls'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Template scaricato — aprilo con Excel!');
+}
 
 
 
@@ -3984,18 +4055,20 @@ async function confermaLogin() {
     setUtenteId(profilo.utente_id);  // utente_id viene dal foglio, non dall'input
     localStorage.setItem('irun_profilo_remoto', JSON.stringify(profilo));
     renderNavUser();
-    info.textContent = `✓ Benvenuto ${profilo.nome || profilo.utente_id}!`;
-    info.style.background = 'rgba(76,175,80,0.08)';
-    info.style.border = '1px solid rgba(76,175,80,0.25)';
-    info.style.color = '#81c784';
-    await syncFromSheet();
-    setTimeout(() => {
-      closeLoginModal();
-      renderHome(); renderProfilo();
-      if (currentPage === 'gare')  renderGare('tutte');
-      if (currentPage === 'mappa') renderMappa();
-      if (currentPage === 'stats') renderStats();
-    }, 900);
+    // Chiudi modal subito — non aspettare la sync
+    closeLoginModal();
+    showPage('home');
+    renderHome();
+    renderProfilo();
+    showToast('Benvenuto ' + (profilo.nome || '') + '! 👋');
+    // Sync in background
+    syncFromSheet().then(() => {
+      renderHome();
+      if (currentPage === 'gare')    renderGare('tutte');
+      if (currentPage === 'mappa')   renderMappa();
+      if (currentPage === 'profilo') renderProfilo();
+      if (currentPage === 'stats')   renderStats();
+    });
   } else if (res && res.error) {
     info.textContent = '✗ ' + res.error;
     info.style.background = 'rgba(244,67,54,0.08)';
