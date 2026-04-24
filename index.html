@@ -966,11 +966,7 @@
 
       <!-- GRAFICI RIGA 1 -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Evoluzione maratone</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Tempo al traguardo nel tempo</div>
-          
-        </div>
+        
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Km per anno</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Chilometri totali gareggiati</div>
@@ -2567,7 +2563,33 @@ function renderStats() {
 
   // ── Evoluzione Tempo ──
   renderEvoluzioneSelector(gare);
-  // ── Comparatore ──
+  // ── Popola selector comparatore ──
+  const sel = document.getElementById('comp-selector');
+  if (sel) {
+    // Raggruppa per sport+tipo_gara+luogo
+    const gruppi = {};
+    gare.filter(g => g.esito === 'finisher' && garaTempoSecs(g) > 0).forEach(g => {
+      const sport    = (g.sport    || '').toLowerCase();
+      const tipo     = (g.tipo_gara || g.nome || '').trim();
+      const luogo    = (g.luogo    || '').trim();
+      if (!tipo || !luogo) return;
+      const k = sport + '|||' + tipo + '|||' + luogo;
+      if (!gruppi[k]) gruppi[k] = { sport, tipo, luogo, count: 0 };
+      gruppi[k].count++;
+    });
+    const opzioni = Object.entries(gruppi)
+      .filter(([,v]) => v.count >= 2)
+      .sort((a,b) => b[1].count - a[1].count);
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="">— Seleziona gara ripetuta —</option>'
+      + opzioni.map(([k,v]) =>
+          `<option value="${k}">${sportIcon(v.sport)} ${v.tipo} · ${v.luogo} (${v.count}x)</option>`
+        ).join('');
+    if (curVal) sel.value = curVal;
+    if (!opzioni.length) {
+      sel.innerHTML = '<option value="">— Nessuna gara ripetuta nella stessa città —</option>';
+    }
+  }
   renderComparator();
 }
 
@@ -2953,7 +2975,6 @@ function renderProgramma() {
     btns[0].onclick = e => { e.stopPropagation(); sposta2Gare(g.id); };
     btns[1].onclick = e => { e.stopPropagation(); apriModificaProgramma(g.id); };
     btns[2].onclick = e => { e.stopPropagation(); eliminaGaraProgramma(g.id); };
-    return card;
     cont.appendChild(card);
   });
 }
@@ -3905,159 +3926,91 @@ function populateComparator(gare) {
 }
 
 function renderComparator() {
-  const nome = document.getElementById('comp-selector').value;
-  const content = document.getElementById('comp-content');
-  const empty = document.getElementById('comp-empty');
+  const chiave = document.getElementById('comp-selector').value;
+  if (!chiave) {
+    document.getElementById('comp-content').style.display = 'none';
+    document.getElementById('comp-empty').style.display   = 'block';
+    return;
+  }
+  const [sport, tipoGara, luogo] = chiave.split('|||');
+  const gare = calcolaPBAutomatici(getGare());
+  const filtrate = gare
+    .filter(g =>
+      g.esito === 'finisher' &&
+      (g.sport||'').toLowerCase() === (sport||'').toLowerCase() &&
+      (g.tipo_gara||g.nome||'').toLowerCase() === (tipoGara||'').toLowerCase() &&
+      (g.luogo||'').toLowerCase() === (luogo||'').toLowerCase()
+    )
+    .sort((a,b) => String(a.data||'').localeCompare(String(b.data||'')));
 
-  if (!nome) {
-    content.style.display = 'none';
-    empty.style.display = 'block';
+  if (filtrate.length < 2) {
+    document.getElementById('comp-content').style.display = 'none';
+    document.getElementById('comp-empty').style.display   = 'block';
+    document.getElementById('comp-empty').innerHTML = '<div style="font-size:32px;margin-bottom:8px;">📊</div><div>Servono almeno 2 edizioni per il confronto</div>';
     return;
   }
 
-  const gare = getGare().filter(g => g.nome === nome).sort((a,b) => a.data.localeCompare(b.data));
-  if (!gare.length) return;
+  document.getElementById('comp-content').style.display = 'block';
+  document.getElementById('comp-empty').style.display   = 'none';
+  document.getElementById('comp-label').textContent     = filtrate.length + ' edizioni trovate';
 
-  content.style.display = 'block';
-  empty.style.display = 'none';
-
-  const isTri = gare[0].frazioni !== null;
-  const labels = gare.map(g => g.data.slice(0,4));
-  const tempi = gare.map(g => garaTempoSecs(g));
-  const minT = Math.min(...tempi.filter(t=>t>0));
-  const maxT = Math.max(...tempi.filter(t=>t>0));
-  const pad = (maxT - minT) * 0.15 || 300;
-
-  // Grafico comparatore
+  // Grafico a barre con tempo
   destroyChart('comp');
-  const ctx = document.getElementById('chart-comp').getContext('2d');
-  chartInstances['comp'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Tempo totale',
-        data: tempi,
-        backgroundColor: gare.map(g => g.pb ? 'rgba(255,213,79,0.7)' : 'rgba(255,87,34,0.6)'),
-        borderColor: gare.map(g => g.pb ? '#ffd54f' : CHART_COLORS.accent),
-        borderWidth: 2,
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        ...CHART_DEFAULTS.scales,
-        y: {
-          ...CHART_DEFAULTS.scales.y,
-          min: Math.max(0, minT - pad),
-          max: maxT + pad,
-          ticks: {
-            ...CHART_DEFAULTS.scales.y.ticks,
-            callback: v => secsToHMS(v)
-          }
-        }
+  const ctx = document.getElementById('chart-comp')?.getContext('2d');
+  if (ctx) {
+    const secsArr = filtrate.map(g => garaTempoSecs(g));
+    const pbCalc  = filtrate.map(g => g.pb);
+    chartInstances['comp'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: filtrate.map(g => (g.data||'').slice(0,4)),
+        datasets: [{
+          label: tipoGara + ' · ' + luogo,
+          data: secsArr,
+          backgroundColor: filtrate.map(g => g.pb ? '#ffd54f' : CHART_COLORS.accent),
+          borderRadius: 6,
+        }]
       },
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        legend: { display: false },
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            title: ctx => gare[ctx[0].dataIndex].luogo + ' ' + gare[ctx[0].dataIndex].data.slice(0,4),
-            label: ctx => ' Tempo: ' + secsToHMS(ctx.raw),
-            afterLabel: ctx => {
-              const g = gare[ctx.dataIndex];
-              const prev = gare[ctx.dataIndex - 1];
-              if (!prev) return '';
-              const diff = garaTempoSecs(g) - garaTempoSecs(prev);
-              const sign = diff > 0 ? '+' : '';
-              return ` vs anno prec.: ${sign}${secsToHMS(Math.abs(diff))}`;
-            }
+      options: {
+        ...CHART_DEFAULTS,
+        scales: {
+          ...CHART_DEFAULTS.scales,
+          y: {
+            ...CHART_DEFAULTS.scales.y,
+            ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => secsToHMS(v) }
           }
+        },
+        plugins: {
+          ...CHART_DEFAULTS.plugins,
+          tooltip: { callbacks: { label: ctx2 => secsToHMS(secsArr[ctx2.dataIndex]) + (pbCalc[ctx2.dataIndex] ? ' ★ PB' : '') } }
         }
       }
-    }
-  });
-
-  // Tabella dettaglio
-  const isTriFull = gare.some(g => g.frazioni);
-  let tableHtml = `
-    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text2);">${nome}</div>
-    <table style="width:100%;font-size:12px;border-collapse:collapse;">
-      <tr>
-        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Anno</th>
-        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Tempo</th>
-        ${isTriFull ? '<th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Nuoto</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Bici</th><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Corsa</th>' : ''}
-        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Delta</th>
-        <th style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);">Badge</th>
-      </tr>`;
-
-  gare.forEach((g, i) => {
-    const tempo = garaTempoDisplay(g);
-    const prev = gare[i-1];
-    let delta = '';
-    if (prev) {
-      const diff = garaTempoSecs(g) - garaTempoSecs(prev);
-      const sign = diff > 0 ? '+' : '';
-      const color = diff < 0 ? '#4caf50' : diff > 0 ? '#f44336' : '#888';
-      delta = `<span style="color:${color};font-weight:600;">${sign}${secsToHMS(Math.abs(diff))}</span>`;
-    }
-    const pbBadge = g.pb ? '<span style="background:rgba(255,213,79,0.2);color:#ffd54f;border-radius:3px;padding:1px 5px;font-size:10px;">★ PB</span>' : '';
-    const risultato = g.risultato && g.risultato !== 'FINISHER' ? `<span style="background:rgba(255,255,255,0.05);color:var(--text3);border-radius:3px;padding:1px 5px;font-size:10px;">${g.risultato}</span>` : '';
-
-    const triFrazioni = isTriFull && g.frazioni
-      ? `<td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text2);">${g.frazioni.nuoto||'-'}</td>
-         <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text2);">${g.frazioni.bici||'-'}</td>
-         <td style="padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text2);">${g.frazioni.corsa||'-'}</td>`
-      : isTriFull ? '<td colspan="3" style="padding:6px 8px;border-bottom:1px solid var(--border);"></td>' : '';
-
-    tableHtml += `<tr style="${g.pb ? 'background:rgba(255,213,79,0.05);' : i%2===0 ? '' : 'background:rgba(255,255,255,0.02);'}">
-      <td style="padding:6px 8px;border-bottom:1px solid var(--border);font-weight:600;">${g.data.slice(0,4)}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid var(--border);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--text);">${tempo}</td>
-      ${triFrazioni}
-      <td style="padding:6px 8px;border-bottom:1px solid var(--border);">${delta}</td>
-      <td style="padding:6px 8px;border-bottom:1px solid var(--border);">${pbBadge}${risultato}</td>
-    </tr>`;
-  });
-  tableHtml += '</table>';
-
-  // Migliore e peggiore
-  const validi = gare.filter(g => garaTempoSecs(g) > 0);
-  if (validi.length > 1) {
-    const best = validi.reduce((a,b) => garaTempoSecs(a) < garaTempoSecs(b) ? a : b);
-    const worst = validi.reduce((a,b) => garaTempoSecs(a) > garaTempoSecs(b) ? a : b);
-    const totDiff = garaTempoSecs(validi[validi.length-1]) - garaTempoSecs(validi[0]);
-    const sign = totDiff > 0 ? '+' : '';
-    const color = totDiff < 0 ? '#4caf50' : '#f44336';
-    tableHtml += `
-      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-        <div style="background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:10px;color:#81c784;font-weight:600;margin-bottom:2px;">MIGLIORE</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;">${garaTempoDisplay(best)}</div>
-          <div style="font-size:11px;color:var(--text3);">${best.data.slice(0,4)}</div>
-        </div>
-        <div style="background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.3);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:10px;color:#ef9a9a;font-weight:600;margin-bottom:2px;">PEGGIORE</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;">${garaTempoDisplay(worst)}</div>
-          <div style="font-size:11px;color:var(--text3);">${worst.data.slice(0,4)}</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
-          <div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:2px;">PRIMA→ULTIMA</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:${color};">${sign}${secsToHMS(Math.abs(totDiff))}</div>
-          <div style="font-size:11px;color:var(--text3);">${validi[0].data.slice(0,4)} → ${validi[validi.length-1].data.slice(0,4)}</div>
-        </div>
-      </div>`;
+    });
   }
 
+  // Tabella di confronto
+  let tableHtml = `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">`;
+  const secsAll  = filtrate.map(g => garaTempoSecs(g)).filter(s => s > 0);
+  const minSecs  = Math.min(...secsAll);
+  filtrate.forEach(g => {
+    const secs    = garaTempoSecs(g);
+    const isPB    = g.pb;
+    const diff    = secs - minSecs;
+    const diffStr = diff === 0 ? '' : '+' + secsToHMS(diff);
+    tableHtml += `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${isPB ? 'rgba(255,213,79,0.08)' : 'var(--bg4)'};border:1px solid ${isPB ? 'rgba(255,213,79,0.3)' : 'var(--border)'};border-radius:10px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--accent);min-width:80px;">${secsToHMS(secs)}</div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:14px;">${fmtDataIT(g.data)} ${isPB ? '★ PB' : ''}</div>
+          ${diffStr ? `<div style="font-size:12px;color:var(--text3);">${diffStr} dal migliore</div>` : '<div style="font-size:12px;color:#81c784;">Migliore</div>'}
+        </div>
+      </div>`;
+  });
+  tableHtml += '</div>';
   document.getElementById('comp-table').innerHTML = tableHtml;
 }
 
 
-// ============ INIT ============
-const GARE_PRECARICATE = [];  // dati dal foglio Google
-
-// ============ LOGIN ============
 function openLoginModal(prefilEmail) {
   const uid = getUtenteId();
   switchAuthTab('login');
