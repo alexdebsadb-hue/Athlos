@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I-Run</title>
+<title>I-Run — Il tuo diario di gare</title>
+  <meta name="description" content="Tieni traccia di tutte le tue gare: corsa, triathlon, trail, bici e nuoto. Statistiche, mappe e personal best automatici." />
+  <link rel="canonical" href="https://alexdebsadb-hue.github.io/I-Run/" />
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -1525,12 +1527,15 @@ async function gsGet(params) {
     + '&utente_id=' + encodeURIComponent(uid)
     + Object.entries(params).map(([k,v]) => '&'+k+'='+encodeURIComponent(v)).join('');
   try {
-    const res  = await fetch(url);
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 8000);
+    const res  = await fetch(url, { signal: controller.signal });
+    clearTimeout(tid);
     const json = await res.json();
     if (!json.ok) console.warn('gsGet error:', json.error);
     return json.data || null;
   } catch(e) {
-    console.warn('gsGet fetch error:', e);
+    if (e.name !== 'AbortError') console.warn('gsGet fetch error:', e);
     return null;
   }
 }
@@ -1539,15 +1544,22 @@ async function gsPost(action, data) {
   const uid = getUtenteId();
   if (data && !data.utente_id) data.utente_id = uid;
   try {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 8000);
     const res  = await fetch(GS_URL, {
       method: 'POST',
       body: JSON.stringify({ token: GS_TOKEN, action, data }),
+      signal: controller.signal,
     });
+    clearTimeout(tid);
     const json = await res.json();
     if (!json.ok) console.warn('gsPost error:', json.error);
+    // loginUtente restituisce ok nel corpo, non in data
+    if (json.ok && json.data) return json.data;
+    if (json.ok && json.ok === true) return json;
     return json.data || null;
   } catch(e) {
-    console.warn('gsPost fetch error:', e);
+    if (e.name !== 'AbortError') console.warn('gsPost fetch error:', e);
     return null;
   }
 }
@@ -1663,7 +1675,11 @@ async function caricaConfigurazione() {
     const url = GS_URL
       + '?token=' + encodeURIComponent(GS_TOKEN)
       + '&action=getConfigurazione';
-    const res  = await fetch(url);
+    // Timeout 5 secondi
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 5000);
+    const res  = await fetch(url, { signal: controller.signal });
+    clearTimeout(tid);
     const json = await res.json();
     console.log('Config risposta grezza:', json);
 
@@ -4225,36 +4241,35 @@ function renderNavUser() {
 // ============ INIT ============
 async function init() {
   renderNavUser();
-  // Carica configurazione dal foglio (sport, distanze, regioni) — AWAIT obbligatorio
-  await caricaConfigurazione();
-  console.log('Config pronta:', getConfig());
+
+  // Usa subito i default locali — il sito si apre immediatamente
+  usaConfigDefault();
+
+  // Carica cache configurazione se disponibile
+  const cached = getCachedConfig();
+  if (cached && cached.sport && cached.sport.length) {
+    setConfig(cached);
+    console.log('Config da cache:', cached.sport);
+  }
 
   const uid = getUtenteId();
+
   if (!uid) {
-    // Primo accesso: mostra subito il login
-    if (!getGare().length) {
-      saveGare(GARE_PRECARICATE);
-    }
-    if (!getProgramma().length) {
-      saveProgramma([{
-        id: 1, sport: 'corsa', utente_id: '',
-        nome: 'Passatore di Romagna 100km',
-        data: '2026-05-23', luogo: 'Firenze → Faenza',
-        regione: 'Emilia-Romagna', distanza: 100,
-        note: "Obiettivo: 10h45' — prima ultramaratona da 100km"
-      }]);
-    }
     renderHome();
     renderProgramma();
-    // Mostra login dopo un attimo
-    setTimeout(openLoginModal, 800);
+    setTimeout(openLoginModal, 600);
   } else {
-    // Utente noto: carica cache locale subito, poi sync in background
-    if (!getGare().length) saveGare(GARE_PRECARICATE);
+    // Render immediato con dati locali
     renderHome();
     renderProgramma();
-    syncFromSheet().then(() => {
+
+    // Poi in background: carica config aggiornata + gare
+    Promise.allSettled([
+      caricaConfigurazione(),
+      syncFromSheet()
+    ]).then(() => {
       renderHome();
+      renderProgramma();
       if (currentPage === 'gare')    renderGare('tutte');
       if (currentPage === 'mappa')   renderMappa();
       if (currentPage === 'profilo') renderProfilo();
@@ -4274,3 +4289,75 @@ function regioneColorSVG(n) {
   if (n >= 10) return '#ff5722';
   if (n >= 5)  return '#ff8a65';
   if (n >= 2)  return '#ffccbc';
+  if (n >= 1)  return 'rgba(255,87,34,0.4)';
+  return '#1c1c1c';
+}
+
+function updateMapColors() {
+  const gare = getGare();
+  const regioniMap = {};
+  gare.forEach(g => {
+    if (g.regione && g.regione !== 'Estero') {
+      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
+      regioniMap[g.regione].push(g);
+    }
+  });
+
+  const tooltip = document.getElementById('map-tooltip');
+
+  document.querySelectorAll('#italy-svg .reg-d3').forEach(path => {
+    const regName = path.dataset.region;
+    const gs = regioniMap[regName] || [];
+    const color = regioneColorSVG(gs.length);
+
+    path.style.fill = color;
+    path.style.stroke = '#0a0a0a';
+    path.style.strokeWidth = '0.8';
+    path.style.cursor = gs.length ? 'pointer' : 'default';
+    path.style.transition = 'fill 0.2s, opacity 0.15s';
+
+    path.onmouseenter = function(e) {
+      if (gs.length > 0) {
+        path.style.filter = 'url(#reg-glow)';
+        path.style.opacity = '0.85';
+      }
+      if (!tooltip) return;
+      if (!gs.length) {
+        tooltip.innerHTML = `<div style="font-weight:600;margin-bottom:2px;">${regName}</div><div style="color:var(--text3);font-size:12px;">Nessuna gara ancora</div>`;
+      } else {
+        const kmR = gs.reduce((s,g) => s+(g.distanza||0), 0);
+        const list = gs.slice(0,5).map(g => {
+          const t = g.frazioni ? calcTempoTri(g.frazioni) : (g.tempo||'');
+          return `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${g.data.slice(0,4)} · ${g.nome}${t?' · <span style=color:#ff8a65>'+t+'</span>':''}</div>`;
+        }).join('');
+        const more = gs.length > 5 ? `<div style="font-size:11px;color:var(--accent);margin-top:3px;">+${gs.length-5} altre gare</div>` : '';
+        tooltip.innerHTML = `
+          <div style="font-weight:600;font-size:14px;margin-bottom:5px;">${regName}</div>
+          <div style="color:var(--accent);font-weight:600;margin-bottom:4px;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>
+          ${list}${more}`;
+      }
+      const box = document.getElementById('italy-map-container').getBoundingClientRect();
+      let tx = e.clientX - box.left + 14;
+      let ty = e.clientY - box.top + 14;
+      if (tx + 230 > box.width) tx -= 245;
+      if (ty + 170 > box.height) ty -= 175;
+      tooltip.style.left = Math.max(0,tx) + 'px';
+      tooltip.style.top = Math.max(0,ty) + 'px';
+      tooltip.style.opacity = '1';
+    };
+
+    path.onmouseleave = function() {
+      path.style.filter = '';
+      path.style.opacity = '1';
+      if (tooltip) tooltip.style.opacity = '0';
+    };
+  });
+}
+
+function loadMap() {
+  // SVG già nel DOM — aggiorna solo i colori
+  updateMapColors();
+}
+</script>
+</body>
+</html>
