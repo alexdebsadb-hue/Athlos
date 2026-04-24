@@ -1320,17 +1320,49 @@
       </div>
     </div>
     <div class="import-body">
-      <div id="import-dropzone" class="drop-zone"
-        ondragover="event.preventDefault();this.classList.add('dragover')"
-        ondragleave="this.classList.remove('dragover')"
-        ondrop="handleImportDrop(event)"
-        onclick="triggerImportFile()">
-        <div class="drop-zone-icon">&#x1F4C2;</div>
-        <div class="drop-zone-title">Trascina il file CSV qui</div>
-        <div style="font-size:13px;margin-bottom:16px;">oppure clicca per sfogliare</div>
-        <div style="font-size:12px;color:var(--text3);">Formato: CSV con TAB o virgola come separatore &#xB7; UTF-8</div>
-        <div style="margin-top:16px;">
-          <button class="btn-secondary" style="font-size:12px;" onclick="event.stopPropagation();downloadTemplate()">&#x1F4E5; Scarica template CSV</button>
+
+      <!-- TAB SELECTOR -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);">
+        <button id="imp-tab-paste" onclick="switchImportTab('paste')"
+          style="padding:9px 20px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;">
+          &#x1F4CB; Incolla da Excel
+        </button>
+        <button id="imp-tab-csv" onclick="switchImportTab('csv')"
+          style="padding:9px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;">
+          &#x1F4C2; File CSV
+        </button>
+      </div>
+
+      <!-- PANNELLO INCOLLA -->
+      <div id="imp-panel-paste">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7;">
+          Copia le righe da Excel o Google Sheets e incollale qui sotto con <strong>Ctrl+V</strong>.<br>
+          <span style="color:var(--text3);font-size:12px;">Colonne attese nell'ordine:</span>
+          <code style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">Sport &middot; Tipo gara &middot; Data (GG/MM/AAAA) &middot; Luogo &middot; Regione &middot; Km &middot; Tempo (H:MM:SS) &middot; Esito &middot; Note</code>
+        </div>
+        <textarea id="import-paste-area"
+          placeholder="Incolla qui il contenuto copiato da Excel (Ctrl+V)..."
+          style="width:100%;height:180px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:12px;font-family:monospace;font-size:12px;color:var(--text);resize:vertical;outline:none;box-sizing:border-box;"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border2)'"
+          oninput="onPasteAreaChange(this.value)"></textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-secondary" style="font-size:12px;" onclick="downloadExcelTemplate()">&#x1F4E5; Scarica template Excel</button>
+          <span id="paste-count" style="font-size:13px;color:var(--text3);"></span>
+        </div>
+      </div>
+
+      <!-- PANNELLO CSV -->
+      <div id="imp-panel-csv" style="display:none;">
+        <div id="import-dropzone" class="drop-zone"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleImportDrop(event)"
+          onclick="triggerImportFile()">
+          <div class="drop-zone-icon">&#x1F4C2;</div>
+          <div class="drop-zone-title">Trascina il file CSV qui</div>
+          <div style="font-size:13px;margin-bottom:16px;">oppure clicca per sfogliare</div>
+          <div style="font-size:12px;color:var(--text3);">Formato: CSV con TAB o virgola &#xB7; UTF-8</div>
         </div>
       </div>
       <div id="import-preview" style="display:none;">
@@ -4042,26 +4074,47 @@ async function confermaLogin() {
   if (!email) { alert('Inserisci la tua email'); return; }
 
   const info = document.getElementById('login-info');
-  info.textContent = '⟳ Verifica credenziali...';
-  info.style.display = 'block';
-  info.style.background = 'rgba(255,193,7,0.08)';
-  info.style.border = '1px solid rgba(255,193,7,0.25)';
-  info.style.color = 'var(--text2)';
+  function setInfo(msg, tipo) {
+    info.textContent = msg;
+    info.style.display = 'block';
+    const colors = {
+      loading: ['rgba(255,193,7,0.08)','rgba(255,193,7,0.25)','var(--text2)'],
+      ok:      ['rgba(76,175,80,0.08)', 'rgba(76,175,80,0.25)', '#81c784'],
+      err:     ['rgba(244,67,54,0.08)', 'rgba(244,67,54,0.25)', '#ef9a9a'],
+    };
+    const [bg, border, color] = colors[tipo] || colors.loading;
+    info.style.background = bg;
+    info.style.border = '1px solid ' + border;
+    info.style.color = color;
+  }
 
-  // Login con email come identificativo primario
-  const res = await gsPost('loginUtente', { email: email, password: pwd });
+  setInfo('⟳ Connessione al foglio...', 'loading');
+
+  // Timeout di 8 secondi — se non risponde, accesso offline
+  let res = null;
+  try {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 8000)
+    );
+    res = await Promise.race([
+      gsPost('loginUtente', { email: email, password: pwd }),
+      timeoutPromise
+    ]);
+  } catch(e) {
+    res = null; // timeout o errore rete
+  }
+
   if (res && res.ok) {
+    // LOGIN OK
     const profilo = res;
-    setUtenteId(profilo.utente_id);  // utente_id viene dal foglio, non dall'input
+    setUtenteId(profilo.utente_id);
     localStorage.setItem('irun_profilo_remoto', JSON.stringify(profilo));
     renderNavUser();
-    // Chiudi modal subito — non aspettare la sync
     closeLoginModal();
     showPage('home');
     renderHome();
     renderProfilo();
-    showToast('Benvenuto ' + (profilo.nome || '') + '! 👋');
-    // Sync in background
+    showToast('Benvenuto ' + (profilo.nome || profilo.utente_id || '') + '! 👋');
     syncFromSheet().then(() => {
       renderHome();
       if (currentPage === 'gare')    renderGare('tutte');
@@ -4069,19 +4122,22 @@ async function confermaLogin() {
       if (currentPage === 'profilo') renderProfilo();
       if (currentPage === 'stats')   renderStats();
     });
+
   } else if (res && res.error) {
-    info.textContent = '✗ ' + res.error;
-    info.style.background = 'rgba(244,67,54,0.08)';
-    info.style.border = '1px solid rgba(244,67,54,0.25)';
-    info.style.color = '#ef9a9a';
+    // ERRORE CREDENZIALI — rimane aperto
+    setInfo('✗ ' + res.error, 'err');
+
   } else {
-    // Fallback offline: accesso senza password se foglio non raggiungibile
-    setUtenteId(email);
-    renderNavUser();
-    info.textContent = '⚠ Foglio non raggiungibile. Accesso offline.';
-    info.style.color = 'var(--accent2)';
-    await syncFromSheet();
-    setTimeout(() => { closeLoginModal(); renderHome(); }, 1200);
+    // FOGLIO NON RAGGIUNGIBILE — accesso offline con email come uid temporaneo
+    setInfo('⚠ Foglio non raggiungibile. Accesso in modalità offline.', 'err');
+    setTimeout(() => {
+      setUtenteId(email);
+      renderNavUser();
+      closeLoginModal();
+      showPage('home');
+      renderHome();
+      showToast('Accesso offline — le gare saranno sincronizzate appena possibile');
+    }, 2000);
   }
 }
 
@@ -4218,75 +4274,3 @@ function regioneColorSVG(n) {
   if (n >= 10) return '#ff5722';
   if (n >= 5)  return '#ff8a65';
   if (n >= 2)  return '#ffccbc';
-  if (n >= 1)  return 'rgba(255,87,34,0.4)';
-  return '#1c1c1c';
-}
-
-function updateMapColors() {
-  const gare = getGare();
-  const regioniMap = {};
-  gare.forEach(g => {
-    if (g.regione && g.regione !== 'Estero') {
-      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
-      regioniMap[g.regione].push(g);
-    }
-  });
-
-  const tooltip = document.getElementById('map-tooltip');
-
-  document.querySelectorAll('#italy-svg .reg-d3').forEach(path => {
-    const regName = path.dataset.region;
-    const gs = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-
-    path.style.fill = color;
-    path.style.stroke = '#0a0a0a';
-    path.style.strokeWidth = '0.8';
-    path.style.cursor = gs.length ? 'pointer' : 'default';
-    path.style.transition = 'fill 0.2s, opacity 0.15s';
-
-    path.onmouseenter = function(e) {
-      if (gs.length > 0) {
-        path.style.filter = 'url(#reg-glow)';
-        path.style.opacity = '0.85';
-      }
-      if (!tooltip) return;
-      if (!gs.length) {
-        tooltip.innerHTML = `<div style="font-weight:600;margin-bottom:2px;">${regName}</div><div style="color:var(--text3);font-size:12px;">Nessuna gara ancora</div>`;
-      } else {
-        const kmR = gs.reduce((s,g) => s+(g.distanza||0), 0);
-        const list = gs.slice(0,5).map(g => {
-          const t = g.frazioni ? calcTempoTri(g.frazioni) : (g.tempo||'');
-          return `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${g.data.slice(0,4)} · ${g.nome}${t?' · <span style=color:#ff8a65>'+t+'</span>':''}</div>`;
-        }).join('');
-        const more = gs.length > 5 ? `<div style="font-size:11px;color:var(--accent);margin-top:3px;">+${gs.length-5} altre gare</div>` : '';
-        tooltip.innerHTML = `
-          <div style="font-weight:600;font-size:14px;margin-bottom:5px;">${regName}</div>
-          <div style="color:var(--accent);font-weight:600;margin-bottom:4px;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>
-          ${list}${more}`;
-      }
-      const box = document.getElementById('italy-map-container').getBoundingClientRect();
-      let tx = e.clientX - box.left + 14;
-      let ty = e.clientY - box.top + 14;
-      if (tx + 230 > box.width) tx -= 245;
-      if (ty + 170 > box.height) ty -= 175;
-      tooltip.style.left = Math.max(0,tx) + 'px';
-      tooltip.style.top = Math.max(0,ty) + 'px';
-      tooltip.style.opacity = '1';
-    };
-
-    path.onmouseleave = function() {
-      path.style.filter = '';
-      path.style.opacity = '1';
-      if (tooltip) tooltip.style.opacity = '0';
-    };
-  });
-}
-
-function loadMap() {
-  // SVG già nel DOM — aggiorna solo i colori
-  updateMapColors();
-}
-</script>
-</body>
-</html>
