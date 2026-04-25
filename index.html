@@ -601,6 +601,21 @@
     <button class="nav-link" onclick="showPage('programma',this)">In programma</button>
     <button class="nav-link" onclick="showPage('stats',this)">Statistiche</button>
   </div>
+  <!-- BARRA RICERCA GLOBALE -->
+  <div style="position:relative;margin:0 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:24px;padding:6px 14px;transition:border-color 0.2s;" id="search-wrap">
+      <span style="font-size:14px;color:var(--text3);">🔍</span>
+      <input id="global-search"
+        placeholder="Cerca gare, utenti, luoghi..."
+        style="background:none;border:none;outline:none;color:var(--text);font-family:'Barlow',sans-serif;font-size:13px;width:220px;"
+        oninput="onGlobalSearch(this.value)"
+        onfocus="document.getElementById('search-wrap').style.borderColor='var(--accent)'"
+        onblur="document.getElementById('search-wrap').style.borderColor='var(--border2)';setTimeout(closeSearch,200)"
+        onkeydown="if(event.key==='Escape')closeSearch()" />
+      <span id="search-clear" style="cursor:pointer;color:var(--text3);font-size:16px;display:none;" onclick="clearSearch()">✕</span>
+    </div>
+    <div id="search-dropdown" style="display:none;position:absolute;top:44px;left:0;width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;z-index:500;box-shadow:0 16px 40px rgba(0,0,0,0.5);max-height:480px;overflow-y:auto;"></div>
+  </div>
   <div class="nav-right">
     <span id="sync-badge" style="font-size:12px;color:var(--text3);min-width:100px;text-align:right;"></span>
     <button class="btn-secondary" onclick="openImport()" style="font-size:13px;">📋 Importa gare</button>
@@ -818,7 +833,7 @@
   <div id="page-gare" class="page">
     <div class="profile-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;">Le mie gare</h2>
+        <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">Le mie gare</h2>
         <div style="display:flex;gap:10px;">
           <button class="btn-secondary" onclick="openImportModal()">&#x1F4E5; Import CSV</button>
           <button class="btn-primary" onclick="openForm()">+ Aggiungi gara</button>
@@ -938,7 +953,7 @@
   <div id="page-programma" class="page">
     <div class="profile-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;">Gare in programma</h2>
+        <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">Gare in programma</h2>
         <button class="btn-primary" onclick="openFormProgramma()">+ Aggiungi</button>
       </div>
       <div id="programma-list" class="gare-list">
@@ -958,7 +973,7 @@
     <div class="profile-wrap" style="max-width:1000px;">
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;">Statistiche</h2>
+        <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">Statistiche</h2>
       </div>
 
       <!-- CARDS RIASSUNTO -->
@@ -968,7 +983,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
         
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Gare per anno</div>
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Gare per anno</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Finisher e DNF per anno</div>
           <canvas id="chart-anno" height="200"></canvas>
         </div>
@@ -977,12 +992,12 @@
       <!-- GRAFICI RIGA 2 -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;">
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Distribuzione sport</div>
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Distribuzione sport</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Numero di gare per disciplina</div>
           <canvas id="chart-sport" height="200"></canvas>
         </div>
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Top tipi di gara</div>
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Top tipi di gara</div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Le gare più disputate</div>
           <canvas id="chart-tipo" height="200"></canvas>
         </div>
@@ -990,7 +1005,7 @@
 
       <!-- EVOLUZIONE TEMPO -->
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Evoluzione tempo</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Evoluzione tempo</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">Seleziona un tipo di gara per vedere l'andamento del tempo nel corso degli anni</div>
         <select class="form-select" id="evoluzione-selector" style="max-width:320px;margin-bottom:16px;" onchange="renderEvoluzioneChart(calcolaPBAutomatici(getGare()), this.value)">
           <option value="">— Seleziona tipo di gara —</option>
@@ -1006,7 +1021,7 @@
 
       <!-- COMPARATORE -->
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Confronto gare ripetute</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Confronto gare ripetute</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Seleziona una gara per confrontare le edizioni nel tempo</div>
 
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
@@ -1306,7 +1321,7 @@
     <div class="detail-header">
       <div style="padding-right:40px;">
         <div id="detail-badge-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;"></div>
-        <div id="detail-nome" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;line-height:1.1;"></div>
+        <div id="detail-nome" style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:900;line-height:1.1;"></div>
         <div id="detail-meta" style="color:var(--text2);font-size:13px;margin-top:6px;"></div>
       </div>
       <button class="detail-close" onclick="closeDetail()">&#x2715;</button>
@@ -1320,7 +1335,7 @@
   <div class="import-box">
     <div class="import-header">
       <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;">Import gare <span style="color:var(--accent);">CSV</span></div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:800;">Import gare <span style="color:var(--accent);">CSV</span></div>
         <div id="import-subtitle" style="font-size:13px;color:var(--text3);margin-top:2px;"></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
@@ -1386,7 +1401,7 @@
               <tr>
                 <th><input type="checkbox" id="import-check-all" onchange="toggleAllImport(this.checked)" /></th>
                 <th>Sport</th><th>Nome gara</th><th>Data</th><th>Luogo</th>
-                <th>Regione</th><th>Km</th><th>Tempo</th><th>Stato</th>
+                <th>Regione</th><th>Km</th><th>Tempo letto</th><th>Tempo (secs)</th><th>Stato</th>
               </tr>
             </thead>
             <tbody id="import-table-body"></tbody>
@@ -1394,6 +1409,28 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PROFILO PUBBLICO MODAL -->
+<div class="detail-overlay" id="public-profile-overlay" onclick="if(event.target===this)closePublicProfile()">
+  <div class="detail-box" style="max-width:720px;">
+    <div class="detail-header">
+      <div style="padding-right:40px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+          <div class="avatar" style="width:56px;height:56px;font-size:22px;flex-shrink:0;">
+            <span id="pp-initials">?</span>
+          </div>
+          <div>
+            <div id="pp-nome" style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:900;"></div>
+            <div id="pp-meta" style="font-size:13px;color:var(--text2);margin-top:2px;"></div>
+          </div>
+        </div>
+        <div id="pp-sport" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+      <button class="detail-close" onclick="closePublicProfile()">&#x2715;</button>
+    </div>
+    <div class="detail-body" id="pp-body"></div>
   </div>
 </div>
 
@@ -1613,7 +1650,7 @@ function normalizzaGara(g) {
     tipo_gara: g.tipo_gara || g.nome || '',
     distanza: parseFloat(g.distanza) || 0,
     esito: g.esito || 'finisher',
-    tempo: g.tempo || null,
+    tempo: normalizzaTempo(g.tempo || '') || null,
     frazioni: g.frazioni || null,
     rating: Object.assign(
       { percorso:0, ristori:0, organizzazione:0 },
@@ -2294,7 +2331,7 @@ function renderGare(tipo) {
       .map(([tipo_gara, list]) => `
         <div style="margin-bottom:24px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">${tipo_gara}</span>
+            <span style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;">${tipo_gara}</span>
             <span style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--text2);">${list.length} gar${list.length===1?'a':'e'}</span>
           </div>
           ${list.map(garaCard).join('')}
@@ -2377,7 +2414,7 @@ function renderGare(tipo) {
       <div style="margin-bottom:24px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid ${sportColor(sport)}30;">
           <span style="font-size:22px;">${sportIcon(sport)}</span>
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">${sportLabel(sport)}</span>
+          <span style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;">${sportLabel(sport)}</span>
         </div>
         ${list.map(g => garaCard({...g, pb: true})).join('')}
       </div>
@@ -3037,38 +3074,388 @@ function sposta2Gare(id) {
 }
 
 // ============ RICERCA GLOBALE ============
+// Cache utenti per la ricerca (caricati dal foglio)
+let _utentiCache = [];
+
+// Modal per le recensioni di tutti gli utenti su una gara
+async function cercaRecensioni(query) {
+  // Apri modal profilo pubblico come contenitore temporaneo
+  const overlay = document.getElementById('public-profile-overlay');
+  overlay.classList.add('open');
+  document.getElementById('pp-initials').textContent = '🔍';
+  document.getElementById('pp-nome').textContent     = 'Recensioni: "' + query + '"';
+  document.getElementById('pp-meta').textContent     = '';
+  document.getElementById('pp-sport').innerHTML      = '';
+  document.getElementById('pp-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);">⟳ Raccogliendo recensioni da tutti gli utenti...</div>';
+
+  // Carica tutti gli utenti
+  if (!_utentiCache.length) await caricaUtentiCache();
+  if (!_utentiCache.length) {
+    document.getElementById('pp-body').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);">Impossibile caricare gli utenti al momento</div>';
+    return;
+  }
+
+  const ql = query.toLowerCase();
+  let tutteRecensioni = [];
+
+  // Per ogni utente, carica le sue gare e filtra quelle che matchano
+  const promises = _utentiCache.map(async u => {
+    try {
+      const gare = await gsGet({ action: 'getGare', utente_id: u.utente_id });
+      if (!Array.isArray(gare)) return;
+      const match = gare.map(normalizzaGara).filter(g =>
+        g.rating && (g.rating.percorso || g.rating.ristori || g.rating.organizzazione) &&
+        (
+          (g.nome||g.tipo_gara||'').toLowerCase().includes(ql) ||
+          (g.luogo||'').toLowerCase().includes(ql) ||
+          (g.regione||'').toLowerCase().includes(ql)
+        )
+      );
+      match.forEach(g => tutteRecensioni.push({ ...g, _autore: u }));
+    } catch(e) {}
+  });
+
+  // Aspetta tutte le richieste (max 10 utenti per performance)
+  await Promise.allSettled(promises.slice(0, 10));
+
+  if (!tutteRecensioni.length) {
+    document.getElementById('pp-body').innerHTML = `<div style="text-align:center;padding:32px;color:var(--text3);">
+      <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+      <div>Nessuna recensione trovata per "<strong>${query}</strong>"</div>
+      <div style="font-size:12px;margin-top:8px;">Prova con il nome della gara, la città o la regione</div>
+    </div>`;
+    return;
+  }
+
+  // Raggruppa per gara (nome+luogo)
+  const gruppi = {};
+  tutteRecensioni.forEach(g => {
+    const k = (g.nome||g.tipo_gara||'') + '|' + (g.luogo||'');
+    if (!gruppi[k]) gruppi[k] = { gara: g, recensioni: [] };
+    const avg = g.rating ? Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3) : 0;
+    gruppi[k].recensioni.push({ g, autore: g._autore, avg });
+    // Media voti
+    gruppi[k].mediaAvg = gruppi[k].recensioni.reduce((s,r) => s+r.avg, 0) / gruppi[k].recensioni.length;
+  });
+
+  document.getElementById('pp-nome').textContent = `Recensioni: "${query}" (${tutteRecensioni.length})`;
+
+  let body = '';
+  Object.values(gruppi).sort((a,b) => b.mediaAvg - a.mediaAvg).forEach(({ gara, recensioni, mediaAvg }) => {
+    body += `<div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;margin-bottom:8px;">
+        <span style="font-size:24px;">${sportIcon(gara.sport)}</span>
+        <div style="flex:1;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;">${gara.nome||gara.tipo_gara}</div>
+          <div style="font-size:12px;color:var(--text3);">${gara.luogo||''}${gara.regione?' · '+gara.regione:''} · ${gara.distanza}km</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px;color:#ffd54f;">${'★'.repeat(Math.round(mediaAvg))}${'☆'.repeat(5-Math.round(mediaAvg))}</div>
+          <div style="font-size:11px;color:var(--text3);">${mediaAvg.toFixed(1)}/5 · ${recensioni.length} recension${recensioni.length===1?'e':'i'}</div>
+        </div>
+      </div>`;
+    recensioni.forEach(({ g, autore }) => {
+      const nomeAutore = [autore.nome||'', autore.cognome||''].filter(Boolean).join(' ') || autore.utente_id;
+      const initAutore = nomeAutore.split(' ').map(p=>p[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
+      body += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:6px;margin-left:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${initAutore}</div>
+          <div style="flex:1;font-size:12px;font-weight:600;">${nomeAutore}</div>
+          <div style="font-size:12px;color:var(--text3);">${fmtDataIT(g.data)}</div>
+          <div style="font-size:13px;color:#ffd54f;">${'★'.repeat(Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3))}${'☆'.repeat(5-Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3))}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:11px;margin-bottom:6px;">
+          <div style="text-align:center;"><span style="color:var(--text3);">Percorso</span><br>${'★'.repeat(g.rating.percorso||0)}</div>
+          <div style="text-align:center;"><span style="color:var(--text3);">Ristori</span><br>${'★'.repeat(g.rating.ristori||0)}</div>
+          <div style="text-align:center;"><span style="color:var(--text3);">Org.</span><br>${'★'.repeat(g.rating.organizzazione||0)}</div>
+        </div>
+        ${g.note ? `<div style="font-size:12px;color:var(--text2);font-style:italic;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">"${g.note}"</div>` : ''}
+      </div>`;
+    });
+    body += '</div>';
+  });
+
+  document.getElementById('pp-body').innerHTML = body;
+}
+
+async function caricaUtentiCache() {
+  if (_utentiCache.length > 0) return;
+  try {
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 5000);
+    const url = GS_URL + '?token=' + encodeURIComponent(GS_TOKEN) + '&action=getAllUtenti';
+    const res  = await fetch(url, { signal: controller.signal });
+    clearTimeout(tid);
+    const json = await res.json();
+    if (json.ok && Array.isArray(json.data)) {
+      _utentiCache = json.data;
+    }
+  } catch(e) { /* offline */ }
+}
+
 function onGlobalSearch(q) {
   const dd = document.getElementById('search-dropdown');
+  const clr = document.getElementById('search-clear');
+  if (clr) clr.style.display = q ? 'block' : 'none';
   if (!q || q.length < 2) { dd.style.display = 'none'; return; }
-  const gare = getGare();
+
   const ql = q.toLowerCase();
-  const found = gare.filter(g =>
+  const gare = getGare();
+
+  // Ricerca gare (mie)
+  const gFound = gare.filter(g =>
     (g.nome||g.tipo_gara||'').toLowerCase().includes(ql) ||
     (g.luogo||'').toLowerCase().includes(ql) ||
     (g.regione||'').toLowerCase().includes(ql) ||
-    (g.sport||'').toLowerCase().includes(ql)
-  ).slice(0, 8);
-  if (!found.length) {
-    dd.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--text3);">Nessun risultato</div>';
+    (g.sport||'').toLowerCase().includes(ql) ||
+    (g.data||'').includes(ql)
+  ).slice(0, 6);
+
+  // Ricerca utenti (dalla cache)
+  const uFound = _utentiCache.filter(u =>
+    (u.nome||'').toLowerCase().includes(ql) ||
+    (u.cognome||'').toLowerCase().includes(ql) ||
+    (u.sport_preferito||'').toLowerCase().includes(ql) ||
+    ((u.nome||'')+' '+(u.cognome||'')).toLowerCase().includes(ql)
+  ).filter(u => u.utente_id !== getUtenteId()).slice(0, 4);
+
+  if (!gFound.length && !uFound.length) {
+    dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
+      <div style="font-size:24px;margin-bottom:6px;">🔍</div>Nessun risultato per "<strong>${q}</strong>"
+    </div>`;
     dd.style.display = 'block';
     return;
   }
-  dd.innerHTML = found.map(g => {
-    const dataFmt = g.data ? fmtDataIT(g.data) : '';
-    return `<div onclick="openDetail(${g.id});closeSearch();"
-      style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
-      onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">`
-      + `<span style="font-size:20px;">${sportIcon(g.sport)}</span>`
-      + `<div><div style="font-size:13px;font-weight:600;">${g.nome||g.tipo_gara}</div>`
-      + `<div style="font-size:11px;color:var(--text3);">${dataFmt} · ${g.luogo||''} · ${g.distanza}km</div></div></div>`;
-  }).join('');
+
+  let html = '';
+
+  // Sezione utenti
+  if (uFound.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Utenti</div>`;
+    html += uFound.map(u => {
+      const nome = [u.nome||'', u.cognome||''].filter(Boolean).join(' ') || u.utente_id;
+      const init = nome.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+      const sport = u.sport_preferito || '';
+      const isPub = u.profilo_pubblico !== false && String(u.profilo||'').toUpperCase() !== 'PRIVATO';
+      return `<div onclick="apriProfiloPubblico('${u.utente_id}');closeSearch();"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
+        onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${nome} ${!isPub ? '<span style="font-size:10px;color:var(--text3);">🔒</span>' : ''}</div>
+          <div style="font-size:11px;color:var(--text3);">${sport ? sportIcon(sport.toLowerCase())+' '+sport : 'Atleta'}</div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);">Profilo →</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Sezione mie gare
+  if (gFound.length) {
+    html += `<div style="padding:8px 16px 4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);">Le mie gare</div>`;
+    html += gFound.map(g => {
+      const dataFmt = g.data ? fmtDataIT(g.data) : '';
+      return `<div onclick="openDetail(${g.id});closeSearch();"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
+        onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
+        <span style="font-size:20px;">${sportIcon(g.sport)}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${g.nome||g.tipo_gara}</div>
+          <div style="font-size:11px;color:var(--text3);">${dataFmt}${g.luogo?' · '+g.luogo:''} · ${g.distanza}km</div>
+        </div>
+        ${g.pb ? '<span style="font-size:11px;color:#ffd54f;">★ PB</span>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Link "Cerca recensioni" sempre presente
+  html += `<div style="padding:10px 16px;border-top:1px solid var(--border);text-align:center;">
+    <button class="btn-secondary" style="font-size:12px;width:100%;" onclick="cercaRecensioni('${q.replace(/'/g,"\'")}');closeSearch();">
+      🔍 Cerca recensioni per "<strong>${q}</strong>"
+    </button>
+  </div>`;
+
+  // Pulsante cerca utenti se non in cache
+  if (!_utentiCache.length) {
+    html += `<div style="padding:6px 16px 10px;text-align:center;">
+      <button class="btn-secondary" style="font-size:12px;" onclick="caricaUtentiCache().then(()=>onGlobalSearch(document.getElementById('global-search').value))">
+        🔄 Includi utenti nella ricerca
+      </button>
+    </div>`;
+  }
+
+  dd.innerHTML = html;
   dd.style.display = 'block';
 }
+
+function clearSearch() {
+  const inp = document.getElementById('global-search');
+  if (inp) { inp.value = ''; inp.focus(); }
+  const clr = document.getElementById('search-clear');
+  if (clr) clr.style.display = 'none';
+  closeSearch();
+}
+
 function closeSearch() {
   const dd = document.getElementById('search-dropdown');
   if (dd) dd.style.display = 'none';
-  const inp = document.getElementById('global-search');
-  if (inp) inp.value = '';
+}
+
+// ── Profilo pubblico di un altro utente ──
+async function apriProfiloPubblico(uid) {
+  const overlay = document.getElementById('public-profile-overlay');
+  overlay.classList.add('open');
+  document.getElementById('pp-nome').textContent = 'Caricamento...';
+  document.getElementById('pp-meta').textContent = '';
+  document.getElementById('pp-sport').innerHTML = '';
+  document.getElementById('pp-body').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);">⟳ Caricamento profilo...</div>';
+
+  // Cerca in cache o carica dal foglio
+  let utente = _utentiCache.find(u => u.utente_id === uid);
+  if (!utente) {
+    const res = await gsGet({ action: 'getUtente', utente_id: uid });
+    if (res) utente = res;
+  }
+
+  if (!utente) {
+    document.getElementById('pp-nome').textContent = 'Utente non trovato';
+    document.getElementById('pp-body').innerHTML = '';
+    return;
+  }
+
+  const isPub = utente.profilo_pubblico !== false && String(utente.profilo||'').toUpperCase() !== 'PRIVATO';
+  const nome  = [utente.nome||'', utente.cognome||''].filter(Boolean).join(' ') || uid;
+  const init  = nome.split(' ').map(p=>p[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('pp-initials').textContent = init;
+  document.getElementById('pp-nome').textContent = nome;
+
+  if (!isPub) {
+    document.getElementById('pp-meta').textContent = '🔒 Profilo privato';
+    document.getElementById('pp-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);">⟳ Caricamento recensioni...</div>';
+    // Profilo privato: mostra solo le recensioni (gare con rating)
+    const gare = await gsGet({ action: 'getGare', utente_id: uid });
+    if (!Array.isArray(gare) || !gare.length) {
+      document.getElementById('pp-body').innerHTML = '<div style="padding:20px;color:var(--text3);text-align:center;">Nessuna recensione pubblica</div>';
+      return;
+    }
+    const conRating = gare.map(normalizzaGara).filter(g =>
+      g.rating && (g.rating.percorso || g.rating.ristori || g.rating.organizzazione)
+    ).sort((a,b) => String(b.data||'').localeCompare(String(a.data||'')));
+    document.getElementById('pp-body').innerHTML = conRating.length
+      ? '<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;">Recensioni</div>'
+        + conRating.map(g => renderRecensioneCard(g)).join('')
+      : '<div style="padding:20px;color:var(--text3);text-align:center;">Nessuna recensione</div>';
+    return;
+  }
+
+  // Profilo pubblico — mostra dati
+  const metaParts = [];
+  if (utente.data_nascita) metaParts.push('🎂 ' + fmtDataIT(utente.data_nascita));
+  if (utente.sesso) metaParts.push(utente.sesso === 'M' ? '♂ Uomo' : '♀ Donna');
+  if (utente.peso) metaParts.push('⚖️ ' + utente.peso + ' kg');
+  document.getElementById('pp-meta').textContent = metaParts.join(' · ');
+
+  const sport = utente.sport_preferito || '';
+  const sportEl = document.getElementById('pp-sport');
+  sportEl.innerHTML = sport
+    ? sport.split(',').map(s => s.trim()).filter(Boolean).map(s =>
+        `<span style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;">${sportIcon(s.toLowerCase())} ${s}</span>`
+      ).join('')
+    : '';
+
+  // Carica le sue gare pubbliche
+  document.getElementById('pp-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);">⟳ Caricamento gare...</div>';
+
+  const gare = await gsGet({ action: 'getGare', utente_id: uid });
+  if (!Array.isArray(gare) || !gare.length) {
+    document.getElementById('pp-body').innerHTML = '<div style="padding:20px;color:var(--text3);text-align:center;">Nessuna gara pubblica</div>';
+    return;
+  }
+
+  const gareNorm = gare.map(normalizzaGara).sort((a,b) => String(b.data||'').localeCompare(String(a.data||'')));
+  const stats = {
+    tot: gareNorm.length,
+    km:  Math.round(gareNorm.reduce((s,g) => s+(g.distanza||0), 0)),
+    fin: gareNorm.filter(g => g.esito === 'finisher').length,
+  };
+  const conRating = gareNorm.filter(g => g.rating && (g.rating.percorso||g.rating.ristori||g.rating.organizzazione));
+
+  let body = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--accent);">${stats.tot}</div>
+        <div style="font-size:12px;color:var(--text3);">Gare totali</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--accent);">${stats.km.toLocaleString('it')}</div>
+        <div style="font-size:12px;color:var(--text3);">Km totali</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:800;color:var(--accent);">${stats.tot ? Math.round(stats.fin/stats.tot*100) : 0}%</div>
+        <div style="font-size:12px;color:var(--text3);">Finish Rate</div>
+      </div>
+    </div>`;
+
+  // Tutte le gare
+  body += `<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;">Tutte le gare (${stats.tot})</div>`;
+  body += gareNorm.map(g => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">
+      <span style="font-size:20px;">${sportIcon(g.sport)}</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:13px;">${g.nome||g.tipo_gara} ${g.pb?'<span style="color:#ffd54f;">★ PB</span>':''}</div>
+        <div style="font-size:11px;color:var(--text3);">${fmtDataIT(g.data)}${g.luogo?' · '+g.luogo:''} · ${g.distanza}km</div>
+        ${g.rating&&(g.rating.percorso||g.rating.ristori) ? renderRecensioneInline(g) : ''}
+      </div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:700;color:var(--accent);">${tempoGara(g)}</div>
+    </div>`).join('');
+
+  // Sezione recensioni separate
+  if (conRating.length) {
+    body += `<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin:20px 0 10px;">Recensioni (${conRating.length})</div>`;
+    body += conRating.map(g => renderRecensioneCard(g)).join('');
+  }
+
+  document.getElementById('pp-body').innerHTML = body;
+}
+
+function closePublicProfile() {
+  document.getElementById('public-profile-overlay').classList.remove('open');
+}
+
+function renderRecensioneCard(g) {
+  const avg = g.rating ? Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3) : 0;
+  return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <span style="font-size:18px;">${sportIcon(g.sport)}</span>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:14px;">${g.nome||g.tipo_gara}</div>
+        <div style="font-size:11px;color:var(--text3);">${fmtDataIT(g.data)}${g.luogo?' · '+g.luogo:''}</div>
+      </div>
+      <div style="font-size:18px;">${'★'.repeat(avg)}${'☆'.repeat(5-avg)}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px;">
+      <div style="background:var(--bg4);border-radius:6px;padding:6px;text-align:center;">
+        <div style="color:var(--text3);margin-bottom:2px;">Percorso</div>
+        <div>${'★'.repeat(g.rating.percorso||0)}${'☆'.repeat(5-(g.rating.percorso||0))}</div>
+      </div>
+      <div style="background:var(--bg4);border-radius:6px;padding:6px;text-align:center;">
+        <div style="color:var(--text3);margin-bottom:2px;">Ristori</div>
+        <div>${'★'.repeat(g.rating.ristori||0)}${'☆'.repeat(5-(g.rating.ristori||0))}</div>
+      </div>
+      <div style="background:var(--bg4);border-radius:6px;padding:6px;text-align:center;">
+        <div style="color:var(--text3);margin-bottom:2px;">Organizzazione</div>
+        <div>${'★'.repeat(g.rating.organizzazione||0)}${'☆'.repeat(5-(g.rating.organizzazione||0))}</div>
+      </div>
+    </div>
+    ${g.note ? `<div style="margin-top:8px;font-size:13px;color:var(--text2);font-style:italic;">"${g.note}"</div>` : ''}
+  </div>`;
+}
+
+function renderRecensioneInline(g) {
+  const avg = g.rating ? Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3) : 0;
+  if (!avg) return '';
+  return `<div style="margin-top:3px;font-size:11px;color:#ffd54f;">${'★'.repeat(avg)}${'☆'.repeat(5-avg)} <span style="color:var(--text3);">percorso ${g.rating.percorso||0}/5 · ristori ${g.rating.ristori||0}/5 · org. ${g.rating.organizzazione||0}/5</span></div>`;
 }
 
 // ============ TOAST ============
@@ -3111,7 +3498,7 @@ function openDetail(id) {
     const f = g.frazioni;
     const label1 = g.sport === 'duathlon' ? '&#x1F3C3; C1' : '&#x1F3CA; Nuoto';
     html += `<div style="margin-bottom:10px;text-align:center;">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--accent);">${tempoTot}</span>
+      <span style="font-family:Barlow Condensed,sans-serif;font-size:40px;font-weight:900;color:var(--accent);">${tempoTot}</span>
       <span style="color:var(--text3);font-size:13px;margin-left:8px;">tempo totale</span>
     </div>
     <div class="fraz-row">
@@ -3123,7 +3510,7 @@ function openDetail(id) {
     </div>`;
   } else {
     html += `<div style="text-align:center;">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;color:var(--accent);">${tempoTot !== '--:--' ? tempoTot : '—'}</span>
+      <span style="font-family:Barlow Condensed,sans-serif;font-size:48px;font-weight:900;color:var(--accent);">${tempoTot !== '--:--' ? tempoTot : '—'}</span>
     </div>`;
   }
   html += `</div>`;
@@ -3377,7 +3764,9 @@ function parseStandardRow(cols) {
   const luogo = (cols[3]||'').trim();
   const regione = (cols[4]||'').trim();
   const distanza = parseFloat((cols[5]||'0').replace(',','.')) || 0;
-  const tempo = (cols[6]||'').trim() || null;
+  const tempoRaw = (cols[6]||'').trim();
+  // Normalizza il tempo in H:MM:SS — gestisce formati decimali Excel
+  const tempo = normalizzaTempo(tempoRaw) || null;
   const esito = (cols[7]||'finisher').toLowerCase().includes('dnf') ? 'dnf' : 'finisher';
   const note = (cols[8]||'').trim();
   const hotel = (cols[9]||'').trim();
@@ -3416,6 +3805,8 @@ function renderImportPreview(errCount, fileName) {
     const badge = g.isDuplicate
       ? '<span class="preview-badge-dup">DUPLICATO</span>'
       : '<span class="preview-badge-new">NUOVA</span>';
+    const tempoSecs = garaTempoSecs(g);
+    const tempoDebug = g.tempo ? `<span style="font-size:10px;color:var(--text3);">${g.tempo}</span>` : '<span style="color:#ef9a9a;font-size:11px;">—</span>';
     return `<tr class="${g.isDuplicate ? 'preview-dup' : ''}">
       <td><input type="checkbox" ${g.selected?'checked':''} ${g.isDuplicate?'disabled':''} onchange="importPreviewData[${idx}].selected=this.checked;updateImportCount()"></td>
       <td>${sportIcon(g.sport)} ${sportLabel(g.sport)}</td>
@@ -3424,7 +3815,8 @@ function renderImportPreview(errCount, fileName) {
       <td>${g.luogo||'—'}</td>
       <td>${g.regione||'—'}</td>
       <td>${g.distanza} km</td>
-      <td style="font-family:'Barlow Condensed',sans-serif;font-size:14px;">${tempoDisp}</td>
+      <td style="font-family:Barlow Condensed,sans-serif;font-size:14px;">${tempoDebug}</td>
+      <td style="font-size:12px;color:var(--text3);">${tempoSecs > 0 ? tempoSecs+'s' : '<span style="color:#ef9a9a;">0</span>'}</td>
       <td>${badge}</td>
     </tr>`;
   }).join('');
@@ -3459,7 +3851,7 @@ function confirmImport() {
       utente_id: uid,
       sport: g.sport, nome: g.nome, data: g.data, luogo: g.luogo,
       regione: g.regione, distanza: g.distanza,
-      esito: g.esito || 'finisher', tempo: g.tempo, frazioni: g.frazioni,
+      esito: g.esito || 'finisher', tempo: normalizzaTempo(g.tempo||'')||null, frazioni: g.frazioni,
       risultato: g.risultato || '', pb: g.pb || false,
       rating: {percorso:0,ristori:0,organizzazione:0,posizione:0,pulizia:0,colazione:0},
       ratingHotel: {posizione:0,pulizia:0,colazione:0},
@@ -3547,7 +3939,9 @@ function parsePastedData(text) {
     const cols = raw.split(sep).map(c => c.trim().replace(/^"|"$/g,''));
     if (cols.length < 3) { errCount++; continue; }
     try {
+      console.log('Riga', i, '- cols:', cols.length, '- col[6] (tempo):', JSON.stringify(cols[6]), '- col[1] (nome):', cols[1]);
       const parsed = parseStandardRow(cols);
+      console.log('  → parsed.tempo:', JSON.stringify(parsed?.tempo), 'parsed.nome:', parsed?.nome);
       if (!parsed || !parsed.nome) { errCount++; continue; }
       const chiave = (parsed.nome + '|' + parsed.data).toLowerCase();
       parsed.isDuplicate = esistenti.has(chiave);
@@ -3593,11 +3987,65 @@ function _destroyChart_orig(id) {
   }
 }
 
+function normalizzaTempo(raw) {
+  if (!raw || raw === '' || raw === '0' || raw === '-' || raw === '--:--') return null;
+  const s = String(raw).trim();
+  // Già nel formato corretto H:MM:SS
+  if (/^\d+:\d{2}:\d{2}$/.test(s)) return s;
+  // H:MM senza secondi → aggiungi :00 (es. 3:25 → 3:25:00)
+  if (/^\d+:\d{2}$/.test(s)) return s + ':00';
+  // Numero decimale Excel (frazione di giorno)
+  const n = parseFloat(s.replace(',','.'));
+  if (!isNaN(n) && n > 0 && n < 2 && s.indexOf(':') === -1) {
+    const totalSecs = Math.round((n < 1 ? n : n - 1) * 86400);
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const sec = totalSecs % 60;
+    return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+  // H.MM.SS con punti (Excel italiano)
+  if (/^\d+\.\d{2}\.\d{2}$/.test(s)) return s.replace(/\./g,':');
+  // Qualsiasi altra cosa: prova a parsare come secondi totali
+  const secs = timeToSecs(s);
+  if (secs > 0) return secsToHMS(secs);
+  return s; // ritorna raw se non riesce
+}
+
 function timeToSecs(t) {
-  if (!t) return 0;
-  const p = t.replace(/:/g,'.').split('.');
-  if (p.length === 3) return parseInt(p[0])*3600 + parseInt(p[1])*60 + parseInt(p[2]);
-  if (p.length === 2) return parseInt(p[0])*3600 + parseInt(p[1])*60;
+  if (!t && t !== 0) return 0;
+  // Numero decimale da Excel (es. 0.142361 = 3h25m) — formato seriale Excel
+  if (typeof t === 'number' || (!isNaN(parseFloat(t)) && String(t).indexOf(':') === -1 && String(t).indexOf(',') === -1)) {
+    const n = parseFloat(t);
+    if (n > 0 && n < 1) return Math.round(n * 86400); // frazione di giorno
+    if (n >= 1 && n < 2) return Math.round((n - 1) * 86400); // oltre le 24h
+  }
+  const s = String(t).trim();
+  if (!s) return 0;
+  // Formato H:MM:SS o H:MM o MM:SS
+  const partsColon = s.split(':');
+  if (partsColon.length === 3) {
+    const h = parseInt(partsColon[0]) || 0;
+    const m = parseInt(partsColon[1]) || 0;
+    const sec = parseInt(partsColon[2]) || 0;
+    return h * 3600 + m * 60 + sec;
+  }
+  if (partsColon.length === 2) {
+    const a = parseInt(partsColon[0]) || 0;
+    const b = parseInt(partsColon[1]) || 0;
+    // Contesto gare sportive: H:MM se primo numero <= 23 e secondo <= 59
+    // (es. 3:25 = 3h25min, 45:30 = 45min30sec)
+    // Euristica: se primo > 23, trattalo come MM:SS
+    if (a <= 23 && b <= 59) return a * 3600 + b * 60;  // H:MM
+    return a * 60 + b;  // MM:SS
+  }
+  // Formato con punti H.MM.SS (Excel italiano)
+  const partsDot = s.split('.');
+  if (partsDot.length === 3 && partsDot[0].length <= 2) {
+    const h = parseInt(partsDot[0]) || 0;
+    const m = parseInt(partsDot[1]) || 0;
+    const sec = parseInt(partsDot[2]) || 0;
+    return h * 3600 + m * 60 + sec;
+  }
   return 0;
 }
 
@@ -3665,669 +4113,4 @@ function _OLD_renderStats_UNUSED() {
     <div class="card"><div class="cl">Gare totali</div><div class="cv" style="color:var(--accent)">${gare.length}</div><div class="cs">${finisher.length} finisher · ${gare.length-finisher.length} DNF</div></div>
     <div class="card"><div class="cl">Km gareggiati</div><div class="cv" style="color:var(--accent)">${Math.round(kmTot).toLocaleString('it')}</div><div class="cs">dal 2015 ad oggi</div></div>
     <div class="card"><div class="cl">Personal Best</div><div class="cv" style="color:var(--accent)">${pb}</div><div class="cs">gare con PB segnato</div></div>
-    <div class="card"><div class="cl">Regioni coperte</div><div class="cv" style="color:var(--accent)">${regioni}</div><div class="cs">su 20 regioni italiane</div></div>
-  `;
-
-  // ===== GRAFICO MARATONE =====
-  const maratone = gare
-    .filter(g => g.sport === 'corsa' && Math.abs(g.distanza - 42.2) < 0.5 && g.tempo)
-    .sort((a,b) => a.data.localeCompare(b.data));
-
-  destroyChart('maratone');
-  if (maratone.length) {
-    const ctx1 = document.getElementById('chart-maratone').getContext('2d');
-    const labels = maratone.map(g => g.data.slice(0,7) + ' ' + g.luogo.split('-')[0]);
-    const data = maratone.map(g => Math.round(garaTempoSecs(g)/60 * 10) / 10);
-    const minVal = Math.min(...data) - 5;
-    const maxVal = Math.max(...data) + 5;
-    chartInstances['maratone'] = new Chart(ctx1, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Minuti',
-          data,
-          borderColor: CHART_COLORS.accent,
-          backgroundColor: 'rgba(255,87,34,0.1)',
-          borderWidth: 2.5,
-          pointBackgroundColor: maratone.map(g => g.pb ? '#ffd54f' : CHART_COLORS.accent),
-          pointRadius: maratone.map(g => g.pb ? 7 : 4),
-          pointHoverRadius: 8,
-          fill: true,
-          tension: 0.3,
-        }]
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          ...CHART_DEFAULTS.scales,
-          y: {
-            ...CHART_DEFAULTS.scales.y,
-            min: minVal, max: maxVal,
-            ticks: {
-              ...CHART_DEFAULTS.scales.y.ticks,
-              callback: v => {
-                // Mostra solo tick ogni 5 minuti (300 secondi)
-                if (v % 300 !== 0) return '';
-                const h = Math.floor(v/3600);
-                const m = Math.floor((v%3600)/60);
-                return `${h}h${String(m).padStart(2,'0')}`;
-              }
-            }
-          }
-        },
-        plugins: {
-          ...CHART_DEFAULTS.plugins,
-          tooltip: {
-            ...CHART_DEFAULTS.plugins.tooltip,
-            callbacks: {
-              label: ctx => {
-                const g = maratone[ctx.dataIndex];
-                const pb = g.pb ? ' ★ PB' : '';
-                return `${secsToHMS(garaTempoSecs(g))}${pb}`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  // ===== GRAFICO KM PER ANNO =====
-  const byYear = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    byYear[y] = (byYear[y]||0) + (g.distanza||0);
-  });
-  const years = Object.keys(byYear).sort();
-
-  // ===== KM PER ANNO — stacked per sport =====
-  const sportOrder = ['corsa','ultra','trail','triathlon','tri703','ironman','duathlon','bici','nuoto'];
-  const sportLabelsFull = { corsa:'Corsa', ultra:'Ultra', trail:'Trail', triathlon:'Triathlon Ol.', tri703:'70.3', ironman:'Ironman', duathlon:'Duathlon', bici:'Bici', nuoto:'Nuoto' };
-  const sportColorsFull = { corsa:'#ff5722', ultra:'#ff8a65', trail:'#4caf50', triathlon:'#2196f3', tri703:'#1565c0', ironman:'#0d47a1', duathlon:'#9c27b0', bici:'#ffc107', nuoto:'#009688' };
-
-  // Calcola km per anno per sport
-  const kmByYearSport = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    const s = g.sport;
-    if (!kmByYearSport[y]) kmByYearSport[y] = {};
-    kmByYearSport[y][s] = (kmByYearSport[y][s]||0) + (g.distanza||0);
-  });
-
-  // Trova sport presenti
-  const sportPresenti = [...new Set(gare.map(g=>g.sport))].sort((a,b) => sportOrder.indexOf(a)-sportOrder.indexOf(b));
-
-  const kmDatasets = sportPresenti.map(s => ({
-    label: sportLabelsFull[s]||s,
-    data: years.map(y => Math.round((kmByYearSport[y]||{})[s]||0)),
-    backgroundColor: sportColorsFull[s]||'#888',
-    borderColor: 'rgba(0,0,0,0.3)',
-    borderWidth: 0.5,
-    borderRadius: 2,
-    stack: 'km',
-  }));
-
-  destroyChart('km-anno');
-  const ctx2 = document.getElementById('chart-km-anno').getContext('2d');
-  chartInstances['km-anno'] = new Chart(ctx2, {
-    type: 'bar',
-    data: { labels: years, datasets: kmDatasets },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        x: { ...CHART_DEFAULTS.scales.x, stacked: true },
-        y: {
-          ...CHART_DEFAULTS.scales.y,
-          stacked: true,
-          ticks: {
-            ...CHART_DEFAULTS.scales.y.ticks,
-            callback: v => (v % 50 === 0) ? v.toLocaleString('it') : ''
-          }
-        }
-      },
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        legend: { labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:11}, boxWidth:12, padding:8 } },
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} km` }
-        }
-      }
-    }
-  });
-
-  
-  // ===== GRAFICO SPORT =====
-  const sportCount = {};
-  gare.forEach(g => {
-    const sg = sportgruppo(g.sport);
-    sportCount[sg] = (sportCount[sg]||0) + 1;
-  });
-  const sportLabels = { corsa:'Corsa', triathlon:'Triathlon', ultra:'Ultra', trail:'Trail', bici:'Bici', nuoto:'Nuoto', duathlon:'Duathlon' };
-  const sportColors = ['#ff5722','#2196f3','#ff8a65','#4caf50','#ffc107','#009688','#9c27b0'];
-
-  destroyChart('sport');
-  const ctx3 = document.getElementById('chart-sport').getContext('2d');
-  const sportKeys = Object.keys(sportCount).sort((a,b) => sportCount[b]-sportCount[a]);
-  chartInstances['sport'] = new Chart(ctx3, {
-    type: 'doughnut',
-    data: {
-      labels: sportKeys.map(k => sportLabels[k]||k),
-      datasets: [{
-        data: sportKeys.map(k => sportCount[k]),
-        backgroundColor: sportColors.slice(0, sportKeys.length),
-        borderColor: '#111',
-        borderWidth: 2,
-        hoverOffset: 8,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { position:'right', labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:12}, boxWidth:14, padding:10 } },
-        tooltip: { ...CHART_DEFAULTS.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} gare` } }
-      }
-    }
-  });
-
-  // ===== GRAFICO GARE PER ANNO =====
-  const garePerAnno = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    garePerAnno[y] = (garePerAnno[y]||0) + 1;
-  });
-
-  destroyChart('gare-anno');
-  const ctx4 = document.getElementById('chart-gare-anno').getContext('2d');
-
-  // Calcola gare per anno per sport
-  const gareByYearSport = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    const s = g.sport;
-    if (!gareByYearSport[y]) gareByYearSport[y] = {};
-    gareByYearSport[y][s] = (gareByYearSport[y][s]||0) + 1;
-  });
-  const yearsGare = Object.keys(gareByYearSport).sort();
-
-  const gareDatasets = sportPresenti.map(s => ({
-    label: sportLabelsFull[s]||s,
-    data: yearsGare.map(y => (gareByYearSport[y]||{})[s]||0),
-    backgroundColor: sportColorsFull[s]||'#888',
-    borderColor: 'rgba(0,0,0,0.3)',
-    borderWidth: 0.5,
-    borderRadius: 2,
-    stack: 'gare',
-  }));
-
-  chartInstances['gare-anno'] = new Chart(ctx4, {
-    type: 'bar',
-    data: { labels: yearsGare, datasets: gareDatasets },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        x: { ...CHART_DEFAULTS.scales.x, stacked: true },
-        y: {
-          ...CHART_DEFAULTS.scales.y,
-          stacked: true,
-          ticks: {
-            ...CHART_DEFAULTS.scales.y.ticks,
-            stepSize: 1,
-            callback: v => Number.isInteger(v) ? v : ''
-          }
-        }
-      },
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        legend: { labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:11}, boxWidth:12, padding:8 } },
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => ctx.raw > 0 ? ` ${ctx.dataset.label}: ${ctx.raw} gar${ctx.raw===1?'a':'e'}` : null,
-            filter: item => item.raw > 0
-          }
-        }
-      }
-    }
-  });
-
-  // ===== POPOLA SELECTOR COMPARATORE =====
-  populateComparator(gare);
-}
-
-function populateComparator(gare) {
-  const byNome = {};
-  gare.forEach(g => {
-    if (!byNome[g.nome]) byNome[g.nome] = [];
-    byNome[g.nome].push(g);
-  });
-
-  const ripetute = Object.entries(byNome)
-    .filter(([,gs]) => gs.length > 1)
-    .sort((a,b) => b[1].length - a[1].length);
-
-  const sel = document.getElementById('comp-selector');
-  const currentVal = sel.value;
-  sel.innerHTML = '<option value="">— Seleziona una gara ripetuta —</option>';
-  ripetute.forEach(([nome, gs]) => {
-    const opt = document.createElement('option');
-    opt.value = nome;
-    opt.textContent = `${nome} (${gs.length}x)`;
-    sel.appendChild(opt);
-  });
-  if (currentVal) sel.value = currentVal;
-}
-
-function renderComparator() {
-  const chiave = document.getElementById('comp-selector').value;
-  if (!chiave) {
-    document.getElementById('comp-content').style.display = 'none';
-    document.getElementById('comp-empty').style.display   = 'block';
-    return;
-  }
-  const [sport, tipoGara, luogo] = chiave.split('|||');
-  const gare = calcolaPBAutomatici(getGare());
-  const filtrate = gare
-    .filter(g =>
-      g.esito === 'finisher' &&
-      (g.sport||'').toLowerCase() === (sport||'').toLowerCase() &&
-      (g.tipo_gara||g.nome||'').toLowerCase() === (tipoGara||'').toLowerCase() &&
-      (g.luogo||'').toLowerCase() === (luogo||'').toLowerCase()
-    )
-    .sort((a,b) => String(a.data||'').localeCompare(String(b.data||'')));
-
-  if (filtrate.length < 2) {
-    document.getElementById('comp-content').style.display = 'none';
-    document.getElementById('comp-empty').style.display   = 'block';
-    document.getElementById('comp-empty').innerHTML = '<div style="font-size:32px;margin-bottom:8px;">📊</div><div>Servono almeno 2 edizioni per il confronto</div>';
-    return;
-  }
-
-  document.getElementById('comp-content').style.display = 'block';
-  document.getElementById('comp-empty').style.display   = 'none';
-  document.getElementById('comp-label').textContent     = filtrate.length + ' edizioni trovate';
-
-  // Grafico a barre con tempo
-  destroyChart('comp');
-  const ctx = document.getElementById('chart-comp')?.getContext('2d');
-  if (ctx) {
-    const secsArr = filtrate.map(g => garaTempoSecs(g));
-    const pbCalc  = filtrate.map(g => g.pb);
-    chartInstances['comp'] = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: filtrate.map(g => (g.data||'').slice(0,4)),
-        datasets: [{
-          label: tipoGara + ' · ' + luogo,
-          data: secsArr,
-          backgroundColor: filtrate.map(g => g.pb ? '#ffd54f' : CHART_COLORS.accent),
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          ...CHART_DEFAULTS.scales,
-          y: {
-            ...CHART_DEFAULTS.scales.y,
-            ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => secsToHMS(v) }
-          }
-        },
-        plugins: {
-          ...CHART_DEFAULTS.plugins,
-          tooltip: { callbacks: { label: ctx2 => secsToHMS(secsArr[ctx2.dataIndex]) + (pbCalc[ctx2.dataIndex] ? ' ★ PB' : '') } }
-        }
-      }
-    });
-  }
-
-  // Tabella di confronto
-  let tableHtml = `<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">`;
-  const secsAll  = filtrate.map(g => garaTempoSecs(g)).filter(s => s > 0);
-  const minSecs  = Math.min(...secsAll);
-  filtrate.forEach(g => {
-    const secs    = garaTempoSecs(g);
-    const isPB    = g.pb;
-    const diff    = secs - minSecs;
-    const diffStr = diff === 0 ? '' : '+' + secsToHMS(diff);
-    tableHtml += `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${isPB ? 'rgba(255,213,79,0.08)' : 'var(--bg4)'};border:1px solid ${isPB ? 'rgba(255,213,79,0.3)' : 'var(--border)'};border-radius:10px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--accent);min-width:80px;">${secsToHMS(secs)}</div>
-        <div style="flex:1;">
-          <div style="font-weight:600;font-size:14px;">${fmtDataIT(g.data)} ${isPB ? '★ PB' : ''}</div>
-          ${diffStr ? `<div style="font-size:12px;color:var(--text3);">${diffStr} dal migliore</div>` : '<div style="font-size:12px;color:#81c784;">Migliore</div>'}
-        </div>
-      </div>`;
-  });
-  tableHtml += '</div>';
-  document.getElementById('comp-table').innerHTML = tableHtml;
-}
-
-
-function openLoginModal(prefilEmail) {
-  const uid = getUtenteId();
-  switchAuthTab('login');
-  // Non svuotare se è già stata pre-compilata (es. dopo registrazione)
-  if (prefilEmail) {
-    document.getElementById('login-uid').value = prefilEmail;
-  } else if (!document.getElementById('login-uid').value) {
-    document.getElementById('login-uid').value = '';
-  }
-  document.getElementById('login-pwd').value = '';
-  document.getElementById('login-title').innerHTML = uid
-    ? 'Account <span>I-Run</span>'
-    : 'Accedi a <span>I-Run</span>';
-  const cancelBtn = document.getElementById('login-cancel-btn');
-  if (cancelBtn) cancelBtn.style.display = uid ? 'block' : 'none';
-  const info = document.getElementById('login-info');
-  if (info) { info.style.display = 'none'; info.textContent = ''; }
-  document.getElementById('login-overlay').classList.add('open');
-}
-
-function closeLoginModal() {
-  document.getElementById('login-overlay').classList.remove('open');
-}
-
-function svuotaCacheConfig() {
-  localStorage.removeItem('irun_config');
-  _configLoaded = false;
-  _config = { sport:[], distanze:[], nazioni:[], regioni:[] };
-}
-
-function switchAuthTab(tab) {
-  const loginF = document.getElementById('auth-login-form');
-  const regF   = document.getElementById('auth-reg-form');
-  const tLogin = document.getElementById('tab-login');
-  const tReg   = document.getElementById('tab-reg');
-  if (!loginF) return;
-  if (tab === 'login') {
-    loginF.style.display = 'block'; regF.style.display = 'none';
-    tLogin.style.borderBottomColor = 'var(--accent)'; tLogin.style.color = 'var(--accent)'; tLogin.style.fontWeight = '600';
-    tReg.style.borderBottomColor   = 'transparent';   tReg.style.color   = 'var(--text3)';  tReg.style.fontWeight   = '400';
-  } else {
-    loginF.style.display = 'none'; regF.style.display = 'block';
-    tReg.style.borderBottomColor   = 'var(--accent)'; tReg.style.color   = 'var(--accent)'; tReg.style.fontWeight   = '600';
-    tLogin.style.borderBottomColor = 'transparent';   tLogin.style.color = 'var(--text3)';  tLogin.style.fontWeight = '400';
-    // Popola sport nel form registrazione
-    popolaSelectConfig();
-  }
-}
-
-async function confermaLogin() {
-  const email = document.getElementById('login-uid').value.trim();
-  const pwd   = document.getElementById('login-pwd').value;
-  if (!email) { alert('Inserisci la tua email'); return; }
-
-  const info = document.getElementById('login-info');
-  function setInfo(msg, tipo) {
-    info.textContent = msg;
-    info.style.display = 'block';
-    const colors = {
-      loading: ['rgba(255,193,7,0.08)','rgba(255,193,7,0.25)','var(--text2)'],
-      ok:      ['rgba(76,175,80,0.08)', 'rgba(76,175,80,0.25)', '#81c784'],
-      err:     ['rgba(244,67,54,0.08)', 'rgba(244,67,54,0.25)', '#ef9a9a'],
-    };
-    const [bg, border, color] = colors[tipo] || colors.loading;
-    info.style.background = bg;
-    info.style.border = '1px solid ' + border;
-    info.style.color = color;
-  }
-
-  setInfo('⟳ Connessione al foglio...', 'loading');
-
-  // Timeout di 8 secondi — se non risponde, accesso offline
-  let res = null;
-  try {
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 8000)
-    );
-    res = await Promise.race([
-      gsPost('loginUtente', { email: email, password: pwd }),
-      timeoutPromise
-    ]);
-  } catch(e) {
-    res = null; // timeout o errore rete
-  }
-
-  if (res && res.ok) {
-    // LOGIN OK
-    const profilo = res;
-    setUtenteId(profilo.utente_id);
-    localStorage.setItem('irun_profilo_remoto', JSON.stringify(profilo));
-    renderNavUser();
-    closeLoginModal();
-    showPage('home');
-    renderHome();
-    renderProfilo();
-    showToast('Benvenuto ' + (profilo.nome || profilo.utente_id || '') + '! 👋');
-    syncFromSheet().then(() => {
-      renderHome();
-      if (currentPage === 'gare')    renderGare('tutte');
-      if (currentPage === 'mappa')   renderMappa();
-      if (currentPage === 'profilo') renderProfilo();
-      if (currentPage === 'stats')   renderStats();
-    });
-
-  } else if (res && res.error) {
-    // ERRORE CREDENZIALI — rimane aperto
-    setInfo('✗ ' + res.error, 'err');
-
-  } else {
-    // FOGLIO NON RAGGIUNGIBILE — accesso offline con email come uid temporaneo
-    setInfo('⚠ Foglio non raggiungibile. Accesso in modalità offline.', 'err');
-    setTimeout(() => {
-      setUtenteId(email);
-      renderNavUser();
-      closeLoginModal();
-      showPage('home');
-      renderHome();
-      showToast('Accesso offline — le gare saranno sincronizzate appena possibile');
-    }, 2000);
-  }
-}
-
-async function confermaRegistrazione() {
-  const nome    = document.getElementById('reg-nome').value.trim();
-  const cognome = document.getElementById('reg-cognome').value.trim();
-  const email   = document.getElementById('reg-email').value.trim();
-  const pwd     = document.getElementById('reg-pwd').value;
-  const pwd2    = document.getElementById('reg-pwd2').value;
-  const info    = document.getElementById('reg-info');
-
-  if (!nome)    { mostraInfoReg('Inserisci il nome', 'err', info); return; }
-  if (!cognome) { mostraInfoReg('Inserisci il cognome', 'err', info); return; }
-  if (!email)   { mostraInfoReg('Inserisci la email', 'err', info); return; }
-  if (!pwd)     { mostraInfoReg('Inserisci una password', 'err', info); return; }
-  if (pwd.length < 6) { mostraInfoReg('Password troppo corta (min. 6 caratteri)', 'err', info); return; }
-  if (pwd !== pwd2) { mostraInfoReg('Le password non corrispondono', 'err', info); return; }
-
-  const uid = (nome + cognome).toLowerCase().replace(/\s/g,'') + '_' + Date.now().toString().slice(-4);
-  const profilo = document.querySelector('input[name="reg-profilo"]:checked');
-  const sportPref   = (document.getElementById('reg-sport').value   || '').trim();
-  const dataNascita = (document.getElementById('reg-nascita').value || '').trim();
-  const sessoVal    = (document.getElementById('reg-sesso').value   || '').trim();
-  const pesoVal     = (document.getElementById('reg-peso').value    || '').trim();
-  const profiloVal  = profilo ? profilo.value : 'pubblico';
-
-  const utente = {
-    utente_id:        uid,
-    nome:             nome,
-    cognome:          cognome,
-    email:            email,
-    data_nascita:     dataNascita,
-    sesso:            sessoVal,
-    peso:             pesoVal,
-    sport_preferito:  sportPref,
-    profilo_pubblico: profiloVal === 'pubblico',
-    profilo:          profiloVal === 'pubblico' ? 'PUBBLICO' : 'PRIVATO',
-    password:         pwd,
-  };
-  console.log('Registrazione utente:', JSON.stringify({...utente, password:'[hidden]'}));
-
-  mostraInfoReg('⟳ Creazione account...', 'loading', info);
-  const res = await gsPost('registraUtente', utente);
-  if (res && res.created) {
-    mostraInfoReg('✓ Account creato! Ora accedi con la tua email.', 'ok', info);
-    setTimeout(() => {
-      // Passa email direttamente — NON chiamare openLoginModal che svuoterebbe il campo
-      switchAuthTab('login');
-      document.getElementById('login-uid').value = email;
-      document.getElementById('login-pwd').value = '';
-      // Svuota info registrazione
-      document.getElementById('reg-info').style.display = 'none';
-    }, 1500);
-  } else if (res && res.error) {
-    mostraInfoReg('✗ ' + res.error, 'err', info);
-  } else {
-    mostraInfoReg('✗ Errore nella registrazione. Riprova.', 'err', info);
-  }
-}
-
-function mostraInfoReg(msg, tipo, el) {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.display = 'block';
-  if (tipo === 'err') {
-    el.style.background = 'rgba(244,67,54,0.08)'; el.style.border = '1px solid rgba(244,67,54,0.25)'; el.style.color = '#ef9a9a';
-  } else if (tipo === 'ok') {
-    el.style.background = 'rgba(76,175,80,0.08)'; el.style.border = '1px solid rgba(76,175,80,0.25)'; el.style.color = '#81c784';
-  } else {
-    el.style.background = 'rgba(255,193,7,0.08)'; el.style.border = '1px solid rgba(255,193,7,0.25)'; el.style.color = 'var(--text2)';
-  }
-}
-
-function renderNavUser() {
-  const uid = getUtenteId();
-  const initials = uid ? uid.slice(0,2).toUpperCase() : '?';
-  const el = document.getElementById('nav-initials');
-  if (el) el.textContent = initials;
-  const avatar = document.getElementById('nav-avatar');
-  if (avatar) avatar.style.background = uid
-    ? 'linear-gradient(135deg,var(--accent),var(--accent2))'
-    : 'var(--bg4)';
-}
-
-// ============ INIT ============
-async function init() {
-  renderNavUser();
-
-  // Usa subito i default locali — il sito si apre immediatamente
-  usaConfigDefault();
-
-  // Carica cache configurazione se disponibile
-  const cached = getCachedConfig();
-  if (cached && cached.sport && cached.sport.length) {
-    setConfig(cached);
-    console.log('Config da cache:', cached.sport);
-  }
-
-  const uid = getUtenteId();
-
-  if (!uid) {
-    renderHome();
-    renderProgramma();
-    setTimeout(openLoginModal, 600);
-  } else {
-    // Render immediato con dati locali
-    renderHome();
-    renderProgramma();
-
-    // Poi in background: carica config aggiornata + gare
-    Promise.allSettled([
-      caricaConfigurazione(),
-      syncFromSheet()
-    ]).then(() => {
-      renderHome();
-      renderProgramma();
-      if (currentPage === 'gare')    renderGare('tutte');
-      if (currentPage === 'mappa')   renderMappa();
-      if (currentPage === 'profilo') renderProfilo();
-      if (currentPage === 'stats')   renderStats();
-    });
-  }
-}
-
-init();
-</script>
-
-<!-- D3 + Mappa Italia -->
-<script>
-// Mappa SVG pura — nessuna dipendenza esterna
-
-function regioneColorSVG(n) {
-  if (n >= 10) return '#ff5722';
-  if (n >= 5)  return '#ff8a65';
-  if (n >= 2)  return '#ffccbc';
-  if (n >= 1)  return 'rgba(255,87,34,0.4)';
-  return '#1c1c1c';
-}
-
-function updateMapColors() {
-  const gare = getGare();
-  const regioniMap = {};
-  gare.forEach(g => {
-    if (g.regione && g.regione !== 'Estero') {
-      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
-      regioniMap[g.regione].push(g);
-    }
-  });
-
-  const tooltip = document.getElementById('map-tooltip');
-
-  document.querySelectorAll('#italy-svg .reg-d3').forEach(path => {
-    const regName = path.dataset.region;
-    const gs = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-
-    path.style.fill = color;
-    path.style.stroke = '#0a0a0a';
-    path.style.strokeWidth = '0.8';
-    path.style.cursor = gs.length ? 'pointer' : 'default';
-    path.style.transition = 'fill 0.2s, opacity 0.15s';
-
-    path.onmouseenter = function(e) {
-      if (gs.length > 0) {
-        path.style.filter = 'url(#reg-glow)';
-        path.style.opacity = '0.85';
-      }
-      if (!tooltip) return;
-      if (!gs.length) {
-        tooltip.innerHTML = `<div style="font-weight:600;margin-bottom:2px;">${regName}</div><div style="color:var(--text3);font-size:12px;">Nessuna gara ancora</div>`;
-      } else {
-        const kmR = gs.reduce((s,g) => s+(g.distanza||0), 0);
-        const list = gs.slice(0,5).map(g => {
-          const t = g.frazioni ? calcTempoTri(g.frazioni) : (g.tempo||'');
-          return `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${g.data.slice(0,4)} · ${g.nome}${t?' · <span style=color:#ff8a65>'+t+'</span>':''}</div>`;
-        }).join('');
-        const more = gs.length > 5 ? `<div style="font-size:11px;color:var(--accent);margin-top:3px;">+${gs.length-5} altre gare</div>` : '';
-        tooltip.innerHTML = `
-          <div style="font-weight:600;font-size:14px;margin-bottom:5px;">${regName}</div>
-          <div style="color:var(--accent);font-weight:600;margin-bottom:4px;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>
-          ${list}${more}`;
-      }
-      const box = document.getElementById('italy-map-container').getBoundingClientRect();
-      let tx = e.clientX - box.left + 14;
-      let ty = e.clientY - box.top + 14;
-      if (tx + 230 > box.width) tx -= 245;
-      if (ty + 170 > box.height) ty -= 175;
-      tooltip.style.left = Math.max(0,tx) + 'px';
-      tooltip.style.top = Math.max(0,ty) + 'px';
-      tooltip.style.opacity = '1';
-    };
-
-    path.onmouseleave = function() {
-      path.style.filter = '';
-      path.style.opacity = '1';
-      if (tooltip) tooltip.style.opacity = '0';
-    };
-  });
-}
-
-function loadMap() {
-  // SVG già nel DOM — aggiorna solo i colori
-  updateMapColors();
-}
-</script>
-</body>
-</html>
+    <div class="card"><div class="cl">Regioni coperte</div><div 
