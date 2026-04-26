@@ -810,7 +810,7 @@
       <div style="margin-top:16px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--text2);">
           <input type="checkbox" id="reg-privacy" style="margin-top:2px;flex-shrink:0;" />
-          <span>Ho letto e accetto la <a href="#" onclick="apriPrivacy();return false;" style="color:var(--accent);text-decoration:none;">Privacy Policy</a> e i <a href="#" onclick="apriPrivacy();return false;" style="color:var(--accent);text-decoration:none;">Termini di servizio</a> di I-Run. Acconsento al trattamento dei dati personali per la gestione del profilo e delle gare.</span>
+          <span>Ho letto e accetto la <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Privacy Policy</a> e i <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Termini di servizio</a> di I-Run. Acconsento al trattamento dei dati personali per la gestione del profilo e delle gare.</span>
         </label>
       </div>
       <div id="reg-info" style="display:none;border-radius:8px;padding:12px;font-size:13px;margin-top:12px;"></div>
@@ -1341,59 +1341,70 @@
 <!-- FORM PROGRAMMA -->
 <div class="form-overlay" id="form-programma-overlay" onclick="closeFormProgrammaOutside(event)">
   <div class="form-box">
-    <div class="form-title">Gara in <span>programma</span></div>
+    <div class="form-title" id="form-prog-title">Gara in <span>programma</span></div>
     <input type="hidden" id="form-programma-edit-id" value="" />
     <div class="form-grid">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Sport</label>
-          <select class="form-select" id="p-sport" onchange="selectedSportP=this.value;popolaTipoGaraP(this.value)">
-            <option value="">Seleziona sport...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Tipo gara</label>
-          <select class="form-select" id="p-tipo-gara">
-            <option value="">Seleziona tipo...</option>
-          </select>
-        </div>
+
+      <!-- Sport -->
+      <div class="form-group">
+        <div class="form-label">Sport <span style="color:var(--accent)">*</span></div>
+        <select class="form-select" id="p-sport" onchange="onPSportChange(this.value)">
+          <option value="">Seleziona sport...</option>
+        </select>
       </div>
+
+      <!-- Tipo gara + Data -->
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Nome gara</label>
-          <input class="form-input" id="p-nome" placeholder="es. Passatore di Romagna" />
+          <label class="form-label">Tipo gara <span style="color:var(--accent)">*</span></label>
+          <select class="form-select" id="p-tipo-gara">
+            <option value="">Prima seleziona uno sport...</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Data</label>
+          <label class="form-label">Data <span style="color:var(--accent)">*</span>
+            <span style="color:var(--text3);font-size:11px;font-weight:400;">(deve essere futura)</span>
+          </label>
           <input class="form-input" id="p-data" type="date" />
         </div>
       </div>
+
+      <!-- Luogo + Area + Regione -->
       <div class="form-row triple">
         <div class="form-group">
-          <label class="form-label">Luogo</label>
-          <input class="form-input" id="p-luogo" placeholder="Città" />
+          <label class="form-label">Luogo / Città</label>
+          <input class="form-input" id="p-luogo" placeholder="es. Roma" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Area / Nazione</label>
+          <select class="form-select" id="p-nazione">
+            <option value="">Seleziona...</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
           <select class="form-select" id="p-regione">
             <option value="">Seleziona...</option>
-            <option>Abruzzo</option><option>Emilia-Romagna</option><option>Lazio</option>
-            <option>Lombardia</option><option>Toscana</option><option>Veneto</option><option>Estero</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Distanza (km)</label>
-          <input class="form-input" id="p-distanza" type="number" step="0.1" placeholder="100" />
-        </div>
       </div>
+
+      <!-- Distanza -->
+      <div class="form-group" style="max-width:180px;">
+        <label class="form-label">Distanza (km)</label>
+        <input class="form-input" id="p-distanza" type="number" step="0.1" placeholder="42.2" />
+      </div>
+
+      <!-- Note -->
       <div class="form-group">
         <label class="form-label">Note / obiettivo</label>
         <textarea class="form-textarea" id="p-note" placeholder="Obiettivo tempo, strategia, motivazione..."></textarea>
       </div>
+
     </div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="closeFormProgramma()">Annulla</button>
-      <button class="btn-primary" onclick="salvaGaraProgramma()">Salva</button>
+      <button class="btn-primary" id="form-prog-save-btn" onclick="salvaGaraProgramma()">Salva in programma</button>
     </div>
   </div>
 </div>
@@ -1532,7 +1543,7 @@
       <p style="color:var(--text3);font-size:12px;">Versione 1.0 — I-Run</p>
     </div>
     <div class="form-actions" style="margin-top:20px;">
-      <button class="btn-primary" onclick="document.getElementById('privacy-overlay').classList.remove('open');document.getElementById('reg-privacy').checked=true;" style="flex:1;">Ho letto — Accetto</button>
+      <button class="btn-primary" onclick="window.open('https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub','_blank');document.getElementById('privacy-overlay').classList.remove('open');document.getElementById('reg-privacy').checked=true;" style="flex:1;">Ho letto — Accetto</button>
     </div>
   </div>
 </div>
@@ -1671,7 +1682,7 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
-const GS_URL   = 'https://script.google.com/macros/s/AKfycbwGWsm2U2QabL8Zc56TrvQ7tCXlUC-UVuxXsFBBlXa-0WQdmIl_AqgSUBad78HKKpmg/exec';
+const GS_URL   = 'https://script.google.com/macros/s/AKfycbwdllyrClurXWDqtupKyqbH471NQgjDM5Ix9WlPM67tM8yEXb16FC0Ou0Xj_OiHF-CO/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
 // ============ STORAGE — dual layer (locale + remoto) ============
@@ -1886,23 +1897,19 @@ async function caricaConfigurazione() {
       cfg.distanze = Array.isArray(cfg.distanze) ? cfg.distanze : [];
       cfg.nazioni  = Array.isArray(cfg.nazioni)  ? cfg.nazioni  : [];
       cfg.regioni  = Array.isArray(cfg.regioni)  ? cfg.regioni  : [];
-      // Costruisci sport_distanze dalle righe abbinate del foglio
-      // Il foglio ha: col A = sport, col B = distanza (sulla stessa riga)
-      if (cfg.sport_distanze_raw) {
-        cfg.sport_distanze = cfg.sport_distanze_raw;
-      } else if (cfg.righe) {
-        // righe = array di {sport, distanza} dal nuovo endpoint
+      // sport_distanze arriva direttamente dall'Apps Script (oggetto sport→[distanze])
+      if (cfg.sport_distanze && typeof cfg.sport_distanze === 'object') {
+        // già pronto — normalizza le chiavi in lowercase
         const mappa = {};
-        cfg.righe.forEach(r => {
-          if (!r.sport || !r.distanza) return;
-          const k = r.sport.toLowerCase();
-          if (!mappa[k]) mappa[k] = [];
-          mappa[k].push(r.distanza);
+        Object.entries(cfg.sport_distanze).forEach(([k,v]) => {
+          mappa[k.toLowerCase()] = Array.isArray(v) ? v : [];
         });
         cfg.sport_distanze = mappa;
+        console.log('sport_distanze dal foglio:', mappa);
       } else {
-        // Costruisci dai due array paralleli (sport[i] abbinato a distanze[i])
+        // Fallback: nessuna mappa disponibile
         cfg.sport_distanze = {};
+        console.warn('sport_distanze non disponibile nella config');
       }
       setConfig(cfg);
       setCachedConfig(cfg);
@@ -2274,7 +2281,74 @@ function salvaGara() {
 }
 
 // ============ FORM PROGRAMMA ============
-function openFormProgramma() { document.getElementById('form-programma-overlay').classList.add('open'); }
+function openFormProgramma(garaEdit) {
+  document.getElementById('form-programma-overlay').classList.add('open');
+  const isEdit = !!garaEdit;
+  document.getElementById('form-prog-title').innerHTML = isEdit
+    ? 'Modifica <span>gara in programma</span>'
+    : 'Gara in <span>programma</span>';
+  document.getElementById('form-programma-edit-id').value = isEdit ? garaEdit.id : '';
+  const saveBtn = document.getElementById('form-prog-save-btn');
+  if (saveBtn) saveBtn.textContent = isEdit ? 'Salva modifiche' : 'Salva in programma';
+
+  // Imposta data minima = domani
+  const domani = new Date(); domani.setDate(domani.getDate()+1);
+  const pData = document.getElementById('p-data');
+  if (pData) pData.min = domani.toISOString().slice(0,10);
+
+  // Popola sport dal foglio
+  const pSport = document.getElementById('p-sport');
+  if (pSport) {
+    const c = getConfig();
+    pSport.innerHTML = '<option value="">Seleziona sport...</option>';
+    (c.sport || []).forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
+    });
+  }
+
+  // Popola nazione e regione
+  const pNaz = document.getElementById('p-nazione');
+  if (pNaz) {
+    const c = getConfig();
+    pNaz.innerHTML = '<option value="">Seleziona...</option>';
+    (c.nazioni || ['Italia','Estero']).forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; pNaz.appendChild(o);
+    });
+  }
+  const pReg = document.getElementById('p-regione');
+  if (pReg) {
+    const c = getConfig();
+    pReg.innerHTML = '<option value="">Seleziona...</option>';
+    (c.regioni || REGIONI_DEFAULT).forEach(r => {
+      const o = document.createElement('option'); o.value = r; o.textContent = r; pReg.appendChild(o);
+    });
+  }
+
+  // Reset tipo gara
+  const pTipo = document.getElementById('p-tipo-gara');
+  if (pTipo) pTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
+
+  if (isEdit) {
+    const g = garaEdit;
+    if (pSport) { pSport.value = (g.sport||'').toLowerCase(); onPSportChange(pSport.value); }
+    setTimeout(() => {
+      if (pTipo) pTipo.value = g.tipo_gara || g.nome || '';
+      if (pData) pData.value = g.data || '';
+      const pLuogo = document.getElementById('p-luogo'); if (pLuogo) pLuogo.value = g.luogo || '';
+      if (pNaz) pNaz.value = g.nazione || '';
+      if (pReg) pReg.value = g.regione || '';
+      const pDist = document.getElementById('p-distanza'); if (pDist) pDist.value = g.distanza || '';
+      const pNote = document.getElementById('p-note'); if (pNote) pNote.value = g.note || '';
+    }, 60);
+  } else {
+    // Reset campi
+    ['p-luogo','p-distanza','p-note'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    if (pData) pData.value = '';
+  }
+}
 function closeFormProgramma() { document.getElementById('form-programma-overlay').classList.remove('open'); }
 function closeFormProgrammaOutside(e) { if(e.target === document.getElementById('form-programma-overlay')) closeFormProgramma(); }
 function selectSportP(btn) {
@@ -2299,6 +2373,7 @@ function salvaGaraProgramma() {
     sport: sportP,
     tipo_gara: nomeGara,
     nome: nomeGara,
+    nazione: (document.getElementById('p-nazione') || {}).value || '',
     data: document.getElementById('p-data').value,
     luogo: document.getElementById('p-luogo').value,
     regione: document.getElementById('p-regione').value,
@@ -3211,27 +3286,7 @@ function renderProgramma() {
 function apriModificaProgramma(id) {
   const lista = getProgramma();
   const g = lista.find(x => x.id === id);
-  if (!g) return;
-  // Riusa form programma pre-popolato
-  openFormProgramma();
-  setTimeout(() => {
-    document.getElementById('form-programma-edit-id').value = id;
-    const ps = document.getElementById('p-sport');
-    if (ps) { ps.value = g.sport||''; selectedSportP = g.sport||''; }
-    setTimeout(() => {
-      const pt = document.getElementById('p-tipo-gara');
-      if (pt) { popolaTipoGaraP(g.sport); setTimeout(() => { pt.value = g.tipo_gara||g.nome||''; }, 50); }
-    }, 50);
-    document.getElementById('p-data').value     = g.data     || '';
-    document.getElementById('p-luogo').value    = g.luogo    || '';
-    const pr = document.getElementById('p-regione');
-    if (pr) setTimeout(() => { pr.value = g.regione||''; }, 60);
-    document.getElementById('p-distanza').value = g.distanza || '';
-    document.getElementById('p-note').value     = g.note     || '';
-    // Aggiorna titolo e bottone
-    const titleEl = document.querySelector('#form-programma-overlay .form-title');
-    if (titleEl) titleEl.innerHTML = 'Modifica <span>gara in programma</span>';
-  }, 100);
+  if (g) openFormProgramma(g);
 }
 
 function eliminaGaraProgramma(id) {
@@ -3248,198 +3303,25 @@ function eliminaGaraProgramma(id) {
 function sposta2Gare(id) {
   const lista = getProgramma();
   const idx = lista.findIndex(g => g.id === id);
-  if(idx === -1) return;
+  if (idx === -1) return;
   const garaP = lista[idx];
-  lista.splice(idx, 1);
-  saveProgramma(lista);
-  renderProgramma();
-  if (getUtenteId()) gsPost('deleteProgramma', { id, utente_id: getUtenteId() });
-  // Apri il form pre-popolato con i dati della gara in programma
-  // Costruisci oggetto "bozza" senza id (sarà una nuova gara)
+  // NON eliminare subito — rimane in programma finché non si salva
+  // La gara viene rimossa solo quando si salva il form gara completata
+  _archiviandoProgrammaId = id;
+  // Apri il form gara pre-popolato con i dati della gara in programma
   const bozza = {
     id: null,
-    sport: garaP.sport || '',
+    sport:     garaP.sport || '',
     tipo_gara: garaP.tipo_gara || garaP.nome || '',
-    nome: garaP.tipo_gara || garaP.nome || '',
-    data: garaP.data || '',
-    luogo: garaP.luogo || '',
-    regione: garaP.regione || '',
-    distanza: garaP.distanza || 0,
-    note: garaP.note || '',
+    nome:      garaP.tipo_gara || garaP.nome || '',
+    data:      '',  // da compilare — la data della gara completata
+    luogo:     garaP.luogo || '',
+    regione:   garaP.regione || '',
+    distanza:  garaP.distanza || 0,
+    note:      garaP.note || '',
   };
   openForm(bozza);
   showToast('Completa il risultato e salva! 🏅');
-}
-
-// ============ RICERCA GLOBALE ============
-// Cache utenti per la ricerca (caricati dal foglio)
-let _utentiCache = [];        // utenti dal foglio
-let _gareCache   = [];        // gare di tutti gli utenti (per ricerca globale)
-let _gareCacheTs = 0;         // timestamp ultimo aggiornamento
-
-async function caricaGareCache() {
-  // Ricarica max ogni 5 minuti
-  if (_gareCache.length > 0 && Date.now() - _gareCacheTs < 300000) return;
-  if (!_utentiCache.length) await caricaUtentiCache();
-  if (!_utentiCache.length) return;
-  // Carica gare di tutti gli utenti in parallelo (max 20)
-  const promises = _utentiCache.slice(0, 20).map(async u => {
-    try {
-      const gare = await gsGet({ action: 'getGare', utente_id: u.utente_id });
-      if (!Array.isArray(gare)) return;
-      gare.map(normalizzaGara).forEach(g => _gareCache.push({ ...g, _autore: u }));
-    } catch(e) {}
-  });
-  await Promise.allSettled(promises);
-  _gareCacheTs = Date.now();
-}
-
-// Modal per le recensioni di tutti gli utenti su una gara
-async function cercaRecensioni(query) {
-  // Apri modal profilo pubblico come contenitore temporaneo
-  const overlay = document.getElementById('public-profile-overlay');
-  overlay.classList.add('open');
-  document.getElementById('pp-initials').textContent = '🔍';
-  document.getElementById('pp-nome').textContent     = 'Recensioni: "' + query + '"';
-  document.getElementById('pp-meta').textContent     = '';
-  document.getElementById('pp-sport').innerHTML      = '';
-  document.getElementById('pp-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);">⟳ Raccogliendo recensioni da tutti gli utenti...</div>';
-
-  // Carica tutti gli utenti
-  if (!_utentiCache.length) await caricaUtentiCache();
-  if (!_utentiCache.length) {
-    document.getElementById('pp-body').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);">Impossibile caricare gli utenti al momento</div>';
-    return;
-  }
-
-  // Supporta query speciale "luogo_ID:nomeGara" dal dropdown
-  let queryNome = null;
-  let queryLoc  = query;
-  if (query.includes('_ID:')) {
-    const parts = query.split('_ID:');
-    queryLoc  = parts[0];
-    queryNome = parts[1].toLowerCase();
-  }
-  const ql = queryLoc.toLowerCase();
-
-  let tutteRecensioni = [];
-
-  // Usa cache se disponibile, altrimenti carica dal foglio
-  let gareDaCercare = _gareCache.length > 0
-    ? _gareCache
-    : null;
-
-  if (!gareDaCercare) {
-    await caricaGareCache();
-    gareDaCercare = _gareCache;
-  }
-
-  if (gareDaCercare.length > 0) {
-    // Usa la cache
-    gareDaCercare.filter(g =>
-      g.rating && (g.rating.percorso || g.rating.ristori || g.rating.organizzazione) &&
-      (queryNome
-        ? (g.nome||g.tipo_gara||'').toLowerCase() === queryNome
-        : (
-            (g.nome||g.tipo_gara||'').toLowerCase().includes(ql) ||
-            (g.luogo||'').toLowerCase().includes(ql) ||
-            (g.regione||'').toLowerCase().includes(ql)
-          )
-      )
-    ).forEach(g => tutteRecensioni.push(g));
-  } else {
-    // Fallback: carica per ogni utente
-    const promises = _utentiCache.map(async u => {
-      try {
-        const gare = await gsGet({ action: 'getGare', utente_id: u.utente_id });
-        if (!Array.isArray(gare)) return;
-        gare.map(normalizzaGara).filter(g =>
-          g.rating && (g.rating.percorso || g.rating.ristori || g.rating.organizzazione) &&
-          (queryNome
-            ? (g.nome||g.tipo_gara||'').toLowerCase() === queryNome
-            : (
-                (g.nome||g.tipo_gara||'').toLowerCase().includes(ql) ||
-                (g.luogo||'').toLowerCase().includes(ql) ||
-                (g.regione||'').toLowerCase().includes(ql)
-              )
-          )
-        ).forEach(g => tutteRecensioni.push({ ...g, _autore: u }));
-      } catch(e) {}
-    });
-    await Promise.allSettled(promises.slice(0, 10));
-  }
-
-  if (!tutteRecensioni.length) {
-    document.getElementById('pp-body').innerHTML = `<div style="text-align:center;padding:32px;color:var(--text3);">
-      <div style="font-size:48px;margin-bottom:12px;">🔍</div>
-      <div>Nessuna recensione trovata per "<strong>${query}</strong>"</div>
-      <div style="font-size:12px;margin-top:8px;">Prova con il nome della gara, la città o la regione</div>
-    </div>`;
-    return;
-  }
-
-  // Raggruppa per gara (nome+luogo)
-  const gruppi = {};
-  tutteRecensioni.forEach(g => {
-    const k = (g.nome||g.tipo_gara||'') + '|' + (g.luogo||'');
-    if (!gruppi[k]) gruppi[k] = { gara: g, recensioni: [] };
-    const avg = g.rating ? Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3) : 0;
-    gruppi[k].recensioni.push({ g, autore: g._autore, avg });
-    // Media voti
-    gruppi[k].mediaAvg = gruppi[k].recensioni.reduce((s,r) => s+r.avg, 0) / gruppi[k].recensioni.length;
-  });
-
-  document.getElementById('pp-nome').textContent = `Recensioni: "${query}" (${tutteRecensioni.length})`;
-
-  let body = '';
-  Object.values(gruppi).sort((a,b) => b.mediaAvg - a.mediaAvg).forEach(({ gara, recensioni, mediaAvg }) => {
-    body += `<div style="margin-bottom:20px;">
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;margin-bottom:8px;">
-        <span style="font-size:24px;">${sportIcon(gara.sport)}</span>
-        <div style="flex:1;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:800;">${gara.nome||gara.tipo_gara}</div>
-          <div style="font-size:12px;color:var(--text3);">${gara.luogo||''}${gara.regione?' · '+gara.regione:''} · ${gara.distanza}km</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:20px;color:#ffd54f;">${'★'.repeat(Math.round(mediaAvg))}${'☆'.repeat(5-Math.round(mediaAvg))}</div>
-          <div style="font-size:11px;color:var(--text3);">${mediaAvg.toFixed(1)}/5 · ${recensioni.length} recension${recensioni.length===1?'e':'i'}</div>
-        </div>
-      </div>`;
-    recensioni.forEach(({ g, autore }) => {
-      const nomeAutore = [autore.nome||'', autore.cognome||''].filter(Boolean).join(' ') || autore.utente_id;
-      const initAutore = nomeAutore.split(' ').map(p=>p[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
-      body += `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:6px;margin-left:12px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${initAutore}</div>
-          <div style="flex:1;font-size:12px;font-weight:600;">${nomeAutore}</div>
-          <div style="font-size:12px;color:var(--text3);">${fmtDataIT(g.data)}</div>
-          <div style="font-size:13px;color:#ffd54f;">${'★'.repeat(Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3))}${'☆'.repeat(5-Math.round((g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3))}</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:11px;margin-bottom:6px;">
-          <div style="text-align:center;"><span style="color:var(--text3);">Percorso</span><br>${'★'.repeat(g.rating.percorso||0)}</div>
-          <div style="text-align:center;"><span style="color:var(--text3);">Ristori</span><br>${'★'.repeat(g.rating.ristori||0)}</div>
-          <div style="text-align:center;"><span style="color:var(--text3);">Org.</span><br>${'★'.repeat(g.rating.organizzazione||0)}</div>
-        </div>
-        ${g.note ? `<div style="font-size:12px;color:var(--text2);font-style:italic;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;">"${g.note}"</div>` : ''}
-      </div>`;
-    });
-    body += '</div>';
-  });
-
-  document.getElementById('pp-body').innerHTML = body;
-}
-
-async function caricaUtentiCache() {
-  if (_utentiCache.length > 0) return;
-  try {
-    const url = GS_URL + '?token=' + encodeURIComponent(GS_TOKEN) + '&action=getAllUtenti';
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
-    const res = await Promise.race([fetch(url), timeout]);
-    const json = await res.json();
-    if (json.ok && Array.isArray(json.data)) {
-      _utentiCache = json.data;
-    }
-  } catch(e) { /* offline */ }
 }
 
 function onGlobalSearch(q) {
@@ -3913,6 +3795,11 @@ function popolaTipoGaraP(sport) {
   distanze.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o);
   });
+}
+
+function onPSportChange(sport) {
+  selectedSportP = sport;
+  popolaTipoGaraP(sport);
 }
 function closeDetailOutside(e) { if (e.target === document.getElementById('detail-overlay')) closeDetail(); }
 
@@ -4830,19 +4717,49 @@ function svuotaCacheConfig() {
 function switchAuthTab(tab) {
   const loginF = document.getElementById('auth-login-form');
   const regF   = document.getElementById('auth-reg-form');
+  const resetF = document.getElementById('auth-reset-form');
   const tLogin = document.getElementById('tab-login');
   const tReg   = document.getElementById('tab-reg');
+  const tReset = document.getElementById('tab-reset');
   if (!loginF) return;
+
+  // Nascondi tutti i form
+  loginF.style.display = 'none';
+  regF.style.display   = 'none';
+  if (resetF) resetF.style.display = 'none';
+
+  // Reset stile tutti i tab
+  [tLogin, tReg, tReset].forEach(t => {
+    if (!t) return;
+    t.style.borderBottomColor = 'transparent';
+    t.style.color = 'var(--text3)';
+    t.style.fontWeight = '400';
+  });
+
   if (tab === 'login') {
-    loginF.style.display = 'block'; regF.style.display = 'none';
-    tLogin.style.borderBottomColor = 'var(--accent)'; tLogin.style.color = 'var(--accent)'; tLogin.style.fontWeight = '600';
-    tReg.style.borderBottomColor   = 'transparent';   tReg.style.color   = 'var(--text3)';  tReg.style.fontWeight   = '400';
-  } else {
-    loginF.style.display = 'none'; regF.style.display = 'block';
-    tReg.style.borderBottomColor   = 'var(--accent)'; tReg.style.color   = 'var(--accent)'; tReg.style.fontWeight   = '600';
-    tLogin.style.borderBottomColor = 'transparent';   tLogin.style.color = 'var(--text3)';  tLogin.style.fontWeight = '400';
-    // Popola sport nel form registrazione
+    loginF.style.display = 'block';
+    tLogin.style.borderBottomColor = 'var(--accent)';
+    tLogin.style.color = 'var(--accent)';
+    tLogin.style.fontWeight = '600';
+
+  } else if (tab === 'reg') {
+    regF.style.display = 'block';
+    tReg.style.borderBottomColor = 'var(--accent)';
+    tReg.style.color = 'var(--accent)';
+    tReg.style.fontWeight = '600';
     popolaSelectConfig();
+
+  } else if (tab === 'reset') {
+    if (resetF) resetF.style.display = 'block';
+    if (tReset) {
+      tReset.style.borderBottomColor = 'var(--accent)';
+      tReset.style.color = 'var(--accent)';
+      tReset.style.fontWeight = '600';
+    }
+    // Pre-compila email dal campo login se già inserita
+    const emailLogin = (document.getElementById('login-uid') || {}).value || '';
+    const resetEmail = document.getElementById('reset-email');
+    if (resetEmail && !resetEmail.value && emailLogin) resetEmail.value = emailLogin;
   }
 }
 
