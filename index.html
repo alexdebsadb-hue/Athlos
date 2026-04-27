@@ -1684,7 +1684,7 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
-const GS_URL   = 'https://script.google.com/macros/s/AKfycbwGWsm2U2QabL8Zc56TrvQ7tCXlUC-UVuxXsFBBlXa-0WQdmIl_AqgSUBad78HKKpmg/exec';
+const GS_URL   = 'https://script.google.com/macros/s/AKfycbwdllyrClurXWDqtupKyqbH471NQgjDM5Ix9WlPM67tM8yEXb16FC0Ou0Xj_OiHF-CO/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
 // ============ STORAGE — dual layer (locale + remoto) ============
@@ -2133,9 +2133,14 @@ function openForm(garaEdit) {
   document.getElementById('form-save-btn').textContent = isEdit ? 'Salva modifiche' : 'Salva gara';
 
   resetRatings();
-  // Se config non caricata, ricarica prima di popolare
-  if (!_configLoaded || !_config.sport || !_config.sport.length) {
-    caricaConfigurazione().then(() => popolaSelectConfig());
+  // Ricarica sempre la config se manca sport_distanze
+  const c = getConfig();
+  if (!_configLoaded || !c.sport || !c.sport.length || 
+      !c.sport_distanze || Object.keys(c.sport_distanze).length === 0) {
+    caricaConfigurazione().then(() => {
+      popolaSelectConfig();
+      console.log('[openForm] Config ricaricata, sport_distanze:', Object.keys(getConfig().sport_distanze||{}));
+    });
   } else {
     popolaSelectConfig();
   }
@@ -2300,15 +2305,37 @@ function openFormProgramma(garaEdit) {
   const pData = document.getElementById('p-data');
   if (pData) pData.min = domani.toISOString().slice(0,10);
 
-  // Popola sport dal foglio
-  const pSport = document.getElementById('p-sport');
-  if (pSport) {
-    const c = getConfig();
-    pSport.innerHTML = '<option value="">Seleziona sport...</option>';
-    (c.sport || []).forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
-    });
+  // Assicura config aggiornata con sport_distanze
+  const cfgP = getConfig();
+  const loadAndFill = () => {
+    const cc = getConfig();
+    const pSport = document.getElementById('p-sport');
+    if (pSport) {
+      pSport.innerHTML = '<option value="">Seleziona sport...</option>';
+      (cc.sport || []).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
+      });
+    }
+    const pNazInner = document.getElementById('p-nazione');
+    if (pNazInner) {
+      pNazInner.innerHTML = '<option value="">Seleziona...</option>';
+      (cc.nazioni || ['Italia','Estero']).forEach(n => {
+        const o = document.createElement('option'); o.value = n; o.textContent = n; pNazInner.appendChild(o);
+      });
+    }
+    const pRegInner = document.getElementById('p-regione');
+    if (pRegInner) {
+      pRegInner.innerHTML = '<option value="">Seleziona...</option>';
+      (cc.regioni || REGIONI_DEFAULT).forEach(r => {
+        const o = document.createElement('option'); o.value = r; o.textContent = r; pRegInner.appendChild(o);
+      });
+    }
+  };
+  if (!cfgP.sport_distanze || Object.keys(cfgP.sport_distanze).length === 0) {
+    caricaConfigurazione().then(loadAndFill);
+  } else {
+    loadAndFill();
   }
 
   // Popola nazione e regione
@@ -2893,7 +2920,11 @@ function renderEvoluzioneChart(gare, tipoGara) {
   chartInstances['evoluzione'] = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: filtrate.map(g => (g.data||'').slice(0,7) + (g.luogo?' '+g.luogo.split(' ')[0]:'')),
+      labels: filtrate.map(g => {
+        const anno  = (g.data||'').slice(0,4);
+        const luogo = (g.luogo||'');
+        return luogo ? [anno, luogo] : anno;
+      }),
       datasets: [{
         label: tipoGara,
         data: filtrate.map(g => garaTempoSecs(g)),
@@ -2909,6 +2940,15 @@ function renderEvoluzioneChart(gare, tipoGara) {
       ...CHART_DEFAULTS,
       scales: {
         ...CHART_DEFAULTS.scales,
+        x: {
+          ...CHART_DEFAULTS.scales.x,
+          ticks: {
+            ...CHART_DEFAULTS.scales.x.ticks,
+            maxRotation: 45,
+            minRotation: 0,
+            autoSkip: false,
+          }
+        },
         y: {
           ...CHART_DEFAULTS.scales.y,
           ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => secsToHMS(v) }
@@ -3377,10 +3417,19 @@ function onGlobalSearch(q) {
   const hasCacheGare = _gareCache.length > 0;
   const hasResults   = uFound.length || mieGare.length || gPubliche.length;
 
-  if (!hasResults && hasCacheGare) {
+  if (!hasResults && hasCacheGare && !uFound.length) {
     dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
       <div style="font-size:24px;margin-bottom:6px;">🔍</div>
       Nessun risultato per "<strong>${q}</strong>"
+    </div>`;
+    dd.style.display = 'block';
+    return;
+  }
+  // Se non ci sono risultati ma la cache non è caricata, mostra subito quel che abbiamo
+  if (!hasResults && !hasCacheGare && !mieGare.length && !uFound.length) {
+    dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
+      <div style="font-size:24px;margin-bottom:6px;">🔍</div>
+      Nessuna gara trovata tra le tue per "<strong>${q}</strong>"
     </div>`;
     dd.style.display = 'block';
     return;
@@ -4830,11 +4879,8 @@ async function confermaLogin() {
       if (currentPage === 'profilo') renderProfilo();
       if (currentPage === 'stats')   renderStats();
     });
-    // Carica utenti e gare community in background
-    setTimeout(async () => {
-      await caricaUtentiCache();
-      await caricaGareCache();
-    }, 2000);
+    // Carica utenti e gare community in background (subito, non aspettiamo)
+    caricaUtentiCache().then(() => caricaGareCache());
 
   } else if (res && res.error) {
     // ERRORE CREDENZIALI — rimane aperto
@@ -5071,4 +5117,28 @@ function updateMapColors() {
           <div style="color:var(--accent);font-weight:600;margin-bottom:4px;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>
           ${list}${more}`;
       }
-      const box = document.getElementById('italy-map-container').getBo
+      const box = document.getElementById('italy-map-container').getBoundingClientRect();
+      let tx = e.clientX - box.left + 14;
+      let ty = e.clientY - box.top + 14;
+      if (tx + 230 > box.width) tx -= 245;
+      if (ty + 170 > box.height) ty -= 175;
+      tooltip.style.left = Math.max(0,tx) + 'px';
+      tooltip.style.top = Math.max(0,ty) + 'px';
+      tooltip.style.opacity = '1';
+    };
+
+    path.onmouseleave = function() {
+      path.style.filter = '';
+      path.style.opacity = '1';
+      if (tooltip) tooltip.style.opacity = '0';
+    };
+  });
+}
+
+function loadMap() {
+  // SVG già nel DOM — aggiorna solo i colori
+  updateMapColors();
+}
+</script>
+</body>
+</html>
