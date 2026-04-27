@@ -742,10 +742,8 @@
           <label class="form-label">Sport preferito</label>
           <input class="form-input" id="reg-sport" placeholder="es. Corsa, Trail..." list="reg-sport-list" autocomplete="off" />
           <datalist id="reg-sport-list">
-            <option value="Corsa"><option value="Triathlon"><option value="Trail">
-            <option value="Ultra"><option value="Bici"><option value="Nuoto">
-            <option value="Duathlon"><option value="Ironman">
-          </datalist>
+          <!-- Popolato dal foglio CONFIGURAZIONE -->
+        </datalist>
         </div>
         <div class="form-group">
           <label class="form-label">Città</label>
@@ -755,15 +753,8 @@
       <div class="form-group">
         <label class="form-label">Regione</label>
         <select class="form-select" id="reg-regione">
-          <option value="">Seleziona regione...</option>
-          <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option>
-          <option>Campania</option><option>Emilia-Romagna</option>
-          <option>Friuli-Venezia Giulia</option><option>Lazio</option><option>Liguria</option>
-          <option>Lombardia</option><option>Marche</option><option>Molise</option>
-          <option>Piemonte</option><option>Puglia</option><option>Sardegna</option>
-          <option>Sicilia</option><option>Toscana</option><option>Trentino-Alto Adige</option>
-          <option>Umbria</option><option>Valle d&#39;Aosta</option><option>Veneto</option>
-          <option>Estero</option>
+          <option value="">⏳ Caricamento...</option>
+          <!-- Popolato dal foglio CONFIGURAZIONE -->
         </select>
       </div>
       <div class="form-row">
@@ -1622,15 +1613,8 @@
         <div class="form-group">
           <label class="form-label">Regione</label>
           <select class="form-select" id="ep-regione">
-            <option value="">Seleziona...</option>
-            <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option>
-            <option>Campania</option><option>Emilia-Romagna</option>
-            <option>Friuli-Venezia Giulia</option><option>Lazio</option><option>Liguria</option>
-            <option>Lombardia</option><option>Marche</option><option>Molise</option>
-            <option>Piemonte</option><option>Puglia</option><option>Sardegna</option>
-            <option>Sicilia</option><option>Toscana</option><option>Trentino-Alto Adige</option>
-            <option>Umbria</option><option>Valle d&#39;Aosta</option><option>Veneto</option>
-            <option>Estero</option>
+            <option value="">⏳ Caricamento...</option>
+            <!-- Popolato dal foglio CONFIGURAZIONE -->
           </select>
         </div>
         <div class="form-group">
@@ -1917,45 +1901,21 @@ async function caricaConfigurazione() {
       setCachedConfig(cfg);
       console.log('Config caricata:', cfg);
     } else {
-      console.warn('Config: struttura non riconosciuta, uso defaults. Risposta:', json);
-      usaConfigDefault();
+      console.warn('Config: struttura non riconosciuta. Risposta:', json);
+      showToast('⚠️ Configurazione non valida. Verifica il foglio CONFIGURAZIONE.');
     }
   } catch(e) {
-    console.warn('Config fetch fallito, uso defaults:', e);
-    usaConfigDefault();
+    console.warn('Config fetch fallito:', e.message);
+    // Non usare defaults hardcoded — mostra messaggio
+    showSyncBadge('err');
+    showToast('⚠️ Impossibile caricare la configurazione dal foglio Google');
   }
 }
 
 function usaConfigDefault() {
-  const def = {
-    sport: ['Corsa','Triathlon','Trail','Ultra','Bici','Nuoto','Duathlon','Ironman'],
-    distanze: [
-      '5 km','10 km','Mezza Maratona (21,1 km)','Maratona (42,2 km)',
-      '30 km','50 km','Trail 30 km','Ultra 50 km',
-      '70.3 Ironman (113 km)','140.6 Ironman (226 km)',
-      'Triathlon Sprint (23,25 km)','Triathlon Olimpico (51,5 km)','Duathlon classico'
-    ],
-    nazioni: ['Italia','Estero','Francia','Spagna','Germania','Austria','Svizzera','Belgio','Paesi Bassi'],
-    regioni: [
-      'Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna',
-      'Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche',
-      'Molise','Piemonte','Puglia','Sardegna','Sicilia','Toscana',
-      'Trentino-Alto Adige','Umbria',"Valle d'Aosta",'Veneto','Estero'
-    ],
-    sport_distanze: {
-      'corsa':      ['5 km','10 km','Mezza Maratona (21,1 km)','Maratona (42,2 km)','30 km','50 km'],
-      'trail':      ['Trail 30 km','Ultra 50 km','10 km','30 km','50 km'],
-      'ultra':      ['Ultra 50 km','30 km','50 km','100 km'],
-      'bici':       ['30 km','50 km','100 km'],
-      'nuoto':      ['1 km','2 km','5 km','10 km'],
-      'triathlon':  ['Sprint (750m/20km/5km)','Olimpico (1,5km/40km/10km)','Middle (1,9km/90km/21km)','Long (3,8km/180km/42km)'],
-      'duathlon':   ['Duathlon Sprint','Duathlon Classico','Duathlon Long'],
-      'ironman':    ['70.3 Ironman (113 km)','140.6 Ironman (226 km)'],
-      'tri703':     ['70.3 Ironman (113 km)'],
-    }
-  };
-  setConfig(def);
-  console.log('Usati defaults config');
+  // Nessun default hardcoded — attendiamo il foglio Google
+  setConfig({ sport:[], distanze:[], nazioni:[], regioni:[], sport_distanze:{} });
+  console.log('Config: in attesa del foglio Google...');
 }
 
 function popolaSelectConfig() {
@@ -1964,7 +1924,7 @@ function popolaSelectConfig() {
   // Sport nel form gara
   const fSport = document.getElementById('f-sport');
   if (fSport) {
-    fSport.innerHTML = '<option value="">Seleziona sport...</option>';
+    fSport.innerHTML = '<option value="">⏳ Caricamento dal foglio...</option>';
     (c.sport || []).forEach(s => {
       const o = document.createElement('option');
       o.value = s.toLowerCase(); o.textContent = s;
@@ -1985,7 +1945,7 @@ function popolaSelectConfig() {
   const fNaz = document.getElementById('f-nazione');
   if (fNaz) {
     fNaz.innerHTML = '<option value="">Seleziona area...</option>';
-    (c.nazioni || ['Italia', 'Estero']).forEach(n => {
+    (c.nazioni || []).forEach(n => {
       const o = document.createElement('option'); o.value = n; o.textContent = n; fNaz.appendChild(o);
     });
   }
@@ -1993,7 +1953,7 @@ function popolaSelectConfig() {
   const fReg = document.getElementById('f-regione');
   if (fReg) {
     fReg.innerHTML = '<option value="">Seleziona...</option>';
-    (c.regioni || REGIONI_DEFAULT).forEach(r => {
+    (c.regioni || []).forEach(r => {
       const o = document.createElement('option'); o.value = r; o.textContent = r; fReg.appendChild(o);
     });
   }
@@ -2001,23 +1961,18 @@ function popolaSelectConfig() {
   const pReg = document.getElementById('p-regione');
   if (pReg) {
     pReg.innerHTML = '<option value="">Seleziona...</option>';
-    (c.regioni || REGIONI_DEFAULT).forEach(r => {
+    (c.regioni || []).forEach(r => {
       const o = document.createElement('option'); o.value = r; o.textContent = r; pReg.appendChild(o);
     });
   }
-  // Aggiorna datalist sport nel form registrazione
+  // Aggiorna datalist sport nel form registrazione (dal foglio)
   const rSportList = document.getElementById('reg-sport-list');
-  if (rSportList && c.sport && c.sport.length) {
+  if (rSportList) {
     rSportList.innerHTML = (c.sport || []).map(s => `<option value="${s}">`).join('');
   }
 }
 
-const REGIONI_DEFAULT = [
-  "Abruzzo","Basilicata","Calabria","Campania","Emilia-Romagna",
-  "Friuli-Venezia Giulia","Lazio","Liguria","Lombardia","Marche",
-  "Molise","Piemonte","Puglia","Sardegna","Sicilia","Toscana",
-  "Trentino-Alto Adige","Umbria","Valle d'Aosta","Veneto","Estero"
-];
+const REGIONI_DEFAULT = []; // Dati dal foglio Google
 
 function onSportChange(sport) {
   selectedSport = sport;
@@ -2320,14 +2275,14 @@ function openFormProgramma(garaEdit) {
     const pNazInner = document.getElementById('p-nazione');
     if (pNazInner) {
       pNazInner.innerHTML = '<option value="">Seleziona...</option>';
-      (cc.nazioni || ['Italia','Estero']).forEach(n => {
+      (cc.nazioni || []).forEach(n => {
         const o = document.createElement('option'); o.value = n; o.textContent = n; pNazInner.appendChild(o);
       });
     }
     const pRegInner = document.getElementById('p-regione');
     if (pRegInner) {
       pRegInner.innerHTML = '<option value="">Seleziona...</option>';
-      (cc.regioni || REGIONI_DEFAULT).forEach(r => {
+      (cc.regioni || []).forEach(r => {
         const o = document.createElement('option'); o.value = r; o.textContent = r; pRegInner.appendChild(o);
       });
     }
@@ -2343,7 +2298,7 @@ function openFormProgramma(garaEdit) {
   if (pNaz) {
     const c = getConfig();
     pNaz.innerHTML = '<option value="">Seleziona...</option>';
-    (c.nazioni || ['Italia','Estero']).forEach(n => {
+    (c.nazioni || []).forEach(n => {
       const o = document.createElement('option'); o.value = n; o.textContent = n; pNaz.appendChild(o);
     });
   }
@@ -2351,7 +2306,7 @@ function openFormProgramma(garaEdit) {
   if (pReg) {
     const c = getConfig();
     pReg.innerHTML = '<option value="">Seleziona...</option>';
-    (c.regioni || REGIONI_DEFAULT).forEach(r => {
+    (c.regioni || []).forEach(r => {
       const o = document.createElement('option'); o.value = r; o.textContent = r; pReg.appendChild(o);
     });
   }
@@ -3425,11 +3380,27 @@ function onGlobalSearch(q) {
     dd.style.display = 'block';
     return;
   }
-  // Se non ci sono risultati ma la cache non è caricata, mostra subito quel che abbiamo
+  // Cache non ancora caricata — avvia caricamento e mostra spinner
+  if (!_utentiCache.length && !_gareCache.length) {
+    dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
+      <div style="font-size:28px;margin-bottom:8px;">⏳</div>
+      Caricamento dati dal foglio Google...<br>
+      <span style="font-size:11px;">La prima ricerca richiede qualche secondo</span>
+    </div>`;
+    dd.style.display = 'block';
+    // Carica e poi riesegui la ricerca automaticamente
+    caricaUtentiCache()
+      .then(() => caricaGareCache())
+      .then(() => {
+        const inp = document.getElementById('global-search');
+        if (inp && inp.value === q) onGlobalSearch(q);
+      });
+    return;
+  }
   if (!hasResults && !hasCacheGare && !mieGare.length && !uFound.length) {
     dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
       <div style="font-size:24px;margin-bottom:6px;">🔍</div>
-      Nessuna gara trovata tra le tue per "<strong>${q}</strong>"
+      Nessun risultato per "<strong>${q}</strong>"
     </div>`;
     dd.style.display = 'block';
     return;
@@ -4804,7 +4775,13 @@ function switchAuthTab(tab) {
     tReg.style.borderBottomColor = 'var(--accent)';
     tReg.style.color = 'var(--accent)';
     tReg.style.fontWeight = '600';
-    popolaSelectConfig();
+    // Assicura config dal foglio prima di popolare
+    const cfgReg = getConfig();
+    if (!cfgReg.regioni || !cfgReg.regioni.length) {
+      caricaConfigurazione().then(popolaSelectConfig);
+    } else {
+      popolaSelectConfig();
+    }
 
   } else if (tab === 'reset') {
     if (resetF) resetF.style.display = 'block';
