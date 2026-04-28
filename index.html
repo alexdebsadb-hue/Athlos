@@ -780,7 +780,9 @@
       </div>
       <div style="margin-top:16px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--text2);">
-          <input type="checkbox" id="reg-privacy" style="margin-top:2px;flex-shrink:0;" />
+          <input type="hidden" id="reg-timestamp-consenso" value="" />
+          <input type="checkbox" id="reg-privacy" style="margin-top:2px;flex-shrink:0;"
+            onchange="if(this.checked)document.getElementById('reg-timestamp-consenso').value=new Date().toISOString();" />
           <span>Ho letto e accetto la <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Privacy Policy</a> e i <a href="#" onclick="apriTermini();return false;" style="color:var(--accent);">Termini di servizio</a> di I-Run. Acconsento al trattamento dei dati personali per la gestione del profilo e delle gare.</span>
         </label>
       </div>
@@ -3341,10 +3343,13 @@ async function _eseguiRicerca(q) {
   if (!dd) return;
   const ql = q.toLowerCase();
 
-  // Mostra loading
+  // Mostra loading subito
   dd.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text3);font-size:13px;">
     <span style="font-size:20px;">⏳</span> Ricerca in corso...</div>`;
   dd.style.display = 'block';
+
+  // Piccola pausa per far comparire il loading prima del fetch
+  await new Promise(r => setTimeout(r, 10));
 
   // ── Mie gare (da localStorage — istantaneo) ──
   const mieGare = getGare().filter(g =>
@@ -3400,24 +3405,7 @@ async function _eseguiRicerca(q) {
     dd.style.display = 'block';
     return;
   }
-  // Cache non ancora caricata — avvia caricamento e mostra spinner
-  if (!_utentiCache.length && !_gareCache.length) {
-    dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
-      <div style="font-size:28px;margin-bottom:8px;">⏳</div>
-      Caricamento dati dal foglio Google...<br>
-      <span style="font-size:11px;">La prima ricerca richiede qualche secondo</span>
-    </div>`;
-    dd.style.display = 'block';
-    // Carica e poi riesegui la ricerca automaticamente
-    caricaUtentiCache()
-      .then(() => caricaGareCache())
-      .then(() => {
-        const inp = document.getElementById('global-search');
-        if (inp && inp.value === q) onGlobalSearch(q);
-      });
-    return;
-  }
-  if (!hasResults && !hasCacheGare && !mieGare.length && !uFound.length) {
+  if (!hasResults) {
     dd.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px;">
       <div style="font-size:24px;margin-bottom:6px;">🔍</div>
       Nessun risultato per "<strong>${q}</strong>"
@@ -4918,8 +4906,8 @@ async function confermaRegistrazione() {
   const regioneVal  = (document.getElementById('reg-regione').value || '').trim();
   const profiloVal  = profilo ? profilo.value : 'pubblico';
 
-  const tsConsenso = document.getElementById('reg-timestamp-consenso').value
-    || new Date().toISOString();
+  const tsEl = document.getElementById('reg-timestamp-consenso');
+  const tsConsenso = (tsEl ? tsEl.value : '') || new Date().toISOString();
 
   const utente = {
     utente_id:           uid,
