@@ -759,26 +759,6 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Città</label>
-          <input class="form-input" id="reg-citta" placeholder="es. Milano" autocomplete="off" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Regione</label>
-          <select class="form-select" id="reg-regione">
-            <option value="">Seleziona...</option>
-            <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option>
-            <option>Campania</option><option>Emilia-Romagna</option>
-            <option>Friuli-Venezia Giulia</option><option>Lazio</option>
-            <option>Liguria</option><option>Lombardia</option><option>Marche</option>
-            <option>Molise</option><option>Piemonte</option><option>Puglia</option>
-            <option>Sardegna</option><option>Sicilia</option><option>Toscana</option>
-            <option>Trentino-Alto Adige</option><option>Umbria</option>
-            <option>Valle d'Aosta</option><option>Veneto</option><option>Estero</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
           <label class="form-label">Password <span style="color:var(--accent)">*</span></label>
           <input class="form-input" id="reg-pwd" type="password" placeholder="min. 6 caratteri" />
         </div>
@@ -801,7 +781,7 @@
       <div style="margin-top:16px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--text2);">
           <input type="checkbox" id="reg-privacy" style="margin-top:2px;flex-shrink:0;" />
-          <span>Ho letto e accetto la <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Privacy Policy</a> e i <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Termini di servizio</a> di I-Run. Acconsento al trattamento dei dati personali per la gestione del profilo e delle gare.</span>
+          <span>Ho letto e accetto la <a href="https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub" target="_blank" style="color:var(--accent);">Privacy Policy</a> e i <a href="#" onclick="apriTermini();return false;" style="color:var(--accent);">Termini di servizio</a> di I-Run. Acconsento al trattamento dei dati personali per la gestione del profilo e delle gare.</span>
         </label>
       </div>
       <div id="reg-info" style="display:none;border-radius:8px;padding:12px;font-size:13px;margin-top:12px;"></div>
@@ -1519,6 +1499,33 @@
   </div>
 </div>
 
+<!-- TERMINI DI SERVIZIO MODAL -->
+<div class="form-overlay" id="termini-overlay" onclick="if(event.target===this)document.getElementById('termini-overlay').classList.remove('open')">
+  <div class="form-box" style="max-width:600px;max-height:80vh;overflow-y:auto;">
+    <div class="form-title">Termini di <span>servizio</span></div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+      <p><strong>1. Accettazione</strong><br>
+      Utilizzando I-Run accetti i presenti Termini. Se non li accetti, non utilizzare il servizio.</p>
+      <p><strong>2. Descrizione del servizio</strong><br>
+      I-Run è una piattaforma gratuita per il tracciamento personale di gare ed attività sportive. Il servizio è fornito "così com'è", senza garanzie di continuità o disponibilità.</p>
+      <p><strong>3. Account utente</strong><br>
+      Sei responsabile della riservatezza delle tue credenziali. Non condividere la tua password. Ogni utente può avere un solo account. Ci riserviamo il diritto di sospendere account che violino questi termini.</p>
+      <p><strong>4. Contenuti inseriti</strong><br>
+      Sei responsabile dei dati che inserisci. Non inserire dati falsi, offensivi o relativi a terze persone senza consenso. I dati inseriti rimangono di tua proprietà.</p>
+      <p><strong>5. Profilo pubblico</strong><br>
+      Se imposti il profilo come pubblico, nome, sport e gare saranno visibili agli altri utenti registrati. Puoi cambiare questa impostazione in qualsiasi momento dal tuo profilo.</p>
+      <p><strong>6. Limitazione di responsabilità</strong><br>
+      I-Run non è responsabile per eventuali imprecisioni nei dati, interruzioni del servizio o perdita di dati. Esegui backup periodici dei tuoi dati tramite l'export disponibile.</p>
+      <p><strong>7. Modifiche</strong><br>
+      Ci riserviamo il diritto di modificare questi termini. Le modifiche saranno comunicate agli utenti registrati. L'uso continuato del servizio costituisce accettazione.</p>
+      <p style="color:var(--text3);font-size:12px;">Versione 1.0 — I-Run</p>
+    </div>
+    <div class="form-actions" style="margin-top:20px;">
+      <button class="btn-primary" onclick="document.getElementById('termini-overlay').classList.remove('open');document.getElementById('reg-privacy').checked=true;" style="flex:1;">Ho letto — Accetto</button>
+    </div>
+  </div>
+</div>
+
 <!-- PRIVACY MODAL -->
 <div class="form-overlay" id="privacy-overlay" onclick="if(event.target===this)document.getElementById('privacy-overlay').classList.remove('open')">
   <div class="form-box" style="max-width:600px;max-height:80vh;overflow-y:auto;">
@@ -1577,26 +1584,6 @@
         <div class="form-group">
           <label class="form-label">Peso (kg)</label>
           <input class="form-input" id="ep-peso" type="number" placeholder="70" />
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Città</label>
-          <input class="form-input" id="ep-citta" placeholder="es. Milano" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Regione</label>
-          <select class="form-select" id="ep-regione">
-            <option value="">Seleziona...</option>
-            <option>Abruzzo</option><option>Basilicata</option><option>Calabria</option>
-            <option>Campania</option><option>Emilia-Romagna</option>
-            <option>Friuli-Venezia Giulia</option><option>Lazio</option>
-            <option>Liguria</option><option>Lombardia</option><option>Marche</option>
-            <option>Molise</option><option>Piemonte</option><option>Puglia</option>
-            <option>Sardegna</option><option>Sicilia</option><option>Toscana</option>
-            <option>Trentino-Alto Adige</option><option>Umbria</option>
-            <option>Valle d'Aosta</option><option>Veneto</option><option>Estero</option>
-          </select>
         </div>
       </div>
       <div class="form-row">
@@ -1668,7 +1655,7 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
-const GS_URL   = 'https://script.google.com/macros/s/AKfycbwGWsm2U2QabL8Zc56TrvQ7tCXlUC-UVuxXsFBBlXa-0WQdmIl_AqgSUBad78HKKpmg/exec';
+const GS_URL   = 'https://script.google.com/macros/s/AKfycbwdllyrClurXWDqtupKyqbH471NQgjDM5Ix9WlPM67tM8yEXb16FC0Ou0Xj_OiHF-CO/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
 // ============ STORAGE — dual layer (locale + remoto) ============
@@ -3163,6 +3150,9 @@ function editProfile() {
 function apriPrivacy() {
   document.getElementById('privacy-overlay').classList.add('open');
 }
+function apriTermini() {
+  document.getElementById('termini-overlay').classList.add('open');
+}
 
 function closeEditProfile() {
   document.getElementById('edit-profile-overlay').classList.remove('open');
@@ -3860,7 +3850,12 @@ function popolaTipoGaraP(sport) {
 
 function onPSportChange(sport) {
   selectedSportP = sport;
-  popolaTipoGaraP(sport);
+  const c = getConfig();
+  if (!c.sport_distanze || Object.keys(c.sport_distanze).length === 0) {
+    caricaConfigurazione().then(() => popolaTipoGaraP(sport));
+  } else {
+    popolaTipoGaraP(sport);
+  }
 }
 function closeDetailOutside(e) { if (e.target === document.getElementById('detail-overlay')) closeDetail(); }
 
@@ -4992,7 +4987,9 @@ async function confermaResetPassword() {
 
   // Cerca l'utente per email e aggiorna la password
   console.log('[RESET] Invio reset per email:', email);
-  const res = await gsPost('resetPasswordByEmail', { email: email, password: pwd.trim(), utente_id: '' });
+  // gsPost aggiunge automaticamente utente_id — lo forziamo a stringa vuota
+  // per evitare che sovrascriva il campo email
+  const res = await gsPost('resetPasswordByEmail', { email: email, password: pwd.trim(), utente_id: 'noop' });
   console.log('[RESET] Risposta:', JSON.stringify(res));
 
   if (res && res.updated) {
