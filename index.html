@@ -1705,8 +1705,7 @@ async function gsGet(params) {
     if (!json.ok) console.warn('gsGet error:', json.error);
     return json.data || null;
   } catch(e) {
-    console.warn('gsGet fetch error:', e.message);
-    return null;
+      return null;
   }
 }
 
@@ -1725,8 +1724,7 @@ async function gsPost(action, data) {
     try {
       json = JSON.parse(text);
     } catch(parseErr) {
-      console.error('[gsPost] Risposta non JSON:', text.slice(0, 200));
-      return null;
+          return null;
     }
     if (!json.ok) console.warn('[gsPost] Errore:', json.error);
     // loginUtente restituisce ok nel corpo, non in data
@@ -1815,8 +1813,7 @@ async function syncFromSheet() {
     showSyncBadge('ok');
     return true;
   } catch(e) {
-    console.warn('syncFromSheet error:', e);
-    showSyncBadge('err');
+      showSyncBadge('err');
     return false;
   }
 }
@@ -1854,8 +1851,7 @@ async function caricaConfigurazione() {
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
     const res = await Promise.race([fetch(url), timeout]);
     const json = await res.json();
-    console.log('Config risposta grezza:', json);
-
+  
     // Accetta sia { ok:true, data:{...} } che { ok:false, data:{...} } che risposta diretta
     let cfg = null;
     if (json && json.data && typeof json.data === 'object' && !Array.isArray(json.data)) {
@@ -1878,21 +1874,16 @@ async function caricaConfigurazione() {
           mappa[k.toLowerCase()] = Array.isArray(v) ? v : [];
         });
         cfg.sport_distanze = mappa;
-        console.log('sport_distanze dal foglio:', mappa);
-      } else {
+        } else {
         // Fallback: nessuna mappa disponibile
         cfg.sport_distanze = {};
-        console.warn('sport_distanze non disponibile nella config');
-      }
+        }
       setConfig(cfg);
       setCachedConfig(cfg);
-      console.log('Config caricata:', cfg);
     } else {
-      console.warn('Config: struttura non riconosciuta. Risposta:', json);
       showToast('⚠️ Configurazione non valida. Verifica il foglio CONFIGURAZIONE.');
     }
   } catch(e) {
-    console.warn('Config fetch fallito:', e.message);
     // Non usare defaults hardcoded — mostra messaggio
     showSyncBadge('err');
     showToast('⚠️ Impossibile caricare la configurazione dal foglio Google');
@@ -1902,12 +1893,10 @@ async function caricaConfigurazione() {
 function usaConfigDefault() {
   // Nessun default hardcoded — attendiamo il foglio Google
   setConfig({ sport:[], distanze:[], nazioni:[], regioni:[], sport_distanze:{} });
-  console.log('Config: in attesa del foglio Google...');
 }
 
 function popolaSelectConfig() {
   const c = getConfig();
-  console.log('popolaSelectConfig — sport:', c.sport, 'distanze:', c.distanze);
   // Sport nel form gara
   const fSport = document.getElementById('f-sport');
   if (fSport) {
@@ -1977,14 +1966,12 @@ function onSportChange(sport) {
   const matchKey = Object.keys(sportDistanze).find(k =>
     k.toLowerCase() === sportLower
   );
-  console.log('[sportChange] sport:', sportLower, '| chiavi disponibili:', Object.keys(sportDistanze), '| match:', matchKey);
   if (matchKey && sportDistanze[matchKey].length) {
     distanzeFiltrate = sportDistanze[matchKey];
   } else {
     // Fallback: mostra tutte le distanze
     distanzeFiltrate = c.distanze || [];
-    console.warn('[sportChange] Nessun match — mostro tutte le distanze');
-  }
+    }
 
   distanzeFiltrate.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; fTipo.appendChild(o);
@@ -2081,8 +2068,7 @@ function openForm(garaEdit) {
       !c.sport_distanze || Object.keys(c.sport_distanze).length === 0) {
     caricaConfigurazione().then(() => {
       popolaSelectConfig();
-      console.log('[openForm] Config ricaricata, sport_distanze:', Object.keys(getConfig().sport_distanze||{}));
-    });
+        });
   } else {
     popolaSelectConfig();
   }
@@ -3391,7 +3377,6 @@ async function _eseguiRicerca(q) {
       });
     }
   } catch(e) {
-    console.warn('Ricerca foglio:', e.message);
   }
 
   const gPubliche = Object.values(aggGare).sort((a,b) => b.count - a.count).slice(0, 5);
@@ -4218,9 +4203,7 @@ function parsePastedData(text) {
     const cols = raw.split(sep).map(c => c.trim().replace(/^"|"$/g,''));
     if (cols.length < 3) { errCount++; continue; }
     try {
-      console.log('Riga', i, '- cols:', cols.length, '- col[6] (tempo):', JSON.stringify(cols[6]), '- col[1] (nome):', cols[1]);
       const parsed = parseStandardRow(cols);
-      console.log('  → parsed.tempo:', JSON.stringify(parsed?.tempo), 'parsed.nome:', parsed?.nome);
       if (!parsed || !parsed.nome) { errCount++; continue; }
       const chiave = (parsed.nome + '|' + parsed.data).toLowerCase();
       parsed.isDuplicate = esistenti.has(chiave);
@@ -4850,8 +4833,6 @@ async function confermaLogin() {
   }
 
   setInfo('⟳ Connessione al foglio...', 'loading');
-  console.log('[LOGIN] Tentativo login per:', email);
-  console.log('[LOGIN] GS_URL:', GS_URL.slice(0, 60) + '...');
 
   // Timeout di 8 secondi — se non risponde, accesso offline
   let res = null;
@@ -4863,14 +4844,12 @@ async function confermaLogin() {
       gsPost('loginUtente', { email: email, password: pwd }),
       timeoutPromise
     ]);
-    console.log('[LOGIN] Risposta ricevuta:', JSON.stringify(res));
   } catch(e) {
     console.error('[LOGIN] Errore fetch/timeout:', e.message);
     res = null;
   }
 
   if (res && res.ok) {
-    console.log('[LOGIN] OK — utente_id:', res.utente_id);
     // LOGIN OK
     const profilo = res;
     setUtenteId(profilo.utente_id);
@@ -4951,7 +4930,6 @@ async function confermaRegistrazione() {
     citta:            cittaVal,
     regione:          regioneVal,
   };
-  console.log('Registrazione utente:', JSON.stringify({...utente, password:'[hidden]'}));
 
   mostraInfoReg('⟳ Creazione account...', 'loading', info);
   const res = await gsPost('registraUtente', utente);
@@ -4986,11 +4964,9 @@ async function confermaResetPassword() {
   mostraInfoReg('⟳ Aggiornamento password...', 'loading', info);
 
   // Cerca l'utente per email e aggiorna la password
-  console.log('[RESET] Invio reset per email:', email);
   // gsPost aggiunge automaticamente utente_id — lo forziamo a stringa vuota
   // per evitare che sovrascriva il campo email
   const res = await gsPost('resetPasswordByEmail', { email: email, password: pwd.trim(), utente_id: 'noop' });
-  console.log('[RESET] Risposta:', JSON.stringify(res));
 
   if (res && res.updated) {
     mostraInfoReg('✓ Password aggiornata! Ora puoi accedere.', 'ok', info);
@@ -5038,11 +5014,9 @@ async function init() {
   const cached = getCachedConfig();
   if (cached && cached.sport && cached.sport.length) {
     setConfig(cached);
-    console.log('Config da cache:', cached.sport, '| sport_distanze:', Object.keys(cached.sport_distanze||{}));
   }
   // Carica sempre la config fresca in background
   caricaConfigurazione().then(() => {
-    console.log('Config aggiornata dal foglio:', Object.keys(getConfig().sport_distanze||{}));
   });
 
   const uid = getUtenteId();
