@@ -1634,7 +1634,7 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
-const GS_URL   = 'https://script.google.com/macros/s/AKfycbyulhPWlAnh_ueNDMct2GB0TtXhAeTeEKLImHixergrZYb3X468EhlIf59eSSbcQBnq/exec';
+const GS_URL   = 'https://script.google.com/macros/s/AKfycbwdllyrClurXWDqtupKyqbH471NQgjDM5Ix9WlPM67tM8yEXb16FC0Ou0Xj_OiHF-CO/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
 // ============ STORAGE — dual layer (locale + remoto) ============
@@ -3626,16 +3626,94 @@ function closePublicProfile() {
 }
 
 async function cercaRecensioni(query) {
-  // Apri il modal e mostra le recensioni aggregate per quella gara/luogo
   let nomeGara = query, luogoGara = '';
   if (query.includes('_ID:')) {
     const parts = query.split('_ID:');
     luogoGara = parts[0];
     nomeGara  = parts[1];
   }
-  // Usa apriDettaglioGaraCommunity se disponibile
   const chiave = encodeURIComponent(nomeGara + '|||' + luogoGara);
-  apriDettaglioGaraCommunity(chiave, null);
+  await apriDettaglioGaraCommunity(chiave, null);
+}
+
+async function apriDettaglioGaraCommunity(chiaveEncoded, event) {
+  if (event) event.stopPropagation();
+  const chiave    = decodeURIComponent(chiaveEncoded);
+  const [nomeGara, luogoGara] = chiave.split('|||');
+
+  const overlay = document.getElementById('public-profile-overlay');
+  overlay.classList.add('open');
+  document.getElementById('pp-initials').textContent = '🏅';
+  document.getElementById('pp-nome').textContent     = nomeGara;
+  document.getElementById('pp-meta').textContent     = luogoGara ? '📍 ' + luogoGara : '';
+  document.getElementById('pp-sport').innerHTML      = '';
+  document.getElementById('pp-body').innerHTML =
+    '<div style="padding:20px;text-align:center;color:var(--text3);">⟳ Caricamento...</div>';
+
+  // Cerca gare che corrispondono a nome+luogo
+  const gareMatch = await gsGet({ action: 'cercaGarePerCitta', q: luogoGara || nomeGara });
+  if (!Array.isArray(gareMatch) || !gareMatch.length) {
+    document.getElementById('pp-body').innerHTML =
+      '<div style="padding:20px;text-align:center;color:var(--text3);">Nessuna recensione trovata</div>';
+    return;
+  }
+
+  const filtrate = gareMatch.map(normalizzaGara).filter(g =>
+    (g.nome||g.tipo_gara||'').toLowerCase() === nomeGara.toLowerCase() &&
+    (!luogoGara || (g.luogo||'').toLowerCase() === luogoGara.toLowerCase())
+  );
+
+  const conRating = filtrate.filter(g =>
+    g.rating && (g.rating.percorso || g.rating.ristori || g.rating.organizzazione)
+  );
+  const count    = filtrate.length;
+  const mediaAvg = conRating.length
+    ? conRating.reduce((s,g) => s + (g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3, 0) / conRating.length
+    : 0;
+
+  document.getElementById('pp-nome').textContent = nomeGara + (luogoGara ? ' · ' + luogoGara : '');
+  document.getElementById('pp-meta').textContent =
+    '👥 ' + count + ' partecipant' + (count===1?'e':'i') +
+    (mediaAvg > 0 ? '  ·  ⭐ ' + mediaAvg.toFixed(1) + '/5' : '');
+
+  // Box media voti
+  let body = '';
+  if (mediaAvg > 0) {
+    const mr = Math.round(mediaAvg);
+    body += `<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;">
+      <div style="text-align:center;min-width:80px;">
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:48px;font-weight:900;color:var(--accent);line-height:1;">${mediaAvg.toFixed(1)}</div>
+        <div style="font-size:18px;color:#ffd54f;">${'★'.repeat(mr)}${'☆'.repeat(5-mr)}</div>
+        <div style="font-size:11px;color:var(--text3);">${conRating.length} recension${conRating.length===1?'e':'i'}</div>
+      </div>
+      <div style="flex:1;">
+        ${['percorso','ristori','organizzazione'].map(k => {
+          const avg = conRating.reduce((s,g) => s+(g.rating[k]||0),0)/conRating.length;
+          return `<div style="margin-bottom:6px;font-size:12px;">
+            <span style="color:var(--text3);display:inline-block;width:110px;">${k.charAt(0).toUpperCase()+k.slice(1)}</span>
+            <span style="color:#ffd54f;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span>
+            <span style="color:var(--text3);font-size:11px;margin-left:4px;">${avg.toFixed(1)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Ultime 5 recensioni
+  const ultime5 = conRating
+    .sort((a,b) => String(b.data||'').localeCompare(String(a.data||'')))
+    .slice(0, 5);
+
+  if (ultime5.length) {
+    body += `<div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;">Ultime recensioni</div>`;
+    body += ultime5.map(g => renderRecensioneCard(g)).join('');
+  }
+
+  if (!count) {
+    body = '<div style="padding:20px;text-align:center;color:var(--text3);">Nessuna recensione disponibile</div>';
+  }
+
+  document.getElementById('pp-body').innerHTML = body;
 }
 
 function renderRecensioneCard(g) {
