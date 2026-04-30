@@ -3511,8 +3511,7 @@ function logoff() {
   renderNavUser();
   showPage('home');
   renderHome();
-  showToast('Sei uscito dal tuo account');
-  setTimeout(openLoginModal, 800);
+  showToast('Sei uscito dall\'account');
 }
 
 function resetPassword() {
@@ -5464,7 +5463,6 @@ async function init() {
   if (!uid) {
     renderHome();
     renderProgramma();
-    setTimeout(openLoginModal, 600);
   } else {
     // Render immediato con dati locali
     renderHome();
