@@ -1242,6 +1242,11 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label class="form-label">Nome gara</label>
+        <input class="form-input" id="f-nome" placeholder="es. Maratona di Roma, Ironman Italy..." />
+      </div>
+
       <div class="form-row triple">
         <div class="form-group">
           <label class="form-label">Luogo / Città</label>
@@ -1521,16 +1526,9 @@
     </div>
     <div class="import-body">
 
-      <!-- TAB SELECTOR -->
-      <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);">
-        <button id="imp-tab-paste" onclick="switchImportTab('paste')"
-          style="padding:9px 20px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;">
-          &#x1F4CB; Incolla da Excel
-        </button>
-        <button id="imp-tab-csv" onclick="switchImportTab('csv')"
-          style="padding:9px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;">
-          &#x1F4C2; File CSV
-        </button>
+      <!-- Solo Incolla da Excel -->
+      <div style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+        <span style="font-size:13px;font-weight:700;color:var(--accent);">📋 Incolla da Excel</span>
       </div>
 
       <!-- PANNELLO INCOLLA -->
@@ -1538,7 +1536,7 @@
         <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7;">
           Copia le righe da Excel o Google Sheets e incollale qui sotto con <strong>Ctrl+V</strong>.<br>
           <span style="color:var(--text3);font-size:12px;">Colonne attese nell'ordine:</span>
-          <code style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">Sport &middot; Tipo gara &middot; Data (GG/MM/AAAA) &middot; Luogo &middot; Regione &middot; Km &middot; Tempo (H:MM:SS) &middot; Esito &middot; Note</code>
+          <code style="font-size:11px;background:var(--bg3);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px;">Sport &middot; Tipo gara &middot; Nome gara &middot; Data (GG/MM/AAAA) &middot; Luogo &middot; Regione &middot; Km &middot; Tempo (H:MM:SS) &middot; Esito &middot; Note</code>
         </div>
         <textarea id="import-paste-area"
           placeholder="Incolla qui il contenuto copiato da Excel (Ctrl+V)..."
@@ -1552,19 +1550,7 @@
         </div>
       </div>
 
-      <!-- PANNELLO CSV -->
-      <div id="imp-panel-csv" style="display:none;">
-        <div id="import-dropzone" class="drop-zone"
-          ondragover="event.preventDefault();this.classList.add('dragover')"
-          ondragleave="this.classList.remove('dragover')"
-          ondrop="handleImportDrop(event)"
-          onclick="triggerImportFile()">
-          <div class="drop-zone-icon">&#x1F4C2;</div>
-          <div class="drop-zone-title">Trascina il file CSV qui</div>
-          <div style="font-size:13px;margin-bottom:16px;">oppure clicca per sfogliare</div>
-          <div style="font-size:12px;color:var(--text3);">Formato: CSV con TAB o virgola &#xB7; UTF-8</div>
-        </div>
-      </div>
+
       <div id="import-preview" style="display:none;">
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
           <div id="import-stats-new" style="background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;color:#81c784;"></div>
@@ -2184,7 +2170,9 @@ function openForm(garaEdit) {
       const fTipo = document.getElementById('f-tipo-gara');
       if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
     }, 50);
-    document.getElementById('f-data').value = g.data || '';
+    document.getElementById('f-data').value  = g.data  || '';
+    const fNome = document.getElementById('f-nome');
+    if (fNome) fNome.value = (g.nome !== g.tipo_gara ? g.nome : '') || '';
     document.getElementById('f-luogo').value = g.luogo || '';
     setTimeout(() => {
       const fReg = document.getElementById('f-regione');
@@ -2256,12 +2244,13 @@ function salvaGara() {
   const isTriFlag = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
                     sportLower.includes('triathlon') || sportLower.includes('ironman');
   const isTri = isTriFlag;
+  const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
   const gara = {
     id: isEdit ? parseInt(editId) : Date.now(),
     utente_id: getUtenteId(),
     sport: sportVal,
     tipo_gara: tipoGara,
-    nome: tipoGara,
+    nome: nomeGaraCustom || tipoGara,
     data: document.getElementById('f-data').value,
     luogo: document.getElementById('f-luogo').value,
     regione: document.getElementById('f-regione').value,
@@ -4263,11 +4252,13 @@ function parseLegacyRow(cols, i) {
 function parseStandardRow(cols) {
   // Formato standard I-Run:
   // sport | nome | data(YYYY-MM-DD o DD/MM/YYYY) | luogo | regione | distanza | tempo | esito | note | hotel | hotelTipo
-  const sport = (cols[0]||'corsa').toLowerCase();
-  const nome = (cols[1]||'').trim();
-  if (!nome) return null;
+  const sport     = (cols[0]||'corsa').toLowerCase();
+  const tipoGara  = (cols[1]||'').trim();
+  const nomeGara  = (cols[2]||'').trim();   // Nome gara (colonna 3)
+  const nome = nomeGara || tipoGara;
+  if (!tipoGara) return null;
 
-  let dataRaw = (cols[2]||'').trim();
+  let dataRaw = (cols[3]||'').trim();
   let dataISO = dataRaw;
   const dp = dataRaw.split('/');
   if (dp.length === 3) {
@@ -4276,19 +4267,18 @@ function parseStandardRow(cols) {
     dataISO = y + '-' + dp[1].padStart(2,'0') + '-' + dp[0].padStart(2,'0');
   }
 
-  const luogo = (cols[3]||'').trim();
-  const regione = (cols[4]||'').trim();
-  const distanza = parseFloat((cols[5]||'0').replace(',','.')) || 0;
-  const tempoRaw = (cols[6]||'').trim();
-  // Normalizza il tempo in H:MM:SS — gestisce formati decimali Excel
-  const tempo = normalizzaTempo(tempoRaw) || null;
-  const esito = (cols[7]||'finisher').toLowerCase().includes('dnf') ? 'dnf' : 'finisher';
-  const note = (cols[8]||'').trim();
-  const hotel = (cols[9]||'').trim();
-  const hotelTipo = (cols[10]||'').trim();
+  const luogo    = (cols[4]||'').trim();
+  const regione  = (cols[5]||'').trim();
+  const distanza = parseFloat((cols[6]||'0').replace(',','.')) || 0;
+  const tempoRaw = (cols[7]||'').trim();
+  const tempo    = normalizzaTempo(tempoRaw) || null;
+  const esito    = (cols[8]||'finisher').toLowerCase().includes('dnf') ? 'dnf' : 'finisher';
+  const note     = (cols[9]||'').trim();
+  const hotel    = (cols[10]||'').trim();
+  const hotelTipo = (cols[11]||'').trim();
 
-  return { sport, nome, data: dataISO, luogo, regione, distanza,
-    esito, tempo, frazioni: null, risultato: '', pb: false,
+  return { sport, tipo_gara: tipoGara, nome, data: dataISO, luogo, regione, distanza,
+    esito, tempo, frazioni: null, risultato: '',
     note, hotel, hotelTipo };
 }
 
@@ -4469,10 +4459,10 @@ function parsePastedData(text) {
 
 function downloadExcelTemplate() {
   // Crea un TSV (apre come Excel) con intestazioni e righe di esempio
-  const header = ['Sport','Tipo gara','Data','Luogo','Regione','Km','Tempo','Esito','Note'].join('	');
-  const ex1    = ['Corsa','Maratona (42,2 km)','16/03/2025','Roma','Lazio','42.2','3:25:00','finisher','Ottima gara'].join('	');
-  const ex2    = ['Trail','Trail 30 km','18/05/2025','Visso','Marche','35','4:12:00','finisher','Dislivello impegnativo'].join('	');
-  const ex3    = ['Triathlon','Triathlon Olimpico (51,5 km)','01/06/2025','Riccione','Emilia-Romagna','51.5','','finisher',''].join('	');
+  const header = ['Sport','Tipo gara','Nome gara','Data','Luogo','Regione','Km','Tempo','Esito','Note'].join('	');
+  const ex1    = ['Corsa','Maratona (42,2 km)','Maratona di Roma','16/03/2025','Roma','Lazio','42.2','3:25:00','finisher','Ottima gara'].join('	');
+  const ex2    = ['Trail','Trail 30 km','Trail dei Sibillini','18/05/2025','Visso','Marche','35','4:12:00','finisher','Dislivello impegnativo'].join('	');
+  const ex3    = ['Triathlon','Triathlon Olimpico (51,5 km)','Ironman Italy Riccione','01/06/2025','Riccione','Emilia-Romagna','51.5','','finisher',''].join('	');
   const tsv    = [header, ex1, ex2, ex3].join('\n');
   const blob   = new Blob(['﻿' + tsv], { type: 'text/tab-separated-values;charset=utf-8;' });
   const url    = URL.createObjectURL(blob);
