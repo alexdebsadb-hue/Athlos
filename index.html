@@ -2864,18 +2864,27 @@ function renderStats() {
   });
   destroyChart('sport');
   const sportLabels = Object.keys(perSport);
+  const _sportColorSolid = {
+    corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
+    bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
+    duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
+  };
   if (sportLabels.length) {
     const ctx2 = document.getElementById('chart-sport')?.getContext('2d');
     if (ctx2) chartInstances['sport'] = new Chart(ctx2, {
       type: 'doughnut',
       data: {
-        labels: sportLabels.map(s => sportLabel(s)),
+        labels: sportLabels.map(s => sportIcon(s) + ' ' + sportLabel(s)),
         datasets: [{ data: sportLabels.map(s=>perSport[s]),
-          backgroundColor: sportLabels.map(s => sportColor(s)),
-          borderColor: 'var(--bg2)', borderWidth: 2 }]
+          backgroundColor: sportLabels.map(s => _sportColorSolid[s] || '#607d8b'),
+          borderColor: 'var(--bg3)', borderWidth: 3,
+          hoverOffset: 6 }]
       },
-      options: { ...CHART_DEFAULTS, cutout: '60%',
-        plugins: { ...CHART_DEFAULTS.plugins, legend: { display: true, position: 'right', labels: { color: CHART_COLORS.text, font: { size: 12 } } } } }
+      options: { ...CHART_DEFAULTS, cutout: '55%',
+        plugins: { ...CHART_DEFAULTS.plugins,
+          legend: { display: true, position: 'right',
+            labels: { color: CHART_COLORS.text, font: { size: 12, family:'Barlow' },
+              boxWidth: 14, padding: 10 } } } }
     });
   }
 
@@ -3520,10 +3529,11 @@ async function _eseguiRicerca(q) {
   const ql = q.toLowerCase();
 
   // ── Mie gare (da localStorage — istantaneo, nessun fetch) ──
+  // Substring semplice case-insensitive:
+  // "roma" trova "Romania", "Maratona di Roma", "Roma Nord" — tutto ciò che contiene "roma"
   const mieGare = getGare().filter(g =>
-    (g.nome||'').toLowerCase().includes(ql) ||
-    (g.luogo||'').toLowerCase().includes(ql) ||
-    (g.regione||'').toLowerCase().includes(ql)
+    (g.nome  ||'').toLowerCase().includes(ql) ||
+    (g.luogo ||'').toLowerCase().includes(ql)
   ).slice(0, 5).map(g => ({ ...g, _isMia: true }));
 
   // Mostra subito le mie gare, poi aggiungeremo utenti e gare community
@@ -5509,13 +5519,19 @@ async function renderSocial() {
   document.getElementById('social-top-rating').innerHTML = top5Rating.length
     ? top5Rating.map((g,i) => {
         const mr = Math.round(g.media);
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg4);border-radius:8px;">
+        const chiave = encodeURIComponent(g.nome + '|||' + (g.luogo||''));
+        return `<div onclick="apriDettaglioGaraCommunity('${chiave}', event)"
+          style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg4);border-radius:8px;cursor:pointer;transition:background 0.15s;"
+          onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background='var(--bg4)'">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:900;color:var(--text3);min-width:20px;">${i+1}</div>
           <div style="flex:1;">
             <div style="font-size:13px;font-weight:600;">${sportIcon(g.sport)} ${g.nome}</div>
-            <div style="font-size:11px;color:var(--text3);">${g.count} recension${g.count===1?'e':'i'}</div>
+            <div style="font-size:11px;color:var(--text3);">${g.count} recension${g.count===1?'e':'i'} · clicca per vedere →</div>
           </div>
-          <div style="font-size:14px;color:#ffd54f;">${'★'.repeat(mr)}${'☆'.repeat(5-mr)}</div>
+          <div style="text-align:right;">
+            <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;color:var(--accent);line-height:1;">${g.media.toFixed(1)}</div>
+            <div style="font-size:11px;color:#ffd54f;">${'★'.repeat(mr)}${'☆'.repeat(5-mr)}</div>
+          </div>
         </div>`;
       }).join('')
     : '<div style="color:var(--text3);font-size:13px;padding:8px;">Nessuna recensione</div>';
