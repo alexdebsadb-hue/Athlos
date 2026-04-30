@@ -3522,10 +3522,8 @@ async function _eseguiRicerca(q) {
   // ── Mie gare (da localStorage — istantaneo, nessun fetch) ──
   const mieGare = getGare().filter(g =>
     (g.nome||'').toLowerCase().includes(ql) ||
-    (g.tipo_gara||'').toLowerCase().includes(ql) ||
     (g.luogo||'').toLowerCase().includes(ql) ||
-    (g.regione||'').toLowerCase().includes(ql) ||
-    (g.sport||'').toLowerCase().includes(ql)
+    (g.regione||'').toLowerCase().includes(ql)
   ).slice(0, 5).map(g => ({ ...g, _isMia: true }));
 
   // Mostra subito le mie gare, poi aggiungeremo utenti e gare community
@@ -5459,11 +5457,12 @@ async function renderSocial() {
   // ── TOP PERCORSI VELOCI separati: Mezza Maratona e Maratona ──
   function buildPercorsiVeloci(gare, filtroFn) {
     const percorsi = {};
-    gare.filter(g => filtroFn((g.tipo_gara||g.nome||'').toLowerCase()) &&
+    gare.filter(g => filtroFn((g.nome||g.tipo_gara||'').toLowerCase()) &&
                      garaTempoSecs(g) > 0 && g.esito === 'finisher')
       .forEach(g => {
-        const k = (g.luogo||'') + '|' + (g.tipo_gara||g.nome||'');
-        if (!percorsi[k]) percorsi[k] = { luogo:g.luogo, tipo:g.tipo_gara||g.nome, secs:[], count:0 };
+        const nomeKey = (g.nome||g.tipo_gara||'').trim();
+        const k = nomeKey; // raggruppa per nome gara
+        if (!percorsi[k]) percorsi[k] = { nome:nomeKey, luogo:g.luogo, sport:g.sport, secs:[], count:0 };
         percorsi[k].secs.push(garaTempoSecs(g));
         percorsi[k].count++;
       });
@@ -5479,7 +5478,7 @@ async function renderSocial() {
       <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg4);border-radius:8px;">
         <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:900;color:var(--text3);min-width:16px;">${i+1}</div>
         <div style="flex:1;">
-          <div style="font-size:12px;font-weight:600;">${g.luogo||'—'}</div>
+          <div style="font-size:12px;font-weight:600;">${g.nome}</div>
           <div style="font-size:10px;color:var(--text3);">${g.count} atleti</div>
         </div>
         <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:var(--accent);">${secsToHMS(g.media)}</div>
@@ -5495,8 +5494,9 @@ async function renderSocial() {
   // ── TOP 5 MIGLIOR RATING ──
   const ratingGare = {};
   gare.filter(g => g.rating && (g.rating.percorso||g.rating.ristori||g.rating.organizzazione)).forEach(g => {
-    const k = (g.luogo||'') + '|' + (g.tipo_gara||g.nome||'') + '|' + (g.sport||'');
-    if (!ratingGare[k]) ratingGare[k] = { luogo:g.luogo, tipo:g.tipo_gara||g.nome, sport:g.sport, ratings:[], count:0 };
+    const nomeKey = (g.nome||g.tipo_gara||'').trim();
+    const k = nomeKey + '|' + (g.sport||'');
+    if (!ratingGare[k]) ratingGare[k] = { nome:nomeKey, sport:g.sport, ratings:[], count:0 };
     const avg = (g.rating.percorso+g.rating.ristori+g.rating.organizzazione)/3;
     ratingGare[k].ratings.push(avg);
     ratingGare[k].count++;
@@ -5512,8 +5512,8 @@ async function renderSocial() {
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg4);border-radius:8px;">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:900;color:var(--text3);min-width:20px;">${i+1}</div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:600;">${sportIcon(g.sport)} ${g.tipo}</div>
-            <div style="font-size:11px;color:var(--text3);">📍 ${g.luogo||'—'} · ${g.count} rec.</div>
+            <div style="font-size:13px;font-weight:600;">${sportIcon(g.sport)} ${g.nome}</div>
+            <div style="font-size:11px;color:var(--text3);">${g.count} recension${g.count===1?'e':'i'}</div>
           </div>
           <div style="font-size:14px;color:#ffd54f;">${'★'.repeat(mr)}${'☆'.repeat(5-mr)}</div>
         </div>`;
