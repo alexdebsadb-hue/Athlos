@@ -631,8 +631,9 @@
 </nav>
 
 <!-- LOGIN / REGISTRAZIONE MODAL -->
-<div class="form-overlay" id="login-overlay" onclick="if(event.target===this&&getUtenteId())closeLoginModal()">
-  <div class="form-box" style="max-width:520px;">
+<div class="form-overlay" id="login-overlay" onclick="if(event.target===this)closeLoginModal()">
+  <div class="form-box" style="max-width:520px;position:relative;">
+    <button onclick="closeLoginModal()" style="position:absolute;top:16px;right:16px;background:var(--bg4);border:1px solid var(--border2);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all 0.15s;z-index:1;" onmouseenter="this.style.background='var(--bg3)';this.style.color='var(--text)'" onmouseleave="this.style.background='var(--bg4)';this.style.color='var(--text2)'">&#x2715;</button>
     <div class="form-title" id="login-title">Accedi a <span>I-Run</span></div>
 
     <!-- TAB LOGIN / REGISTRAZIONE / RESET -->
@@ -2178,6 +2179,12 @@ function onSportChange(sport) {
 // ============ OPEN FORM (aggiornato) ============
 // ============ NAVIGATION ============
 function showPage(page, btn) {
+  // Se non loggato, solo home è accessibile
+  const uid = getUtenteId();
+  if (!uid && page !== 'home') {
+    openLoginModal();
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -5442,6 +5449,27 @@ function renderNavUser() {
   if (avatar) avatar.style.background = uid
     ? 'linear-gradient(135deg,var(--accent),var(--accent2))'
     : 'var(--bg4)';
+
+  // Mostra/nasconde link di navigazione in base al login
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const onclick = link.getAttribute('onclick') || '';
+    const isHome  = onclick.includes("'home'");
+    if (!uid && !isHome) {
+      link.style.opacity = '0.35';
+      link.style.cursor  = 'not-allowed';
+      link.title = 'Accedi per usare questa sezione';
+    } else {
+      link.style.opacity = '';
+      link.style.cursor  = '';
+      link.title = '';
+    }
+  });
+
+  // Nascondi bottoni azione navbar se non loggato
+  const btnImport = document.querySelector('button[onclick="openImport()"]');
+  const btnAdd    = document.querySelector('button[onclick="openForm()"]');
+  if (btnImport) btnImport.style.display = uid ? '' : 'none';
+  if (btnAdd)    btnAdd.style.display    = uid ? '' : 'none';
 }
 
 // ============ INIT ============
