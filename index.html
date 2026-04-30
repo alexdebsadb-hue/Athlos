@@ -795,9 +795,35 @@
         </label>
       </div>
       <div id="reg-info" style="display:none;border-radius:8px;padding:12px;font-size:13px;margin-top:12px;"></div>
+
+      <!-- STEP 2: verifica OTP (nascosto finché non inviato) -->
+      <div id="reg-otp-block" style="display:none;margin-top:16px;padding:16px;background:var(--bg3);border:1px solid rgba(255,87,34,0.3);border-radius:10px;">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+          📧 Abbiamo inviato un codice di 6 cifre alla tua email.<br>
+          <span style="font-size:12px;color:var(--text3);">Controlla anche la cartella spam.</span>
+        </div>
+        <div class="form-row" style="align-items:flex-end;">
+          <div class="form-group" style="flex:1;">
+            <label class="form-label">Codice di verifica</label>
+            <input class="form-input" id="reg-otp" placeholder="123456" maxlength="6"
+              style="font-size:20px;letter-spacing:8px;text-align:center;font-family:monospace;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')" />
+          </div>
+          <button class="btn-primary" onclick="verificaOTPeRegistra()" style="height:42px;padding:0 20px;white-space:nowrap;">
+            ✓ Verifica e registrati
+          </button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text3);">
+          Non hai ricevuto il codice?
+          <button onclick="inviaOTP(true)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;font-family:'Barlow',sans-serif;">
+            Reinvia
+          </button>
+        </div>
+      </div>
+
       <div class="form-actions" style="margin-top:20px;">
         <button class="btn-secondary" onclick="switchAuthTab('login')">Torna al login</button>
-        <button class="btn-primary" onclick="confermaRegistrazione()" style="flex:1;">Crea account</button>
+        <button class="btn-primary" id="reg-submit-btn" onclick="inviaOTP(false)" style="flex:1;">Invia codice di verifica →</button>
       </div>
     </div>
 
@@ -2616,12 +2642,30 @@ function renderHome() {
 
 async function renderLanding() {
   // Carica dati community in background
-  const [utentiRes, gareRes] = await Promise.allSettled([
-    gsGet({ action: 'getAllUtenti', utente_id: '' }),
-    gsGet({ action: 'getAllGare',   utente_id: '' }),
-  ]);
-  const utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
-  const gare   = (gareRes.status   === 'fulfilled' && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+  // Riusa cache Social se disponibile
+  let _lsCache = null;
+  try {
+    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    if (sc && Date.now() - sc.ts < 1800000) _lsCache = sc;
+  } catch(e) {}
+
+  let utenti = [], gare = [];
+  if (_lsCache) {
+    utenti = Array.isArray(_lsCache.utenti) ? _lsCache.utenti : [];
+    gare   = Array.isArray(_lsCache.gare)   ? _lsCache.gare.map(normalizzaGara) : [];
+  } else {
+    const [utentiRes, gareRes] = await Promise.allSettled([
+      gsGet({ action: 'getAllUtenti', utente_id: '' }),
+      gsGet({ action: 'getAllGare',   utente_id: '' }),
+    ]);
+    utenti = (utentiRes.status==='fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
+    gare   = (gareRes.status==='fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+    if (utenti.length || gare.length) {
+      try { localStorage.setItem('irun_social_cache', JSON.stringify({
+        utenti, gare: gare.map(g=>({...g})), ts: Date.now()
+      })); } catch(e) {}
+    }
+  }
 
   // Cards numeri
   const el = id => document.getElementById(id);
@@ -3720,10 +3764,22 @@ async function _eseguiRicerca(q) {
   const uFound  = [];
   const aggGare = {};
 
+  // Cache utenti per 10 minuti
+  let cachedUtenti = null;
+  try {
+    const cu = JSON.parse(localStorage.getItem('irun_utenti_cache')||'null');
+    if (cu && Date.now() - cu.ts < 600000) cachedUtenti = cu.data;
+  } catch(e) {}
+
   const [tuttiUtenti, gareMatch] = await Promise.allSettled([
-    gsGet({ action: 'getAllUtenti' }),
+    cachedUtenti ? Promise.resolve(cachedUtenti) : gsGet({ action: 'getAllUtenti' }),
     gsGet({ action: 'cercaGarePerCitta', q: q }),
   ]);
+
+  // Salva cache utenti
+  if (!cachedUtenti && tuttiUtenti.status === 'fulfilled' && Array.isArray(tuttiUtenti.value)) {
+    try { localStorage.setItem('irun_utenti_cache', JSON.stringify({ data: tuttiUtenti.value, ts: Date.now() })); } catch(e) {}
+  }
 
   if (tuttiUtenti.status === 'fulfilled' && Array.isArray(tuttiUtenti.value)) {
     const uid = getUtenteId();
@@ -5335,6 +5391,102 @@ async function confermaLogin() {
   }
 }
 
+// OTP temporaneo in memoria (non in localStorage per sicurezza)
+let _otpData = null; // { code, email, expires }
+let _pendingUtente = null; // dati utente in attesa di verifica
+
+async function inviaOTP(resend) {
+  const nome    = document.getElementById('reg-nome').value.trim();
+  const cognome = document.getElementById('reg-cognome').value.trim();
+  const email   = document.getElementById('reg-email').value.trim();
+  const pwd     = document.getElementById('reg-pwd').value;
+  const pwd2    = document.getElementById('reg-pwd2').value;
+  const info    = document.getElementById('reg-info');
+  const privacyOk = document.getElementById('reg-privacy')?.checked;
+
+  if (!resend) {
+    // Validazioni base prima di inviare OTP
+    if (!privacyOk) { mostraInfoReg('Devi accettare la Privacy Policy', 'err', info); return; }
+    if (!nome)      { mostraInfoReg('Inserisci il nome', 'err', info); return; }
+    if (!cognome)   { mostraInfoReg('Inserisci il cognome', 'err', info); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      mostraInfoReg('Inserisci una email valida', 'err', info); return;
+    }
+    if (!pwd || pwd.length < 6) { mostraInfoReg('Password min. 6 caratteri', 'err', info); return; }
+    if (pwd !== pwd2) { mostraInfoReg('Le password non corrispondono', 'err', info); return; }
+  }
+
+  mostraInfoReg('⟳ Invio codice di verifica...', 'loading', info);
+
+  // Chiedi al GS di inviare l'OTP via email
+  const res = await gsPost('inviaOTP', { email, nome });
+  if (res && res.sent) {
+    document.getElementById('reg-otp-block').style.display = 'block';
+    document.getElementById('reg-submit-btn').style.display = 'none';
+    mostraInfoReg('✓ Codice inviato a ' + email, 'ok', info);
+    document.getElementById('reg-otp').focus();
+  } else {
+    mostraInfoReg('✗ ' + (res?.error || 'Errore invio email. Riprova.'), 'err', info);
+  }
+}
+
+async function verificaOTPeRegistra() {
+  const otp   = document.getElementById('reg-otp').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const info  = document.getElementById('reg-info');
+
+  if (!otp || otp.length !== 6) {
+    mostraInfoReg('Inserisci il codice a 6 cifre', 'err', info); return;
+  }
+
+  mostraInfoReg('⟳ Verifica codice...', 'loading', info);
+
+  // Verifica OTP e completa registrazione in un solo step
+  const nome      = document.getElementById('reg-nome').value.trim();
+  const cognome   = document.getElementById('reg-cognome').value.trim();
+  const pwd       = document.getElementById('reg-pwd').value;
+  const profilo   = document.querySelector('input[name="reg-profilo"]:checked');
+  const sportPref = (document.getElementById('reg-sport').value   || '').trim();
+  const dataNasc  = (document.getElementById('reg-nascita').value || '').trim();
+  const sessoVal  = (document.getElementById('reg-sesso').value   || '').trim();
+  const pesoVal   = (document.getElementById('reg-peso').value    || '').trim();
+  const cittaVal  = (document.getElementById('reg-citta').value   || '').trim();
+  const regioneVal= (document.getElementById('reg-regione').value || '').trim();
+  const profiloVal= profilo ? profilo.value : 'pubblico';
+  const tsEl      = document.getElementById('reg-timestamp-consenso');
+  const tsConsenso= (tsEl && tsEl.value) ? tsEl.value : new Date().toISOString();
+  const uid       = (nome + cognome).toLowerCase().replace(/\s/g,'') + '_' + Date.now().toString().slice(-4);
+
+  const utente = {
+    utente_id: uid, nome, cognome, email,
+    data_nascita: dataNasc, sesso: sessoVal, peso: pesoVal,
+    sport_preferito: sportPref,
+    profilo_pubblico: profiloVal === 'pubblico',
+    profilo: profiloVal === 'pubblico' ? 'PUBBLICO' : 'PRIVATO',
+    password: pwd, citta: cittaVal, regione: regioneVal,
+    timestamp_consenso: tsConsenso,
+    otp_code: otp, // il GS verifica l'OTP prima di creare l'account
+  };
+
+  const res = await gsPost('registraUtente', utente);
+  if (res && res.created) {
+    mostraInfoReg('✓ Account creato! Ora accedi.', 'ok', info);
+    setTimeout(() => {
+      switchAuthTab('login');
+      document.getElementById('login-uid').value = email;
+      document.getElementById('login-pwd').value = '';
+      // Reset OTP block per prossima registrazione
+      document.getElementById('reg-otp-block').style.display = 'none';
+      document.getElementById('reg-submit-btn').style.display = 'block';
+      document.getElementById('reg-otp').value = '';
+    }, 1500);
+  } else if (res && res.error) {
+    mostraInfoReg('✗ ' + res.error, 'err', info);
+  } else {
+    mostraInfoReg('✗ Errore. Riprova.', 'err', info);
+  }
+}
+
 async function confermaRegistrazione() {
   const nome    = document.getElementById('reg-nome').value.trim();
   const cognome = document.getElementById('reg-cognome').value.trim();
@@ -5525,11 +5677,29 @@ async function renderSocial() {
   document.getElementById('social-loading').style.display = 'block';
   document.getElementById('social-content').style.display = 'none';
 
-  // Carica tutti gli utenti e tutte le gare in parallelo
-  const [utentiRes, gareRes] = await Promise.allSettled([
-    gsGet({ action: 'getAllUtenti', utente_id: '' }),
-    gsGet({ action: 'getAllGare',   utente_id: '' }),
-  ]);
+  // Cache Social 30 minuti
+  let _socialCache = null;
+  try {
+    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    if (sc && Date.now() - sc.ts < 1800000) _socialCache = sc;
+  } catch(e) {}
+
+  let utentiRes, gareRes;
+  if (_socialCache) {
+    utentiRes = { status:'fulfilled', value: _socialCache.utenti };
+    gareRes   = { status:'fulfilled', value: _socialCache.gare };
+  } else {
+    [utentiRes, gareRes] = await Promise.allSettled([
+      gsGet({ action: 'getAllUtenti', utente_id: '' }),
+      gsGet({ action: 'getAllGare',   utente_id: '' }),
+    ]);
+    // Salva cache
+    if (utentiRes.status==='fulfilled' && gareRes.status==='fulfilled') {
+      try { localStorage.setItem('irun_social_cache', JSON.stringify({
+        utenti: utentiRes.value, gare: gareRes.value, ts: Date.now()
+      })); } catch(e) {}
+    }
+  }
 
   const utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
   const gare   = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
