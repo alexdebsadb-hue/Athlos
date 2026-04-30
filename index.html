@@ -623,8 +623,13 @@
     <button class="btn-secondary" onclick="openImport()" style="font-size:13px;">📋 Importa gare</button>
     <button class="btn-secondary" onclick="openForm()">+ Aggiungi gara</button>
     <div id="nav-user-btn" style="cursor:pointer;" onclick="openLoginModal()">
-      <div class="avatar" style="width:36px;height:36px;font-size:14px;" id="nav-avatar">
-        <span id="nav-initials">?</span>
+      <!-- Bottone Accedi (non loggato) -->
+      <button id="nav-login-btn" class="btn-primary" style="display:none;font-size:13px;padding:7px 16px;">
+        👤 Accedi
+      </button>
+      <!-- Avatar con iniziali (loggato) -->
+      <div class="avatar" style="width:36px;height:36px;font-size:14px;display:none;" id="nav-avatar">
+        <span id="nav-initials"></span>
       </div>
     </div>
   </div>
@@ -5445,10 +5450,15 @@ function renderNavUser() {
   const initials = uid ? uid.slice(0,2).toUpperCase() : '?';
   const el = document.getElementById('nav-initials');
   if (el) el.textContent = initials;
-  const avatar = document.getElementById('nav-avatar');
-  if (avatar) avatar.style.background = uid
-    ? 'linear-gradient(135deg,var(--accent),var(--accent2))'
-    : 'var(--bg4)';
+  const avatar   = document.getElementById('nav-avatar');
+  const loginBtn = document.getElementById('nav-login-btn');
+  if (uid) {
+    if (avatar)   { avatar.style.display = 'flex'; avatar.style.background = 'linear-gradient(135deg,var(--accent),var(--accent2))'; }
+    if (loginBtn)   loginBtn.style.display = 'none';
+  } else {
+    if (avatar)   avatar.style.display   = 'none';
+    if (loginBtn) loginBtn.style.display = 'block';
+  }
 
   // Mostra/nasconde link di navigazione in base al login
   document.querySelectorAll('.nav-link').forEach(link => {
