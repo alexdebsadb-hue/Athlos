@@ -5252,8 +5252,11 @@ function closeLoginModal() {
 
 function svuotaCacheConfig() {
   localStorage.removeItem('irun_config');
+  localStorage.removeItem('irun_social_cache');
+  localStorage.removeItem('irun_utenti_cache');
   _configLoaded = false;
   _config = { sport:[], distanze:[], nazioni:[], regioni:[] };
+  console.log('Cache svuotata (config + social + utenti)');
 }
 
 function switchAuthTab(tab) {
@@ -5701,8 +5704,15 @@ async function renderSocial() {
     }
   }
 
-  const utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
-  const gare   = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+  let utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
+  const gare = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+
+  // Se utenti è vuoto ma cache era presente, invalida cache e ricarica
+  if (!utenti.length && _socialCache) {
+    localStorage.removeItem('irun_social_cache');
+    const freshU = await gsGet({ action: 'getAllUtenti', utente_id: '' });
+    if (Array.isArray(freshU)) utenti = freshU;
+  }
 
   // Se entrambi vuoti, mostra errore
   if (!utenti.length && !gare.length) {
