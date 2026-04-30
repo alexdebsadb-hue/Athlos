@@ -5780,10 +5780,14 @@ async function renderSocial() {
       </div>`).join('');
 
   // ── ETÀ MEDIA ──
-  const oggi = new Date();
+  const annoOggi = new Date().getFullYear();
   const eta = utenti
-    .map(u => u.data_nascita ? Math.floor((oggi - new Date(u.data_nascita)) / (365.25*24*3600*1000)) : null)
-    .filter(e => e !== null && e > 10 && e < 100);
+    .map(u => {
+      const anno = parseInt(u.anno_nascita || (u.data_nascita ? String(u.data_nascita).slice(0,4) : ''));
+      const e = annoOggi - anno;
+      return (anno > 1920 && e > 10 && e < 100) ? e : null;
+    })
+    .filter(e => e !== null);
   const etaMedia = eta.length ? Math.round(eta.reduce((s,e)=>s+e,0)/eta.length) : null;
   document.getElementById('social-eta').textContent = etaMedia ? etaMedia : '—';
 
