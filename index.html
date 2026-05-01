@@ -1678,6 +1678,13 @@
           <button class="btn-secondary" style="font-size:12px;" onclick="downloadExcelTemplate()">&#x1F4E5; Scarica template Excel</button>
           <span id="paste-count" style="font-size:13px;color:var(--text3);"></span>
         </div>
+        <!-- Bottone importa — appare subito dopo aver incollato e parsato -->
+        <div id="import-go-btn" style="display:none;margin-top:20px;">
+          <button class="btn-primary" onclick="confirmImport()"
+            style="width:100%;padding:14px;font-size:16px;font-weight:700;border-radius:10px;">
+            ✅ Importa gare in I-Run
+          </button>
+        </div>
       </div>
 
 
@@ -4371,8 +4378,8 @@ function openImportModal() {
 
 function closeImport() {
   document.getElementById('import-overlay').classList.remove('open');
-  const btnBottom = document.getElementById('import-confirm-bottom');
-  if (btnBottom) btnBottom.style.display = 'none';
+  const goBtn = document.getElementById('import-go-btn');
+  if (goBtn) goBtn.style.display = 'none';
 }
 function closeImportOutside(e) { if (e.target === document.getElementById('import-overlay')) closeImport(); }
 
@@ -4560,14 +4567,14 @@ function renderImportPreview(errCount, fileName) {
   errEl.textContent = `${errCount} righe non valide`;
   errEl.style.display = errCount > 0 ? 'block' : 'none';
 
+  const goBtn = document.getElementById('import-go-btn');
   if (nuove > 0) {
     document.getElementById('import-confirm-btn').style.display = 'block';
     document.getElementById('import-confirm-btn').textContent = `Importa ${nuove} gare`;
+    if (goBtn) goBtn.style.display = 'block';
+  } else {
+    if (goBtn) goBtn.style.display = 'none';
   }
-  // Il bottone in fondo è dentro import-preview che viene mostrato sopra
-  // — si rende visibile automaticamente con il blocco preview
-  const btnBottom = document.getElementById('import-confirm-bottom');
-  if (btnBottom) btnBottom.style.display = nuove > 0 ? 'block' : 'none';
 
   const tbody = document.getElementById('import-table-body');
   tbody.innerHTML = importPreviewData.map((g, idx) => {
