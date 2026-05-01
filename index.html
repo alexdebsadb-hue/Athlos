@@ -4369,7 +4369,7 @@ let importPreviewData = []; // parsed rows
 
 function openImportModal() {
   document.getElementById('import-overlay').classList.add('open');
-  document.getElementById('import-dropzone').style.display = 'block';
+  const _dz2 = document.getElementById('import-dropzone'); if(_dz2) _dz2.style.display = 'block';
   document.getElementById('import-preview').style.display = 'none';
   document.getElementById('import-confirm-btn').style.display = 'none';
   document.getElementById('import-subtitle').textContent = 'Carica un file CSV per vedere l\'anteprima prima di importare';
@@ -4393,7 +4393,7 @@ function triggerImportFile() {
 
 function handleImportDrop(e) {
   e.preventDefault();
-  document.getElementById('import-dropzone').classList.remove('dragover');
+  const _dz3 = document.getElementById('import-dropzone'); if(_dz3) _dz3.classList.remove('dragover');
   const file = e.dataTransfer.files[0];
   if (file) parseImportFile(file);
 }
@@ -4552,7 +4552,7 @@ function parseStandardRow(cols) {
 }
 
 function renderImportPreview(errCount, fileName) {
-  document.getElementById('import-dropzone').style.display = 'none';
+  const _dz = document.getElementById('import-dropzone'); if(_dz) _dz.style.display = 'none';
   document.getElementById('import-preview').style.display = 'block';
 
   const nuove = importPreviewData.filter(g => !g.isDuplicate).length;
