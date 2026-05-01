@@ -1776,7 +1776,10 @@
             <span id="pp-initials">?</span>
           </div>
           <div>
-            <div id="pp-nome" style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:900;"></div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div id="pp-nome" style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:900;"></div>
+              <div id="pp-status"></div>
+            </div>
             <div id="pp-meta" style="font-size:13px;color:var(--text2);margin-top:2px;"></div>
           </div>
         </div>
@@ -4212,6 +4215,8 @@ async function apriProfiloPubblico(uid) {
   document.getElementById('pp-nome').textContent = 'Caricamento...';
   document.getElementById('pp-meta').textContent = '';
   document.getElementById('pp-sport').innerHTML = '';
+  const ppSt = document.getElementById('pp-status');
+  if (ppSt) ppSt.innerHTML = '';
   document.getElementById('pp-body').innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);">⟳ Caricamento profilo...</div>';
 
   // Cerca in cache o carica dal foglio
@@ -4284,6 +4289,22 @@ async function apriProfiloPubblico(uid) {
     km:  Math.round(gareNorm.reduce((s,g) => s+(g.distanza||0), 0)),
     fin: gareNorm.filter(g => g.esito === 'finisher').length,
   };
+
+  // Calcola e mostra status
+  const ppStatus = document.getElementById('pp-status');
+  if (ppStatus) {
+    const nFin = stats.fin;
+    let status, color;
+    if      (nFin >= 200) { status = '🏆 Leggenda';       color = '#ffd700'; }
+    else if (nFin >= 100) { status = '💎 Elite';           color = '#00bcd4'; }
+    else if (nFin >= 75)  { status = '🔥 Campione';        color = '#ff5722'; }
+    else if (nFin >= 50)  { status = '⚡ Esperto';         color = '#9c27b0'; }
+    else if (nFin >= 25)  { status = '🎖️ Veterano';       color = '#4caf50'; }
+    else if (nFin >= 10)  { status = '🏅 Finisher';        color = '#2196f3'; }
+    else if (nFin >= 1)   { status = '🌱 Rookie';          color = '#ff8a65'; }
+    else                  { status = '👟 Alle prime armi'; color = 'var(--text3)'; }
+    ppStatus.innerHTML = `<span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">${status}</span>`;
+  }
   const conRating = gareNorm.filter(g => g.rating && (g.rating.percorso||g.rating.ristori||g.rating.organizzazione));
 
   let body = `
