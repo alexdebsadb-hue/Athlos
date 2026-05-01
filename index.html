@@ -1408,23 +1408,43 @@
         <input class="form-input" id="f-nome" placeholder="es. Maratona di Roma, Ironman Italy..." />
       </div>
 
-      <div class="form-row triple">
-        <div class="form-group">
-          <label class="form-label">Luogo / Città</label>
-          <input class="form-input" id="f-luogo" placeholder="es. Roma" />
-        </div>
+      <!-- Cascata: Area → Regione → Città → Nome gara -->
+      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Area / Nazione</label>
-          <select class="form-select" id="f-nazione">
+          <select class="form-select" id="f-nazione" onchange="onNazioneChange(this.value)">
             <option value="">Seleziona...</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
-          <select class="form-select" id="f-regione">
-            <option value="">Seleziona...</option>
+          <select class="form-select" id="f-regione" onchange="onRegioneChange(this.value)">
+            <option value="">Prima seleziona area...</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Città</label>
+          <select class="form-select" id="f-citta-sel" onchange="onCittaChange(this.value)">
+            <option value="">Prima seleziona regione...</option>
+          </select>
+        </div>
+        <div class="form-group" id="f-luogo-group">
+          <label class="form-label">Città (testo libero)</label>
+          <input class="form-input" id="f-luogo" placeholder="es. Roma" />
+        </div>
+      </div>
+
+      <!-- Nome gara: dropdown se censita, testo libero se no -->
+      <div class="form-group">
+        <label class="form-label">Nome gara</label>
+        <select class="form-select" id="f-nome-sel" onchange="onNomeGaraSelChange(this.value)" style="display:none;">
+          <option value="">Seleziona gara...</option>
+          <option value="__altro__">✏️ Inserisci manualmente...</option>
+        </select>
+        <input class="form-input" id="f-nome" placeholder="es. Maratona di Roma, Ironman Italy..." />
       </div>
 
       <div class="form-group" style="max-width:180px;">
@@ -1890,7 +1910,24 @@ let _config = { sport:[], distanze:[], nazioni:[], regioni:[] };
 let _configLoaded = false;
 
 function getConfig() { return _config; }
-function setConfig(c) { _config = c; _configLoaded = true; }
+function setConfig(c) {
+  // Costruisci mappa area → [regioni]
+  if (c.gare_censite || c.nazioni) {
+    const areaReg = {};
+    // Dalle nazioni nella config
+    (c.nazioni||[]).forEach(n => { if(!areaReg[n]) areaReg[n] = []; });
+    // Dalle gare censite
+    (c.gare_censite||[]).forEach(g => {
+      if (g.area && g.regione) {
+        if (!areaReg[g.area]) areaReg[g.area] = [];
+        if (!areaReg[g.area].includes(g.regione)) areaReg[g.area].push(g.regione);
+      }
+    });
+    c.area_regioni = areaReg;
+  }
+  _config = c;
+  _configLoaded = true;
+}
 
 // Cache configurazione in localStorage (aggiornata ogni ora)
 function getCachedConfig() {
@@ -2221,6 +2258,101 @@ function popolaSelectConfig() {
 
 const REGIONI_DEFAULT = []; // Dati dal foglio Google
 
+// ── Cascata Area → Regione → Città → NomeGara ──
+function onNazioneChange(area) {
+  const c = getConfig();
+  const fReg = document.getElementById('f-regione');
+  if (!fReg) return;
+  // Filtra regioni per area selezionata
+  // La mappa area→regioni viene dalla config
+  const areaRegioni = c.area_regioni || {};
+  const regioni = area ? (areaRegioni[area] || []) : (c.regioni || []);
+  fReg.innerHTML = '<option value="">Seleziona regione...</option>'
+    + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
+  // Reset a valle
+  onRegioneChange('');
+}
+
+function onRegioneChange(regione) {
+  const c = getConfig();
+  const fCitta = document.getElementById('f-citta-sel');
+  const fLuogoGroup = document.getElementById('f-luogo-group');
+  const fNomeSel = document.getElementById('f-nome-sel');
+  const fNome = document.getElementById('f-nome');
+  if (!fCitta) return;
+
+  // Città disponibili per questa regione
+  const gareCensite = c.gare_censite || [];
+  const citta = [...new Set(
+    gareCensite.filter(g => !regione || g.regione === regione).map(g => g.citta).filter(Boolean)
+  )].sort();
+
+  if (citta.length) {
+    fCitta.innerHTML = '<option value="">Seleziona città...</option>'
+      + citta.map(c => `<option value="${c}">${c}</option>`).join('')
+      + '<option value="__altra__">✏️ Altra città...</option>';
+    fCitta.style.display = '';
+    if (fLuogoGroup) fLuogoGroup.style.display = 'none';
+  } else {
+    // Nessuna città censita per questa regione — campo libero
+    fCitta.style.display = 'none';
+    if (fLuogoGroup) fLuogoGroup.style.display = '';
+  }
+  // Reset nome gara
+  if (fNomeSel) { fNomeSel.style.display = 'none'; fNomeSel.innerHTML = ''; }
+  if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+}
+
+function onCittaChange(citta) {
+  const c = getConfig();
+  const fLuogo = document.getElementById('f-luogo');
+  const fLuogoGroup = document.getElementById('f-luogo-group');
+  const fNomeSel = document.getElementById('f-nome-sel');
+  const fNome = document.getElementById('f-nome');
+
+  if (citta === '__altra__') {
+    // Città non censita — mostra campo testo libero
+    if (fLuogoGroup) fLuogoGroup.style.display = '';
+    if (fLuogo) { fLuogo.value = ''; fLuogo.focus(); }
+    if (fNomeSel) fNomeSel.style.display = 'none';
+    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+    return;
+  }
+
+  if (citta) {
+    if (fLuogo) fLuogo.value = citta;
+    if (fLuogoGroup) fLuogoGroup.style.display = 'none';
+  }
+
+  // Filtra gare censite per questa città
+  const regione = (document.getElementById('f-regione') || {}).value || '';
+  const gareCensite = c.gare_censite || [];
+  const gare = gareCensite.filter(g =>
+    (!citta || g.citta === citta) && (!regione || g.regione === regione)
+  );
+
+  if (gare.length && fNomeSel) {
+    fNomeSel.innerHTML = '<option value="">Seleziona gara...</option>'
+      + gare.map(g => `<option value="${g.nome}" data-dist="${g.distanza||''}">${g.nome}</option>`).join('')
+      + '<option value="__altro__">✏️ Inserisci manualmente...</option>';
+    fNomeSel.style.display = '';
+    if (fNome) fNome.style.display = 'none';
+  } else {
+    if (fNomeSel) fNomeSel.style.display = 'none';
+    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+  }
+}
+
+function onNomeGaraSelChange(val) {
+  const fNome = document.getElementById('f-nome');
+  if (val === '__altro__') {
+    // Inserimento manuale — segnala all'admin
+    if (fNome) { fNome.style.display = ''; fNome.value = ''; fNome.focus(); }
+  } else if (val) {
+    if (fNome) { fNome.style.display = 'none'; fNome.value = val; }
+  }
+}
+
 function onSportChange(sport) {
   selectedSport = sport;
   const c = getConfig();
@@ -2394,6 +2526,15 @@ function openForm(garaEdit) {
     if (fSport) fSport.value = '';
     const fTipo = document.getElementById('f-tipo-gara');
     if (fTipo) fTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
+    // Reset cascata
+    const fCittaSel = document.getElementById('f-citta-sel');
+    if (fCittaSel) { fCittaSel.innerHTML = '<option value="">Prima seleziona regione...</option>'; fCittaSel.style.display = 'none'; }
+    const fNomeSel = document.getElementById('f-nome-sel');
+    if (fNomeSel) { fNomeSel.innerHTML = ''; fNomeSel.style.display = 'none'; }
+    const fNome = document.getElementById('f-nome');
+    if (fNome) fNome.style.display = '';
+    const fLuogoGroup = document.getElementById('f-luogo-group');
+    if (fLuogoGroup) fLuogoGroup.style.display = '';
   }
 }
 
@@ -2484,6 +2625,16 @@ function salvaGara() {
   if (getUtenteId()) {
     const action = isEdit ? 'updateGara' : 'saveGara';
     gsPost(action, gara).then(r => { if (r) showSyncBadge('ok'); });
+    // Se nome gara non era nel dropdown (inserimento manuale), segnala all'admin
+    const nomeSel = document.getElementById('f-nome-sel');
+    const garaCensita = nomeSel && nomeSel.style.display !== 'none' &&
+                        nomeSel.value && nomeSel.value !== '__altro__';
+    if (!isEdit && !garaCensita && gara.nome) {
+      gsPost('segnalaGaraNonCensita', {
+        utente_id: gara.utente_id, sport: gara.sport,
+        nome: gara.nome, luogo: gara.luogo, regione: gara.regione
+      }).catch(() => {});
+    }
   }
   // reset form
   ['f-nome','f-luogo','f-distanza','f-tempo','f-note','f-hotel',
