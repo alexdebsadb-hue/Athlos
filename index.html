@@ -734,8 +734,8 @@
           <label class="form-label">Sesso</label>
           <select class="form-select" id="reg-sesso">
             <option value="">—</option>
-            <option value="M">Uomo</option>
-            <option value="F">Donna</option>
+            <option value="M">M</option>
+            <option value="F">F</option>
             <option value="A">Altro</option>
           </select>
         </div>
@@ -875,6 +875,40 @@
         </div>
       </div>
 
+      <!-- GUIDA COME FUNZIONA -->
+      <div style="max-width:900px;margin:0 auto;padding:40px 24px 0;">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:900;">Come <em style="color:var(--accent)">funziona</em></div>
+          <div style="font-size:14px;color:var(--text3);margin-top:6px;">In 4 semplici passi</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;position:relative;">
+            <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">1</div>
+            <div style="font-size:32px;margin:12px 0 8px;">👤</div>
+            <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Registrati</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Crea il tuo profilo gratuitamente in pochi secondi con verifica email</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;position:relative;">
+            <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">2</div>
+            <div style="font-size:32px;margin:12px 0 8px;">🏅</div>
+            <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Aggiungi le gare</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Inserisci manualmente o importa in blocco da Excel. Valuta ogni gara con le stelle</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;position:relative;">
+            <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">3</div>
+            <div style="font-size:32px;margin:12px 0 8px;">📊</div>
+            <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Analizza i progressi</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Grafici, Personal Best automatici, mappa delle regioni visitate e statistiche complete</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;position:relative;">
+            <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;">4</div>
+            <div style="font-size:32px;margin:12px 0 8px;">🌍</div>
+            <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Scopri la community</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5;">Trova i percorsi più veloci, le gare meglio valutate e confrontati con altri atleti</div>
+          </div>
+        </div>
+      </div>
+
       <!-- STATISTICHE COMMUNITY -->
       <div id="landing-community" style="max-width:900px;margin:0 auto;padding:40px 24px;">
         <div style="text-align:center;margin-bottom:28px;">
@@ -980,14 +1014,17 @@
         </div>
         <div class="profile-info">
           <div class="profile-name" id="profile-name">Il tuo profilo</div>
-          <div class="profile-meta" id="profile-meta"></div>
+          <div style="display:flex;align-items:center;gap:10px;margin:4px 0;">
+            <div class="profile-meta" id="profile-meta" style="margin:0;"></div>
+            <div id="profile-status"></div>
+          </div>
           <div id="profile-sport" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="btn-secondary" onclick="editProfile()">Modifica profilo</button>
           <button class="btn-secondary" onclick="resetPassword()" style="color:var(--accent2);">🔑 Reset password</button>
-          <button class="btn-secondary" onclick="connettGarmin()" title="Collegamento Garmin — prossimamente" style="opacity:0.7;">⌚ Garmin</button>
+          <button class="btn-secondary" onclick="connettStrava()" title="Collega Strava — importa le tue gare" style="opacity:0.9;">🟠 Strava</button>
           <button class="btn-secondary" onclick="logoff()" style="color:#ef9a9a;">← Esci</button>
         </div>
           <div id="profile-visibility" style="font-size:12px;color:var(--text3);"></div>
@@ -1783,8 +1820,8 @@
           <label class="form-label">Sesso</label>
           <select class="form-select" id="ep-sesso">
             <option value="">—</option>
-            <option value="M">Uomo</option>
-            <option value="F">Donna</option>
+            <option value="M">M</option>
+            <option value="F">F</option>
             <option value="A">Altro</option>
           </select>
         </div>
@@ -3487,6 +3524,22 @@ function renderProfilo(profiloEsterno) {
   const pubEl = document.getElementById('profile-visibility');
   if (pubEl) pubEl.textContent = isOwner ? (isPubblico ? '🌐 Profilo pubblico' : '🔒 Profilo privato') : '';
 
+  // ── STATUS per numero gare ──
+  const statusEl = document.getElementById('profile-status');
+  if (statusEl) {
+    const nGare = getGare().filter(g => g.esito === 'finisher').length;
+    let status, color;
+    if      (nGare >= 200) { status = '🏆 Leggenda';    color = '#ffd700'; }
+    else if (nGare >= 100) { status = '💎 Elite';        color = '#00bcd4'; }
+    else if (nGare >= 75)  { status = '🔥 Campione';     color = '#ff5722'; }
+    else if (nGare >= 50)  { status = '⚡ Esperto';      color = '#9c27b0'; }
+    else if (nGare >= 25)  { status = '🎖️ Veterano';    color = '#4caf50'; }
+    else if (nGare >= 10)  { status = '🏅 Finisher';     color = '#2196f3'; }
+    else if (nGare >= 1)   { status = '🌱 Rookie';       color = '#ff8a65'; }
+    else                   { status = '👟 Alle prime armi'; color = 'var(--text3)'; }
+    statusEl.innerHTML = `<span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">${status}</span>`;
+  }
+
   // Sport preferito
   const sportEl = document.getElementById('profile-sport');
   if (sportEl) {
@@ -3565,8 +3618,23 @@ function closeEditProfile() {
   document.getElementById('edit-profile-overlay').classList.remove('open');
 }
 
-function connettGarmin() {
-  showToast('⌚ Collegamento Garmin — funzionalità in arrivo nella prossima versione!');
+function connettStrava() {
+  // Strava OAuth — prossimamente
+  const msg = document.createElement('div');
+  msg.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;display:flex;align-items:center;justify-content:center;" onclick="this.remove()">
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:32px;max-width:480px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:12px;">🟠</div>
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:800;margin-bottom:12px;">Strava — Prossimamente</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;">
+          Il collegamento con Strava ti permetterà di importare le tue attività e scegliere
+          <strong>manualmente</strong> quali considerare come gare ufficiali.<br><br>
+          Potrai selezionare dall'elenco delle tue attività Strava solo quelle che vuoi aggiungere al tuo diario.
+        </div>
+        <button class="btn-secondary" onclick="this.closest('div[style]').remove()" style="margin-top:8px;">Chiudi</button>
+      </div>
+    </div>`;
+  document.body.appendChild(msg);
 }
 
 function logoff() {
@@ -3683,12 +3751,18 @@ async function renderProgramma() {
         <button style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📥 Archivia</button>
         <button style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;">✏️ Modifica</button>
         <button style="background:rgba(244,67,54,0.1);color:#ef9a9a;border:1px solid rgba(244,67,54,0.2);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;">🗑️ Elimina</button>
+        <button style="background:rgba(255,193,7,0.1);color:#ffd54f;border:1px solid rgba(255,193,7,0.2);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer;">⭐ Recensioni</button>
       </div>`;
     // Assegna eventi dopo creazione
     const btns = card.querySelectorAll('button');
     btns[0].onclick = e => { e.stopPropagation(); sposta2Gare(g.id); };
     btns[1].onclick = e => { e.stopPropagation(); apriModificaProgramma(g.id); };
     btns[2].onclick = e => { e.stopPropagation(); eliminaGaraProgramma(g.id); };
+    btns[3].onclick = e => {
+      e.stopPropagation();
+      const chiave = encodeURIComponent((g.nome||g.tipo_gara||'') + '|||' + (g.luogo||''));
+      apriDettaglioGaraCommunity(chiave, null);
+    };
     cont.appendChild(card);
   });
 }
@@ -4768,25 +4842,41 @@ function _destroyChart_orig(id) {
 function normalizzaTempo(raw) {
   if (!raw || raw === '' || raw === '0' || raw === '-' || raw === '--:--') return null;
   const s = String(raw).trim();
-  // Già nel formato corretto H:MM:SS
+
+  // 1. Già H:MM:SS
   if (/^\d+:\d{2}:\d{2}$/.test(s)) return s;
-  // H:MM senza secondi → aggiungi :00 (es. 3:25 → 3:25:00)
+  // 2. H:MM → H:MM:00
   if (/^\d+:\d{2}$/.test(s)) return s + ':00';
-  // Numero decimale Excel (frazione di giorno)
+  // 3. H.MM.SS con punti (Excel italiano es. 3.25.10)
+  if (/^\d{1,2}\.\d{2}\.\d{2}$/.test(s)) return s.replace(/\./g,':');
+  // 4. HH:MM:SS AM/PM (formato 12h)
+  const ampm = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (ampm) {
+    let h = parseInt(ampm[1]);
+    const m = parseInt(ampm[2]);
+    const sec = parseInt(ampm[3]||'0');
+    if (/PM/i.test(ampm[4]) && h < 12) h += 12;
+    if (/AM/i.test(ampm[4]) && h === 12) h = 0;
+    return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+  // 5. Numero decimale Excel (es. 0.142361 = 3h25m — seriale Excel)
   const n = parseFloat(s.replace(',','.'));
-  if (!isNaN(n) && n > 0 && n < 2 && s.indexOf(':') === -1) {
+  if (!isNaN(n) && n > 0 && n < 2 && s.indexOf(':') === -1 && s.indexOf('.') !== s.lastIndexOf('.') === false) {
     const totalSecs = Math.round((n < 1 ? n : n - 1) * 86400);
     const h = Math.floor(totalSecs / 3600);
     const m = Math.floor((totalSecs % 3600) / 60);
     const sec = totalSecs % 60;
-    return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+    if (h < 24) return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
   }
-  // H.MM.SS con punti (Excel italiano)
-  if (/^\d+\.\d{2}\.\d{2}$/.test(s)) return s.replace(/\./g,':');
-  // Qualsiasi altra cosa: prova a parsare come secondi totali
+  // 6. Secondi puri (es. "12300")
+  if (/^\d+$/.test(s) && parseInt(s) < 86400) {
+    const tot = parseInt(s);
+    return Math.floor(tot/3600) + ':' + String(Math.floor((tot%3600)/60)).padStart(2,'0') + ':' + String(tot%60).padStart(2,'0');
+  }
+  // 7. Fallback: prova timeToSecs
   const secs = timeToSecs(s);
   if (secs > 0) return secsToHMS(secs);
-  return s; // ritorna raw se non riesce
+  return null; // non riconosciuto — meglio null che sbagliato
 }
 
 function timeToSecs(t) {
