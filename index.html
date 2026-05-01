@@ -2263,10 +2263,17 @@ function onNazioneChange(area) {
   const c = getConfig();
   const fReg = document.getElementById('f-regione');
   if (!fReg) return;
-  // Filtra regioni per area selezionata
-  // La mappa area→regioni viene dalla config
+
+  // Priorità: regioni dalle gare censite per quest'area
+  // Fallback: tutte le regioni dalla config
   const areaRegioni = c.area_regioni || {};
-  const regioni = area ? (areaRegioni[area] || []) : (c.regioni || []);
+  let regioni = area ? (areaRegioni[area] || []) : [];
+
+  // Se non ci sono regioni censite per quest'area, usa tutte le regioni della config
+  if (!regioni.length) {
+    regioni = (c.regioni || []);
+  }
+
   fReg.innerHTML = '<option value="">Seleziona regione...</option>'
     + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
   // Reset a valle
@@ -4074,7 +4081,7 @@ function _renderRisultatiRicerca(q, ql, mieGare, uFound, gPubliche, dd, soloMie)
       const isPub = u.profilo_pubblico !== false && String(u.profilo||'').toUpperCase() !== 'PRIVATO';
       // Evidenzia la parte che corrisponde alla query
       const nomeHL = evidenzia(nomeCompleto, q);
-      return `<div onclick="apriProfiloPubblico('${u.utente_id}');forceCloseSearch();"
+      return `<div onclick="forceCloseSearch();setTimeout(()=>apriProfiloPubblico('${u.utente_id}'),50);"
         style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
         onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
         <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
