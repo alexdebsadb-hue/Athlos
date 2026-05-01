@@ -4076,9 +4076,10 @@ function _renderRisultatiRicerca(q, ql, mieGare, uFound, gPubliche, dd, soloMie)
       const isPub = u.profilo_pubblico !== false && String(u.profilo||'').toUpperCase() !== 'PRIVATO';
       // Evidenzia la parte che corrisponde alla query
       const nomeHL = evidenzia(nomeCompleto, q);
-      return `<div onclick="_searchActive=false;document.getElementById('search-dropdown').style.display='none';apriProfiloPubblico('${u.utente_id}');"
+      return `<div data-uid="${u.utente_id.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
         style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
-        onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
+        onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''"
+        onclick="apriUtenteDaRicerca(this)">
         <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:600;">${nomeHL} ${!isPub ? '<span style="font-size:11px;" title="Profilo privato">🔒</span>' : '<span style="font-size:11px;" title="Profilo pubblico">🌐</span>'}</div>
@@ -4192,6 +4193,15 @@ function forceCloseSearch() {
   if (inp) inp.value = '';
   const clr = document.getElementById('search-clear');
   if (clr) clr.style.display = 'none';
+}
+
+// Chiamata da onclick inline nella ricerca — evita problemi di escape
+function apriUtenteDaRicerca(el) {
+  const uid = el.closest('[data-uid]').dataset.uid;
+  _searchActive = false;
+  const dd = document.getElementById('search-dropdown');
+  if (dd) dd.style.display = 'none';
+  apriProfiloPubblico(uid);
 }
 
 // ── Profilo pubblico di un altro utente ──
