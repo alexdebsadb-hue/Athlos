@@ -1419,27 +1419,24 @@
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Città</label>
-          <select class="form-select" id="f-citta-sel" onchange="onCittaChange(this.value)">
-            <option value="">Prima seleziona regione...</option>
-          </select>
-        </div>
-        <div class="form-group" id="f-luogo-group">
-          <label class="form-label">Città (testo libero)</label>
-          <input class="form-input" id="f-luogo" placeholder="es. Roma" />
-        </div>
+      <!-- Città: dropdown censite + campo libero sovrapposti -->
+      <div class="form-group">
+        <label class="form-label">Città</label>
+        <select class="form-select" id="f-citta-sel" onchange="onCittaChange(this.value)">
+          <option value="">Seleziona regione prima...</option>
+        </select>
+        <input class="form-input" id="f-luogo" placeholder="es. Roma"
+          style="margin-top:6px;display:none;" />
       </div>
 
-      <!-- Nome gara: dropdown se censita, testo libero se no -->
+      <!-- Nome gara: dropdown censite + campo libero sovrapposti -->
       <div class="form-group">
         <label class="form-label">Nome gara</label>
-        <select class="form-select" id="f-nome-sel" onchange="onNomeGaraSelChange(this.value)" style="display:none;">
-          <option value="">Seleziona gara...</option>
-          <option value="__altro__">✏️ Inserisci manualmente...</option>
+        <select class="form-select" id="f-nome-sel" onchange="onNomeGaraSelChange(this.value)">
+          <option value="">Seleziona città prima...</option>
         </select>
-        <input class="form-input" id="f-nome" placeholder="es. Maratona di Roma, Ironman Italy..." />
+        <input class="form-input" id="f-nome" placeholder="es. Maratona di Roma, Ironman Italy..."
+          style="margin-top:6px;display:none;" />
       </div>
 
       <div class="form-group" style="max-width:180px;">
@@ -2277,81 +2274,80 @@ function onNazioneChange(area) {
 
 function onRegioneChange(regione) {
   const c = getConfig();
-  const fCitta = document.getElementById('f-citta-sel');
-  const fLuogoGroup = document.getElementById('f-luogo-group');
+  const fCitta  = document.getElementById('f-citta-sel');
+  const fLuogo  = document.getElementById('f-luogo');
   const fNomeSel = document.getElementById('f-nome-sel');
-  const fNome = document.getElementById('f-nome');
+  const fNome   = document.getElementById('f-nome');
   if (!fCitta) return;
 
-  // Città disponibili per questa regione
+  // Città disponibili per questa regione dal foglio CONFIGURAZIONE
   const gareCensite = c.gare_censite || [];
   const citta = [...new Set(
     gareCensite.filter(g => !regione || g.regione === regione).map(g => g.citta).filter(Boolean)
   )].sort();
 
-  if (citta.length) {
-    fCitta.innerHTML = '<option value="">Seleziona città...</option>'
-      + citta.map(c => `<option value="${c}">${c}</option>`).join('')
-      + '<option value="__altra__">✏️ Altra città...</option>';
-    fCitta.style.display = '';
-    if (fLuogoGroup) fLuogoGroup.style.display = 'none';
-  } else {
-    // Nessuna città censita per questa regione — campo libero
-    fCitta.style.display = 'none';
-    if (fLuogoGroup) fLuogoGroup.style.display = '';
-  }
+  fCitta.innerHTML = '<option value="">Seleziona città...</option>'
+    + citta.map(cc => `<option value="${cc}">${cc}</option>`).join('')
+    + '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
+
+  // Mostra sempre il dropdown città; campo libero solo se sceglie "Altra città"
+  fCitta.style.display = '';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+
   // Reset nome gara
-  if (fNomeSel) { fNomeSel.style.display = 'none'; fNomeSel.innerHTML = ''; }
-  if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+  if (fNomeSel) {
+    fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  }
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onCittaChange(citta) {
   const c = getConfig();
-  const fLuogo = document.getElementById('f-luogo');
-  const fLuogoGroup = document.getElementById('f-luogo-group');
+  const fLuogo   = document.getElementById('f-luogo');
   const fNomeSel = document.getElementById('f-nome-sel');
-  const fNome = document.getElementById('f-nome');
+  const fNome    = document.getElementById('f-nome');
 
   if (citta === '__altra__') {
-    // Città non censita — mostra campo testo libero
-    if (fLuogoGroup) fLuogoGroup.style.display = '';
-    if (fLuogo) { fLuogo.value = ''; fLuogo.focus(); }
-    if (fNomeSel) fNomeSel.style.display = 'none';
-    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+    // Città non in elenco — mostra campo testo libero
+    if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
+    // Nome gara: solo campo libero
+    if (fNomeSel) fNomeSel.innerHTML = '<option value="">—</option><option value="__altro__">✏️ Inserisci nome gara...</option>';
+    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
     return;
   }
 
-  if (citta) {
-    if (fLuogo) fLuogo.value = citta;
-    if (fLuogoGroup) fLuogoGroup.style.display = 'none';
-  }
+  // Città censita — pre-popola il campo luogo
+  if (citta && fLuogo) { fLuogo.value = citta; fLuogo.style.display = 'none'; }
 
   // Filtra gare censite per questa città
   const regione = (document.getElementById('f-regione') || {}).value || '';
   const gareCensite = c.gare_censite || [];
   const gare = gareCensite.filter(g =>
-    (!citta || g.citta === citta) && (!regione || g.regione === regione)
+    g.citta === citta && (!regione || g.regione === regione)
   );
 
-  if (gare.length && fNomeSel) {
+  if (fNomeSel) {
     fNomeSel.innerHTML = '<option value="">Seleziona gara...</option>'
-      + gare.map(g => `<option value="${g.nome}" data-dist="${g.distanza||''}">${g.nome}</option>`).join('')
-      + '<option value="__altro__">✏️ Inserisci manualmente...</option>';
-    fNomeSel.style.display = '';
-    if (fNome) fNome.style.display = 'none';
-  } else {
-    if (fNomeSel) fNomeSel.style.display = 'none';
-    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+      + gare.map(g => `<option value="${g.nome}">${g.nome}</option>`).join('')
+      + '<option value="__altro__">✏️ Altra gara (non in elenco)...</option>';
   }
+  // Nome gara campo testo: nascosto finché non sceglie "Altra gara"
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onNomeGaraSelChange(val) {
   const fNome = document.getElementById('f-nome');
+  if (!fNome) return;
   if (val === '__altro__') {
-    // Inserimento manuale — segnala all'admin
-    if (fNome) { fNome.style.display = ''; fNome.value = ''; fNome.focus(); }
+    fNome.style.display = '';
+    fNome.value = '';
+    fNome.focus();
   } else if (val) {
-    if (fNome) { fNome.style.display = 'none'; fNome.value = val; }
+    fNome.style.display = 'none';
+    fNome.value = val;
+  } else {
+    fNome.style.display = 'none';
+    fNome.value = '';
   }
 }
 
@@ -2529,14 +2525,18 @@ function openForm(garaEdit) {
     const fTipo = document.getElementById('f-tipo-gara');
     if (fTipo) fTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
     // Reset cascata
+    const fNaz2 = document.getElementById('f-nazione');
+    if (fNaz2) fNaz2.value = '';
+    const fReg2 = document.getElementById('f-regione');
+    if (fReg2) { fReg2.innerHTML = '<option value="">Prima seleziona area...</option>'; }
     const fCittaSel = document.getElementById('f-citta-sel');
-    if (fCittaSel) { fCittaSel.innerHTML = '<option value="">Prima seleziona regione...</option>'; fCittaSel.style.display = 'none'; }
+    if (fCittaSel) fCittaSel.innerHTML = '<option value="">Seleziona regione prima...</option>';
+    const fLuogo2 = document.getElementById('f-luogo');
+    if (fLuogo2) { fLuogo2.style.display = 'none'; fLuogo2.value = ''; }
     const fNomeSel = document.getElementById('f-nome-sel');
-    if (fNomeSel) { fNomeSel.innerHTML = ''; fNomeSel.style.display = 'none'; }
-    const fNome = document.getElementById('f-nome');
-    if (fNome) fNome.style.display = '';
-    const fLuogoGroup = document.getElementById('f-luogo-group');
-    if (fLuogoGroup) fLuogoGroup.style.display = '';
+    if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+    const fNome2 = document.getElementById('f-nome');
+    if (fNome2) { fNome2.style.display = 'none'; fNome2.value = ''; }
   }
 }
 
@@ -4076,7 +4076,7 @@ function _renderRisultatiRicerca(q, ql, mieGare, uFound, gPubliche, dd, soloMie)
       const isPub = u.profilo_pubblico !== false && String(u.profilo||'').toUpperCase() !== 'PRIVATO';
       // Evidenzia la parte che corrisponde alla query
       const nomeHL = evidenzia(nomeCompleto, q);
-      return `<div onclick="forceCloseSearch();setTimeout(()=>apriProfiloPubblico('${u.utente_id}'),50);"
+      return `<div onclick="_searchActive=false;document.getElementById('search-dropdown').style.display='none';apriProfiloPubblico('${u.utente_id}');"
         style="padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;"
         onmouseenter="this.style.background='var(--bg3)'" onmouseleave="this.style.background=''">
         <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
