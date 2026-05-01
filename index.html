@@ -1700,6 +1700,12 @@
           </table>
         </div>
       </div>
+      <!-- Bottone conferma anche in fondo -->
+      <div id="import-confirm-bottom" style="display:none;margin-top:16px;text-align:right;">
+        <button class="btn-primary" onclick="confirmImport()" style="padding:12px 28px;font-size:15px;">
+          ✅ Importa gare selezionate
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -4363,7 +4369,11 @@ function openImportModal() {
   importPreviewData = [];
 }
 
-function closeImport() { document.getElementById('import-overlay').classList.remove('open'); }
+function closeImport() {
+  document.getElementById('import-overlay').classList.remove('open');
+  const btnBottom = document.getElementById('import-confirm-bottom');
+  if (btnBottom) btnBottom.style.display = 'none';
+}
 function closeImportOutside(e) { if (e.target === document.getElementById('import-overlay')) closeImport(); }
 
 function triggerImportFile() {
@@ -4553,6 +4563,8 @@ function renderImportPreview(errCount, fileName) {
   if (nuove > 0) {
     document.getElementById('import-confirm-btn').style.display = 'block';
     document.getElementById('import-confirm-btn').textContent = `Importa ${nuove} gare`;
+    const btnBottom = document.getElementById('import-confirm-bottom');
+    if (btnBottom) btnBottom.style.display = 'block';
   }
 
   const tbody = document.getElementById('import-table-body');
