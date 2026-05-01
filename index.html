@@ -1699,11 +1699,12 @@
             <tbody id="import-table-body"></tbody>
           </table>
         </div>
-      <!-- Bottone conferma in fondo -->
-      <div id="import-confirm-bottom" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:right;">
-        <button class="btn-primary" onclick="confirmImport()" style="padding:12px 28px;font-size:15px;">
-          ✅ Importa gare selezionate
-        </button>
+        <!-- Bottone conferma in fondo alla preview -->
+        <div id="import-confirm-bottom" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:right;">
+          <button class="btn-primary" onclick="confirmImport()" style="padding:12px 32px;font-size:15px;">
+            ✅ Importa gare selezionate
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -4562,9 +4563,11 @@ function renderImportPreview(errCount, fileName) {
   if (nuove > 0) {
     document.getElementById('import-confirm-btn').style.display = 'block';
     document.getElementById('import-confirm-btn').textContent = `Importa ${nuove} gare`;
-    const btnBottom = document.getElementById('import-confirm-bottom');
-    if (btnBottom) btnBottom.style.display = 'block';
   }
+  // Il bottone in fondo è dentro import-preview che viene mostrato sopra
+  // — si rende visibile automaticamente con il blocco preview
+  const btnBottom = document.getElementById('import-confirm-bottom');
+  if (btnBottom) btnBottom.style.display = nuove > 0 ? 'block' : 'none';
 
   const tbody = document.getElementById('import-table-body');
   tbody.innerHTML = importPreviewData.map((g, idx) => {
