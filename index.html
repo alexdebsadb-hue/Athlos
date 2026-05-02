@@ -6783,7 +6783,7 @@ controllaReferral();
 <script>
 // Mappa con canvas flood-fill sull'immagine reale
 
-const MAP_SEEDS = {"Valle d'Aosta": [85, 71], "Piemonte": [87, 130], "Liguria": [171, 194], "Lombardia": [193, 119], "Trentino-Alto Adige": [222, 63], "Veneto": [259, 86], "Friuli-Venezia Giulia": [301, 93], "Emilia-Romagna": [189, 170], "Toscana": [220, 241], "Marche": [277, 224], "Umbria": [261, 262], "Lazio": [275, 302], "Abruzzo": [293, 270], "Molise": [331, 317], "Campania": [360, 356], "Puglia": [385, 370], "Basilicata": [390, 394], "Calabria": [405, 463], "Sicilia": [323, 532], "Sardegna": [104, 408]};
+const MAP_SEEDS = {"Valle d'Aosta": [77, 72], "Piemonte": [81, 133], "Liguria": [171, 192], "Lombardia": [193, 115], "Trentino-Alto Adige": [222, 63], "Veneto": [254, 84], "Friuli-Venezia Giulia": [293, 78], "Emilia-Romagna": [189, 170], "Toscana": [210, 243], "Marche": [277, 224], "Umbria": [261, 262], "Lazio": [261, 304], "Abruzzo": [290, 256], "Molise": [333, 315], "Campania": [360, 356], "Puglia": [378, 347], "Basilicata": [377, 393], "Calabria": [405, 463], "Sicilia": [323, 532], "Sardegna": [104, 408]};
 
 function regioneColorSVG(n) {
   if (n <= 0) return null;
@@ -6808,7 +6808,7 @@ function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
   // Se il pixel target è già del colore di riempimento, esci
   if (tgtR === fillR && tgtG === fillG && tgtB === fillB) return;
   // Tolleranza per colori simili al rosa originale
-  const TOL = 60;
+  const TOL = 30;
   function isSimilar(i) {
     return Math.abs(data[i]-tgtR) < TOL &&
            Math.abs(data[i+1]-tgtG) < TOL &&
