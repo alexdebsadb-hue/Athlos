@@ -1376,8 +1376,9 @@
         </div>
 
         <!-- CLASSIFICA ATLETI -->
-        <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;margin-top:8px;">
-          🏆 Classifica atleti
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:8px;margin-top:8px;flex-wrap:wrap;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;">🏆 Classifica atleti</div>
+          <div style="font-size:12px;color:var(--text3);">🌐 Solo utenti con profilo pubblico</div>
         </div>
         <!-- Filtri classifica -->
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
@@ -1947,13 +1948,29 @@ function setConfig(c) {
   // Costruisci mappa area → [regioni]
   if (c.gare_censite || c.nazioni) {
     const areaReg = {};
-    // Dalle nazioni nella config
-    (c.nazioni||[]).forEach(n => { if(!areaReg[n]) areaReg[n] = []; });
-    // Dalle gare censite
+    // Costruisci area→regioni dalle gare censite nel foglio
     (c.gare_censite||[]).forEach(g => {
       if (g.area && g.regione) {
         if (!areaReg[g.area]) areaReg[g.area] = [];
         if (!areaReg[g.area].includes(g.regione)) areaReg[g.area].push(g.regione);
+      }
+    });
+    // ITALIA sempre mappa alle regioni italiane della config
+    // (le righe senza area nel foglio sono italiane per convenzione)
+    const regioniItaliane = (c.regioni||[]).filter(r =>
+      !['Gran Bretagna','Spagna','Olanda','Francia','Germania','Boston','Chicago','Sidney'].includes(r)
+    );
+    if (!areaReg['ITALIA'] || !areaReg['ITALIA'].length) {
+      areaReg['ITALIA'] = regioniItaliane;
+    }
+    // Aree estere — usa le nazioni come regioni
+    (c.nazioni||[]).filter(n => n !== 'ITALIA').forEach(n => {
+      if (!areaReg[n] || !areaReg[n].length) {
+        // Cerca regioni abbinate a quest'area nel foglio
+        const regAbbinate = (c.gare_censite||[])
+          .filter(g => g.area === n && g.regione)
+          .map(g => g.regione);
+        areaReg[n] = [...new Set(regAbbinate)];
       }
     });
     c.area_regioni = areaReg;
@@ -2297,14 +2314,13 @@ function onNazioneChange(area) {
   const fReg = document.getElementById('f-regione');
   if (!fReg) return;
 
-  // Priorità: regioni dalle gare censite per quest'area
-  // Fallback: tutte le regioni dalla config
   const areaRegioni = c.area_regioni || {};
-  let regioni = area ? (areaRegioni[area] || []) : [];
-
-  // Se non ci sono regioni censite per quest'area, usa tutte le regioni della config
-  if (!regioni.length) {
-    regioni = (c.regioni || []);
+  let regioni = area ? (areaRegioni[area] || []) : (c.regioni || []);
+  // Se area estera senza regioni censite, mostra campo libero invece del dropdown vuoto
+  if (area && !regioni.length) {
+    fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
+    onRegioneChange('');
+    return;
   }
 
   fReg.innerHTML = '<option value="">Seleziona regione...</option>'
@@ -6296,11 +6312,17 @@ function renderClassifica() {
   let gareFiltrate = filtroSport === 'all' ? gare : gare.filter(g => (g.sport||'').toLowerCase() === filtroSport);
   if (filtroTipo) gareFiltrate = gareFiltrate.filter(g => (g.tipo_gara||g.nome||'') === filtroTipo);
 
+  // Solo utenti con profilo pubblico
+  const utentiPubblici = new Set(
+    utenti.filter(u => u.profilo_pubblico !== false && String(u.profilo||'').toUpperCase() !== 'PRIVATO')
+           .map(u => String(u.utente_id||''))
+  );
+
   // Aggrega per utente_id
   const perUtente = {};
   gareFiltrate.filter(g => g.esito === 'finisher').forEach(g => {
     const uid = String(g.utente_id||'');
-    if (!uid) return;
+    if (!uid || !utentiPubblici.has(uid)) return;
     if (!perUtente[uid]) perUtente[uid] = { uid, gare:0, km:0 };
     perUtente[uid].gare++;
     perUtente[uid].km += parseFloat(g.distanza||0);
@@ -6561,8 +6583,8 @@ const _salvaGaraOrig = window.salvaGara;
 function controllaAdmin() {
   const params = new URLSearchParams(window.location.search);
   if (!params.has('admin')) return;
-  // Aspetta che il DOM sia pronto
-  requestAnimationFrame(() => {
+  // Esegui dopo che init() ha terminato il rendering
+  setTimeout(() => {
     document.querySelectorAll('.page').forEach(p => {
       p.classList.remove('active');
       p.style.display = 'none';
@@ -6573,12 +6595,11 @@ function controllaAdmin() {
       adminPage.style.display = 'block';
     }
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-    // Nascondi bottoni navbar non necessari per admin
     const btnImport = document.querySelector('button[onclick="openImport()"]');
     const btnAdd    = document.querySelector('button[onclick="openForm()"]');
     if (btnImport) btnImport.style.display = 'none';
     if (btnAdd)    btnAdd.style.display    = 'none';
-  });
+  }, 800);
 }
 
 init();
