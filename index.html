@@ -1694,24 +1694,34 @@
         </div>
       </div>
 
-      <!-- Luogo + Area + Regione -->
-      <div class="form-row triple">
-        <div class="form-group">
-          <label class="form-label">Luogo / Città</label>
-          <input class="form-input" id="p-luogo" placeholder="es. Roma" />
-        </div>
+      <!-- Cascata Area → Regione → Città → Nome gara (uguale al form gara) -->
+      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Area / Nazione</label>
-          <select class="form-select" id="p-nazione">
+          <select class="form-select" id="p-nazione" onchange="onPNazioneChange(this.value)">
             <option value="">Seleziona...</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
-          <select class="form-select" id="p-regione">
-            <option value="">Seleziona...</option>
+          <select class="form-select" id="p-regione" onchange="onPRegioneChange(this.value)">
+            <option value="">Prima seleziona area...</option>
           </select>
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Città</label>
+        <select class="form-select" id="p-citta-sel" onchange="onPCittaChange(this.value)">
+          <option value="">Seleziona regione prima...</option>
+        </select>
+        <input class="form-input" id="p-luogo" placeholder="es. Roma" style="margin-top:6px;display:none;" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nome gara</label>
+        <select class="form-select" id="p-nome-sel" onchange="onPNomeGaraSelChange(this.value)">
+          <option value="">Seleziona città prima...</option>
+        </select>
+        <input class="form-input" id="p-nome-gara" placeholder="es. Maratona di Roma..." style="margin-top:6px;display:none;" />
       </div>
 
       <!-- Distanza -->
@@ -2303,6 +2313,14 @@ function popolaSelectConfig() {
       const o = document.createElement('option'); o.value = n; o.textContent = n; fNaz.appendChild(o);
     });
   }
+  // Nazione nel form programma
+  const pNazPop = document.getElementById('p-nazione');
+  if (pNazPop) {
+    pNazPop.innerHTML = '<option value="">Seleziona area...</option>';
+    (c.nazioni || []).forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; pNazPop.appendChild(o);
+    });
+  }
   // Regione nel form gara
   const fReg = document.getElementById('f-regione');
   if (fReg) {
@@ -2846,7 +2864,18 @@ function salvaGaraProgramma() {
   const tipoGaraP = (document.getElementById('p-tipo-gara') || {}).value || '';
   const nomeGara  = tipoGaraP || nome || '';
   if (!nomeGara && !sportP) { alert('Seleziona almeno lo sport o il tipo di gara'); return; }
-  const nomeGaraP = (document.getElementById('p-nome-gara') || {}).value?.trim() || '';
+  // Legge dalla cascata — nome da select o campo libero
+  const pNomeSel = document.getElementById('p-nome-sel');
+  const pNomeLib = document.getElementById('p-nome-gara');
+  const nomeGaraP = (pNomeSel && pNomeSel.value && pNomeSel.value !== '__altro__')
+    ? pNomeSel.value
+    : ((pNomeLib || {}).value || '').trim();
+  // Città: da select o campo libero
+  const pCittaSel = document.getElementById('p-citta-sel');
+  const pLuogoLib = document.getElementById('p-luogo');
+  const cittaVal = (pCittaSel && pCittaSel.value && pCittaSel.value !== '__altra__')
+    ? pCittaSel.value
+    : ((pLuogoLib || {}).value || '').trim();
   const gara = {
     id: Date.now(),
     utente_id: getUtenteId() || 'locale',
@@ -2855,7 +2884,7 @@ function salvaGaraProgramma() {
     nome: nomeGaraP || nomeGara,
     nazione: (document.getElementById('p-nazione') || {}).value || '',
     data: document.getElementById('p-data').value,
-    luogo: document.getElementById('p-luogo').value,
+    luogo: cittaVal,
     regione: document.getElementById('p-regione').value,
     distanza: parseFloat(document.getElementById('p-distanza').value) || 0,
     note: document.getElementById('p-note').value,
@@ -3991,8 +4020,16 @@ async function renderProgramma() {
   lista.forEach(g => {
     const dataFmt = g.data ? fmtDataIT(g.data) : '';
     const dataGara = g.data ? new Date(g.data+'T12:00:00') : null;
-    const giorni = dataGara ? Math.ceil((dataGara - oggi) / (1000*60*60*24)) : null;
-    const countdown = giorni !== null ? (giorni > 0 ? `<span style="color:var(--accent);font-weight:600;">tra ${giorni} giorni</span>` : `<span style="color:var(--green);">oggi!</span>`) : '';
+    // Confronto solo per data (senza ora) — domani = 1 giorno
+    const oggiMezzanotte = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate());
+    const garaMezzanotte = dataGara ? new Date(dataGara.getFullYear(), dataGara.getMonth(), dataGara.getDate()) : null;
+    const giorni = garaMezzanotte ? Math.round((garaMezzanotte - oggiMezzanotte) / (1000*60*60*24)) : null;
+    const countdown = giorni !== null
+      ? giorni > 1  ? `<span style="color:var(--accent);font-weight:600;">tra ${giorni} giorni</span>`
+      : giorni === 1 ? `<span style="color:var(--accent);font-weight:700;">domani!</span>`
+      : giorni === 0 ? `<span style="color:var(--green);font-weight:700;">oggi!</span>`
+      : ''
+      : '';
     const card = document.createElement('div');
     card.className = 'gara-card';
     card.style.cursor = 'pointer';
@@ -4705,6 +4742,69 @@ function popolaTipoGaraP(sport) {
 function onPSportChange(sport) {
   selectedSportP = sport;
   popolaTipoGaraP(sport);
+}
+
+// Cascata programma — speculare alla cascata del form gara
+function onPNazioneChange(area) {
+  const c = getConfig();
+  const fReg = document.getElementById('p-regione');
+  if (!fReg) return;
+  const areaRegioni = c.area_regioni || {};
+  let regioni = area ? (areaRegioni[area] || []) : [];
+  if (!regioni.length) regioni = c.regioni || [];
+  fReg.innerHTML = '<option value="">Seleziona regione...</option>'
+    + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
+  onPRegioneChange('');
+}
+
+function onPRegioneChange(regione) {
+  const c = getConfig();
+  const fCitta  = document.getElementById('p-citta-sel');
+  const fLuogo  = document.getElementById('p-luogo');
+  const fNomeSel= document.getElementById('p-nome-sel');
+  const fNome   = document.getElementById('p-nome-gara');
+  if (!fCitta) return;
+  const gareCensite = c.gare_censite || [];
+  const citta = [...new Set(
+    gareCensite.filter(g => !regione || g.regione === regione).map(g => g.citta).filter(Boolean)
+  )].sort();
+  fCitta.innerHTML = '<option value="">Seleziona città...</option>'
+    + citta.map(cc => `<option value="${cc}">${cc}</option>`).join('')
+    + '<option value="__altra__">✏️ Altra città...</option>';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+  if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+}
+
+function onPCittaChange(citta) {
+  const c = getConfig();
+  const fLuogo  = document.getElementById('p-luogo');
+  const fNomeSel= document.getElementById('p-nome-sel');
+  const fNome   = document.getElementById('p-nome-gara');
+  if (citta === '__altra__') {
+    if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
+    if (fNomeSel) fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+    return;
+  }
+  if (citta && fLuogo) { fLuogo.value = citta; fLuogo.style.display = 'none'; }
+  const regione = (document.getElementById('p-regione') || {}).value || '';
+  const gareCensite = c.gare_censite || [];
+  const gare = gareCensite.filter(g => g.citta === citta && (!regione || g.regione === regione));
+  if (fNomeSel) {
+    fNomeSel.innerHTML = '<option value="">Seleziona gara...</option>'
+      + gare.map(g => `<option value="${g.nome}">${g.nome}</option>`).join('')
+      + '<option value="__altro__">✏️ Altra gara...</option>';
+  }
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+}
+
+function onPNomeGaraSelChange(val) {
+  const fNome = document.getElementById('p-nome-gara');
+  if (!fNome) return;
+  if (val === '__altro__') { fNome.style.display = ''; fNome.value = ''; fNome.focus(); }
+  else if (val) { fNome.style.display = 'none'; fNome.value = val; }
+  else { fNome.style.display = 'none'; fNome.value = ''; }
 }
 function closeDetailOutside(e) { if (e.target === document.getElementById('detail-overlay')) closeDetail(); }
 
@@ -6662,11 +6762,54 @@ controllaReferral();
 
 <!-- D3 + Mappa Italia -->
 <script>
-// Mappa SVG pura — nessuna dipendenza esterna
+// Mappa con canvas flood-fill sull'immagine reale
+
+const MAP_SEEDS = {"Valle d'Aosta": [95, 77], "Piemonte": [81, 135], "Liguria": [163, 189], "Lombardia": [185, 117], "Trentino-Alto Adige": [216, 64], "Veneto": [252, 94], "Friuli-Venezia Giulia": [300, 93], "Emilia-Romagna": [187, 166], "Toscana": [211, 238], "Marche": [280, 219], "Umbria": [262, 257], "Lazio": [269, 302], "Abruzzo": [299, 265], "Molise": [333, 310], "Campania": [343, 346], "Puglia": [383, 364], "Basilicata": [385, 394], "Calabria": [406, 452], "Sicilia": [319, 532], "Sardegna": [104, 408]};
 
 function regioneColorSVG(n) {
-  if (n <= 0) return '#1c1c1c';
-  return regioneColor(n); // usa la funzione unificata con _mapColor
+  if (n <= 0) return null;
+  return regioneColor(n);
+}
+
+// Converte hex/rgba in [r,g,b]
+function parseColor(colorStr) {
+  const tmp = document.createElement('canvas');
+  tmp.width = tmp.height = 1;
+  const ctx = tmp.getContext('2d');
+  ctx.fillStyle = colorStr;
+  ctx.fillRect(0,0,1,1);
+  const d = ctx.getImageData(0,0,1,1).data;
+  return [d[0], d[1], d[2]];
+}
+
+// Flood fill sul canvas
+function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
+  const idx = (sy * width + sx) * 4;
+  const tgtR = data[idx], tgtG = data[idx+1], tgtB = data[idx+2];
+  // Se il pixel target è già del colore di riempimento, esci
+  if (tgtR === fillR && tgtG === fillG && tgtB === fillB) return;
+  // Tolleranza per colori simili al rosa originale
+  const TOL = 60;
+  function isSimilar(i) {
+    return Math.abs(data[i]-tgtR) < TOL &&
+           Math.abs(data[i+1]-tgtG) < TOL &&
+           Math.abs(data[i+2]-tgtB) < TOL;
+  }
+  const stack = [[sx, sy]];
+  const visited = new Uint8Array(width * height);
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+    const i = (y * width + x) * 4;
+    if (visited[y * width + x]) continue;
+    if (!isSimilar(i)) continue;
+    visited[y * width + x] = 1;
+    // Blend colore con opacità
+    data[i]   = Math.round(data[i]   * (1-alpha) + fillR * alpha);
+    data[i+1] = Math.round(data[i+1] * (1-alpha) + fillG * alpha);
+    data[i+2] = Math.round(data[i+2] * (1-alpha) + fillB * alpha);
+    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  }
 }
 
 function updateMapColors() {
@@ -6681,17 +6824,46 @@ function updateMapColors() {
 
   const tooltip = document.getElementById('map-tooltip');
 
+  // Approccio canvas: disegna l'immagine originale + flood-fill per le regioni
+  const img = document.getElementById('italy-bg');
+  const svg = document.getElementById('italy-svg');
+  if (!img || !svg) return;
+
+  // Crea canvas temporaneo
+  const canvas = document.createElement('canvas');
+  const vb = svg.viewBox.baseVal;
+  canvas.width  = vb.width  || 500;
+  canvas.height = vb.height || 671;
+  const ctx = canvas.getContext('2d');
+
+  // Disegna immagine originale
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  // Flood-fill per ogni regione con gare
+  Object.entries(MAP_SEEDS).forEach(([regName, [sx, sy]]) => {
+    const gs = regioniMap[regName] || [];
+    if (!gs.length) return;
+    const colorStr = regioneColorSVG(gs.length);
+    if (!colorStr) return;
+    const [r,g,b] = parseColor(colorStr);
+    floodFill(data, canvas.width, canvas.height, sx, sy, r, g, b, 0.6);
+  });
+
+  ctx.putImageData(imageData, 0, 0);
+
+  // Sostituisci l'immagine SVG con il canvas colorato
+  const dataURL = canvas.toDataURL('image/png');
+  img.setAttribute('href', dataURL);
+
+  // Mantieni i path per tooltip e click (trasparenti)
   document.querySelectorAll('#italy-svg .reg-d3').forEach(path => {
     const regName = path.dataset.region;
     const gs = regioniMap[regName] || [];
-    // Colora il path sopra l'immagine con opacity
-    const color = regioneColorSVG(gs.length);
-    path.style.fill = color !== '#1c1c1c' ? color : 'transparent';
-    path.style.fillOpacity = gs.length ? '0.55' : '0';
-    path.style.stroke = gs.length ? 'rgba(255,255,255,0.3)' : 'none';
-    path.style.strokeWidth = '1';
+    path.style.fill = 'transparent';
+    path.style.stroke = 'none';
     path.style.cursor = gs.length ? 'pointer' : 'default';
-    path.style.transition = 'fill 0.2s, opacity 0.15s';
 
     path.onmouseenter = function(e) {
       if (gs.length > 0) {
