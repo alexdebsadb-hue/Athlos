@@ -1354,7 +1354,7 @@
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
           👥 Utenti registrati
         </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="social-utenti-cards"></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;" id="social-utenti-cards"></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:32px;">
           <!-- Per regione -->
@@ -1379,7 +1379,13 @@
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
           🏅 Gare della community
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;" id="social-gare-cards"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;" id="social-gare-cards"></div>
+
+        <!-- Gare per regione -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">🗺️ Gare per regione</div>
+          <div id="social-regioni-gare" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:280px;overflow-y:auto;"></div>
+        </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;">
           <!-- Top 5 gare più partecipate -->
@@ -6138,16 +6144,16 @@ function renderNavUser() {
 async function init() {
   // Se URL ha ?admin, mostra subito pagina admin e non fare altro
   if (new URLSearchParams(window.location.search).has('admin')) {
-    // Modalità admin — mostra SOLO la pagina admin
-    // Nascondi link navbar (tieni solo il logo)
+    // Modalità admin — usa showPage normalmente
     const navLinks = document.querySelector('.nav-links');
     const navRight = document.querySelector('.nav-right');
     if (navLinks) navLinks.style.visibility = 'hidden';
     if (navRight) navRight.style.visibility = 'hidden';
-    // Mostra page-admin
+    // Attiva page-admin come pagina normale
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const adminPage = document.getElementById('page-admin');
-    if (adminPage) adminPage.style.display = 'block';
-    return; // stop — non eseguire altro
+    if (adminPage) adminPage.classList.add('active');
+    return;
   }
   renderNavUser();
 
@@ -6244,16 +6250,24 @@ async function renderSocial() {
   // Usiamo una stima basata su utenti con attività recente — non abbiamo sessioni reali
   const nOnline = Math.max(1, Math.floor(nUtenti * 0.08)); // stima ~8% online
 
+  // Età media per sub-info
+  const annoOggiU = new Date().getFullYear();
+  const etaArr = utenti.map(u => {
+    const anno = parseInt(u.anno_nascita || '');
+    const e = annoOggiU - anno;
+    return (anno > 1920 && e > 10 && e < 100) ? e : null;
+  }).filter(e => e !== null);
+  const etaMediaU = etaArr.length ? Math.round(etaArr.reduce((s,e)=>s+e,0)/etaArr.length) : null;
+
   document.getElementById('social-utenti-cards').innerHTML = [
-    { n: nUtenti,            label: 'Utenti registrati', icon: '👥' },
-    { n: nOnline,            label: 'Online ora',         icon: '🟢' },
-    { n: gare.length,        label: 'Gare registrate',    icon: '🏅' },
-    { n: [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length, label: 'Città coperte', icon: '📍' },
-  ].map(({n, label, icon}) => `
+    { n: nUtenti,  label: 'Utenti registrati', icon: '👥', sub: etaMediaU ? `età media ${etaMediaU} anni` : '' },
+    { n: nOnline,  label: 'Online ora',         icon: '🟢', sub: 'stima sessioni attive' },
+  ].map(({n, label, icon, sub}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
       <div style="font-size:24px;margin-bottom:6px;">${icon}</div>
       <div style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1;">${n.toLocaleString('it')}</div>
       <div style="font-size:12px;color:var(--text3);margin-top:4px;">${label}</div>
+      ${sub ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${sub}</div>` : ''}
     </div>`).join('');
 
   // ── PER REGIONE ──
@@ -6295,17 +6309,8 @@ async function renderSocial() {
         <div style="color:var(--text3);min-width:36px;">${Math.round(n/totSesso*100)}%</div>
       </div>`).join('');
 
-  // ── ETÀ MEDIA ──
-  const annoOggi = new Date().getFullYear();
-  const eta = utenti
-    .map(u => {
-      const anno = parseInt(u.anno_nascita || (u.data_nascita ? String(u.data_nascita).slice(0,4) : ''));
-      const e = annoOggi - anno;
-      return (anno > 1920 && e > 10 && e < 100) ? e : null;
-    })
-    .filter(e => e !== null);
-  const etaMedia = eta.length ? Math.round(eta.reduce((s,e)=>s+e,0)/eta.length) : null;
-  document.getElementById('social-eta').textContent = etaMedia ? etaMedia : '—';
+  // ── ETÀ MEDIA (calcolata sopra in utenti-cards) ──
+  document.getElementById('social-eta').textContent = etaMediaU ? etaMediaU : '—';
 
   // ── STATS GARE ──
   const nGareTot  = gare.length;
@@ -6320,31 +6325,44 @@ async function renderSocial() {
   });
   const sportSorted = Object.entries(perSportSocial).sort((a,b) => b[1]-a[1]);
 
-  document.getElementById('social-gare-cards').innerHTML = `
+  const nCitta   = [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
+  const nRegioni = [...new Set(gare.map(g=>g.regione).filter(r=>r&&r!=='Estero'))].length;
+
+  document.getElementById('social-gare-cards').innerHTML = [
+    { n: nGareTot.toLocaleString('it'), label: 'Gare registrate', icon: '🏅',
+      sub: sportSorted.map(([s,n])=>`${sportIcon(s)} ${n}`).join('  ') },
+    { n: kmTot.toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km gareggiati' },
+    { n: nCitta,                        label: 'Città gareggiate', icon: '📍', sub: '' },
+    { n: nRegioni,                      label: 'Regioni italiane', icon: '🗺️', sub: 'su 20 regioni' },
+  ].map(({n, label, icon, sub}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;">🏅</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1;">${nGareTot.toLocaleString('it')}</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Gare totali</div>
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
-        ${sportSorted.map(([s,n]) => `
-          <div style="display:flex;align-items:center;gap:6px;font-size:12px;">
-            <span>${sportIcon(s)}</span>
-            <span style="flex:1;text-align:left;color:var(--text2);">${sportLabel(s)}</span>
-            <span style="font-weight:700;color:var(--accent);">${n}</span>
-          </div>`).join('')}
-      </div>
-    </div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;">✅</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1;">${nFinisher.toLocaleString('it')}</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Finisher</div>
-      <div style="font-size:13px;color:var(--text3);margin-top:6px;">${nGareTot ? Math.round(nFinisher/nGareTot*100) : 0}% finish rate</div>
-    </div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;">📏</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1;">${kmTot.toLocaleString('it')}</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Km totali</div>
-    </div>`;
+      <div style="font-size:24px;margin-bottom:6px;">${icon}</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;color:var(--accent);line-height:1;">${n}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;">${label}</div>
+      ${sub ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">${sub}</div>` : ''}
+    </div>`).join('');
+
+  // Conteggio gare per regione italiana
+  const garePerRegione = {};
+  gare.forEach(g => {
+    if (g.regione && g.regione !== 'Estero') {
+      garePerRegione[g.regione] = (garePerRegione[g.regione]||0) + 1;
+    }
+  });
+  const regioniGareSorted = Object.entries(garePerRegione).sort((a,b)=>b[1]-a[1]);
+  const maxGR = regioniGareSorted[0]?.[1] || 1;
+  // Mostra lista regioni con gare nel social — aggiungiamo un elemento dedicato
+  const elRG = document.getElementById('social-regioni-gare');
+  if (elRG) {
+    elRG.innerHTML = regioniGareSorted.map(([r,n]) => `
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+        <div style="flex:1;color:var(--text2);">${r}</div>
+        <div style="width:80px;background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;">
+          <div style="width:${Math.round(n/maxGR*100)}%;background:var(--accent);height:100%;border-radius:4px;"></div>
+        </div>
+        <div style="color:var(--accent);font-weight:600;min-width:24px;text-align:right;">${n}</div>
+      </div>`).join('');
+  }
 
   // ── TOP 5 PIÙ PARTECIPATE — raggruppa per nome_gara + sport ──
   const conteggioGare = {};
@@ -6917,59 +6935,6 @@ function loadMap() {
   updateMapColors();
 }
 </script>
-<!-- PANNELLO ADMIN -->
-<div id="page-admin" style="display:none;padding-top:56px;min-height:100vh;background:var(--bg);">
-  <div style="max-width:1000px;margin:0 auto;padding:32px 24px;">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
-      <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">🔐 Pannello <span style="color:var(--accent)">Admin</span></h2>
-      <span id="admin-date" style="font-size:13px;color:var(--text3);"></span>
-    </div>
-
-    <!-- LOGIN ADMIN -->
-    <div id="admin-login" style="">
-      <div style="max-width:360px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:28px;">
-        <div style="font-family:Barlow Condensed,sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;">Accesso riservato</div>
-        <input class="form-input" id="admin-pwd-input" type="password" placeholder="Password admin"
-          style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()" />
-        <button class="btn-primary" onclick="loginAdmin()" style="width:100%;">Accedi</button>
-        <div id="admin-login-err" style="display:none;color:#ef9a9a;font-size:13px;margin-top:10px;"></div>
-      </div>
-    </div>
-
-    <!-- CONTENUTO ADMIN -->
-    <div id="admin-content" style="display:none;">
-      <!-- Riepilogo giornaliero -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;">
-        <!-- Nuovi utenti oggi -->
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">👤 Nuovi utenti oggi</div>
-          <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-        <!-- Nuove gare oggi -->
-        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">🏅 Nuove gare oggi</div>
-          <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-      </div>
-
-      <!-- Gare non censite -->
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:28px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;">📋 Gare non censite (da aggiungere al foglio)</div>
-          <button class="btn-secondary" style="font-size:12px;" onclick="copiaGareNonCensite()">📋 Copia lista</button>
-        </div>
-        <div id="admin-gare-non-censite" style="max-height:400px;overflow-y:auto;"></div>
-      </div>
-
-      <!-- Ultime recensioni -->
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;">
-        <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">⭐ Ultime recensioni inserite</div>
-        <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:8px;"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- PIÈ DI PAGINA -->
