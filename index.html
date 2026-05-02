@@ -1007,29 +1007,33 @@
   <!-- PROFILO -->
   <div id="page-profilo" class="page">
     <div class="profile-wrap">
-      <div class="profile-header" id="profile-header">
-        <div class="avatar" onclick="editProfile()">
-          <span id="avatar-initials">?</span>
-          <div class="avatar-edit">✏️</div>
-        </div>
-        <div class="profile-info">
-          <div class="profile-name" id="profile-name">Il tuo profilo</div>
-          <div style="display:flex;align-items:center;gap:10px;margin:4px 0;">
-            <div class="profile-meta" id="profile-meta" style="margin:0;"></div>
-            <div id="profile-status"></div>
+      <div id="profile-header" style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px;">
+        <!-- Riga 1: Avatar + Nome + Status + Azioni -->
+        <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:18px;">
+          <div class="avatar" onclick="editProfile()" style="flex-shrink:0;">
+            <span id="avatar-initials">?</span>
+            <div class="avatar-edit">✏️</div>
           </div>
-          <div id="profile-sport" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+              <div id="profile-name" style="font-family:Barlow Condensed,sans-serif;font-size:36px;font-weight:900;line-height:1;">Il tuo profilo</div>
+              <div id="profile-status"></div>
+            </div>
+            <div id="profile-meta" style="color:var(--text2);font-size:15px;margin-bottom:8px;"></div>
+            <div id="profile-sport" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;">
+            <div id="profile-visibility" style="font-size:12px;color:var(--text3);"></div>
+            <div id="profile-email" style="font-size:12px;color:var(--text3);"></div>
+          </div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn-secondary" onclick="editProfile()">Modifica profilo</button>
-          <button class="btn-secondary" onclick="resetPassword()" style="color:var(--accent2);">🔑 Reset password</button>
-          <button class="btn-secondary" onclick="connettStrava()" title="Collega Strava — importa le tue gare" style="opacity:0.9;">🟠 Strava</button>
+        <!-- Riga 2: Bottoni azioni — su tutta la larghezza -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border);">
+          <button class="btn-secondary" onclick="editProfile()">✏️ Modifica profilo</button>
+          <button class="btn-secondary" onclick="resetPassword()" style="color:var(--accent2);">🔑 Password</button>
+          <button class="btn-secondary" onclick="connettStrava()" style="opacity:0.9;">🟠 Strava</button>
           <button class="btn-secondary" onclick="invitaAmici()" style="color:#4caf50;">📨 Invita amici</button>
-          <button class="btn-secondary" onclick="logoff()" style="color:#ef9a9a;">← Esci</button>
-        </div>
-          <div id="profile-visibility" style="font-size:12px;color:var(--text3);"></div>
-          <div id="profile-email" style="font-size:12px;color:var(--text3);"></div>
+          <button class="btn-secondary" onclick="logoff()" style="color:#ef9a9a;margin-left:auto;">← Esci</button>
         </div>
       </div>
 
@@ -1375,11 +1379,20 @@
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;margin-top:8px;">
           🏆 Classifica atleti
         </div>
-        <!-- Filtro sport -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-          <span style="font-size:13px;color:var(--text2);">Filtra per sport:</span>
-          <div id="classifica-sport-filter" style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="tab-btn active" onclick="filtraClassifica('all',this)">🏅 Tutti</button>
+        <!-- Filtri classifica -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;color:var(--text2);white-space:nowrap;">Sport:</span>
+            <div id="classifica-sport-filter" style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="tab-btn active" onclick="filtraClassifica('all',this)">🏅 Tutti</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;color:var(--text2);white-space:nowrap;">Tipo gara:</span>
+            <select class="form-select" id="classifica-tipo-filter" onchange="renderClassifica()"
+              style="font-size:13px;padding:5px 10px;min-width:180px;">
+              <option value="">Tutte le distanze</option>
+            </select>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
@@ -6277,8 +6290,11 @@ function renderClassifica() {
   const utenti = (window._socialUtenti || []);
   if (!gare.length || !utenti.length) return;
 
-  const filtro = _classificaSportFiltro;
-  const gareFiltrate = filtro === 'all' ? gare : gare.filter(g => (g.sport||'').toLowerCase() === filtro);
+  const filtroSport = _classificaSportFiltro;
+  const filtroTipo  = (document.getElementById('classifica-tipo-filter') || {}).value || '';
+
+  let gareFiltrate = filtroSport === 'all' ? gare : gare.filter(g => (g.sport||'').toLowerCase() === filtroSport);
+  if (filtroTipo) gareFiltrate = gareFiltrate.filter(g => (g.tipo_gara||g.nome||'') === filtroTipo);
 
   // Aggrega per utente_id
   const perUtente = {};
@@ -6320,9 +6336,19 @@ function renderClassifica() {
 function popolaFiltriClassifica(gare) {
   const sportPresenti = [...new Set(gare.map(g => (g.sport||'').toLowerCase()).filter(Boolean))].sort();
   const cont = document.getElementById('classifica-sport-filter');
-  if (!cont) return;
-  cont.innerHTML = `<button class="tab-btn ${_classificaSportFiltro==='all'?'active':''}" onclick="filtraClassifica('all',this)">🏅 Tutti</button>`
-    + sportPresenti.map(s => `<button class="tab-btn ${_classificaSportFiltro===s?'active':''}" onclick="filtraClassifica('${s}',this)">${sportIcon(s)} ${sportLabel(s)}</button>`).join('');
+  if (cont) {
+    cont.innerHTML = `<button class="tab-btn ${_classificaSportFiltro==='all'?'active':''}" onclick="filtraClassifica('all',this)">🏅 Tutti</button>`
+      + sportPresenti.map(s => `<button class="tab-btn ${_classificaSportFiltro===s?'active':''}" onclick="filtraClassifica('${s}',this)">${sportIcon(s)} ${sportLabel(s)}</button>`).join('');
+  }
+  // Popola tipi gara
+  const tipiGara = [...new Set(gare.map(g => g.tipo_gara||g.nome||'').filter(Boolean))].sort();
+  const selTipo = document.getElementById('classifica-tipo-filter');
+  if (selTipo) {
+    const curVal = selTipo.value;
+    selTipo.innerHTML = '<option value="">Tutte le distanze</option>'
+      + tipiGara.map(t => `<option value="${t}">${t}</option>`).join('');
+    if (curVal) selTipo.value = curVal;
+  }
 }
 
 // ============================================================
@@ -6496,15 +6522,33 @@ function copiaGareNonCensite() {
 // FILTRO PAROLACCE nelle note/recensioni
 // ============================================================
 const _blacklist = [
-  'cazzo','caz','fanculo','vaffanculo','merda','stronzo','stronza','coglione',
-  'coglioni','puttana','troia','bastardo','bastarda','figlio di puttana',
-  'porco dio','porcodio','nazi','nazista','fascist','pedofil','pornograf',
-  'stupro','violenz','isis','jihad','kalashnikov','sparatoria'
+  // Parolacce italiane
+  'cazzo','cazz','fanculo','vaffanculo','vaffa','merda','stronzo','stronza',
+  'coglione','coglioni','puttana','troia','bastardo','bastarda','mignotta',
+  'porco dio','porcodio','porca madonna','cornuto','cornuta','sfigato',
+  'minchia','fica','figa','cazzo','cazzone','rompicazzo','testa di cazzo',
+  // Organi genitali / sessualità
+  'pene','vagina','sesso','scopare','fottere','pompino','sborrata','orgasmo',
+  'masturbaz','eiaculaz','bocchino','succhiare','leccami','sculacciare',
+  // Siti porno / spam
+  'pornhub','xvideos','xhamster','redtube','youporn','brazzers','onlyfans',
+  'sexcam','livesex','webcamsex','porno','pornostar','escort','cam4',
+  // Odio / estremismo
+  'nazi','nazista','fascist','pedofil','pedophil','isis','jihad','terroris',
+  'kalashnikov','sparatoria','attentato','bomba','kamikaze','ku klux',
+  'antisemit','olocausto negaz','razzis',
+  // Link / URL (quasi sempre spam)
+  'http://','https://','www.','bit.ly','tinyurl','.com/','.it/','.net/',
+  // Pubblicità non sportiva
+  'casino','scommesse','slot machine','poker online','guadagna da casa',
+  'bitcoin','criptovalute','investiment facil','mlm','guadagno facile',
 ];
 
 function contenutoOffensivo(testo) {
   if (!testo) return false;
   const t = testo.toLowerCase();
+  // Blocca se contiene URL
+  if (/https?:\/\/|www\./i.test(testo)) return true;
   return _blacklist.some(p => t.includes(p));
 }
 
@@ -6516,13 +6560,25 @@ const _salvaGaraOrig = window.salvaGara;
 // ============================================================
 function controllaAdmin() {
   const params = new URLSearchParams(window.location.search);
-  if (params.has('admin')) {
-    // Mostra pagina admin
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (!params.has('admin')) return;
+  // Aspetta che il DOM sia pronto
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.remove('active');
+      p.style.display = 'none';
+    });
     const adminPage = document.getElementById('page-admin');
-    if (adminPage) { adminPage.classList.add('active'); adminPage.style.display = 'block'; }
+    if (adminPage) {
+      adminPage.classList.add('active');
+      adminPage.style.display = 'block';
+    }
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  }
+    // Nascondi bottoni navbar non necessari per admin
+    const btnImport = document.querySelector('button[onclick="openImport()"]');
+    const btnAdd    = document.querySelector('button[onclick="openForm()"]');
+    if (btnImport) btnImport.style.display = 'none';
+    if (btnAdd)    btnAdd.style.display    = 'none';
+  });
 }
 
 init();
@@ -6614,7 +6670,7 @@ function loadMap() {
 }
 </script>
 <!-- PANNELLO ADMIN -->
-<div id="page-admin" class="page" style="display:none;">
+<div id="page-admin" class="page">
   <div style="max-width:1000px;margin:0 auto;padding:32px 24px;">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
       <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">🔐 Pannello <span style="color:var(--accent)">Admin</span></h2>
