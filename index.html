@@ -1268,7 +1268,7 @@
         
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:20px;">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:700;margin-bottom:4px;">Gare per anno</div>
-          <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Gare completate (Finisher) per sport e anno</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Gare completate per sport e anno</div>
           <canvas id="chart-anno" height="200"></canvas>
         </div>
       </div>
@@ -3356,10 +3356,10 @@ function renderStats() {
   const regioni = new Set(gare.map(g=>g.regione).filter(r=>r&&r!=='Estero')).size;
 
   document.getElementById('stats-summary-cards').innerHTML = [
-    statCard('🏅', 'Gare totali',    gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
+    statCard('🏅', 'Gare totali', gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
     statCard('📏', 'Km gareggiati', Math.round(kmTot).toLocaleString('it'), 'km totali percorsi', '#2196f3'),
     statCard('🗺️', 'Regioni coperte', regioni, 'regioni d\u0027Italia', '#4caf50'),
-    statCard('⚡', 'Finish Rate',    (gare.length ? Math.round(finisher.length/gare.length*100) : 100) + '%', `${pb} Personal Best`, '#9c27b0'),
+    statCard('⚡', 'Finish Rate', (gare.length ? Math.round(finisher.length/gare.length*100) : 100) + '%', `${pb} Personal Best`, '#9c27b0'),
   ].join('');
 
   // ── Per Anno — solo Finisher, colori per sport ──
@@ -5370,7 +5370,7 @@ function _OLD_renderStats_UNUSED() {
   const regioni = new Set(gare.map(g=>g.regione).filter(r=>r&&r!=='Estero')).size;
 
   document.getElementById('stats-summary-cards').innerHTML = [
-    statCard('🏅', 'Gare totali',    gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
+    statCard('🏅', 'Gare totali', gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
     statCard('📏', 'Km gareggiati', Math.round(kmTot).toLocaleString('it'), 'km totali percorsi', '#2196f3'),
     statCard('⭐', 'Personal Best',  pb, 'gare con miglior tempo', '#ffc107'),
     statCard('🗺️', 'Regioni coperte', regioni, 'regioni d\u0027Italia', '#4caf50'),
@@ -6279,7 +6279,7 @@ async function renderSocial() {
     const s = u.sesso || '—';
     perSesso[s] = (perSesso[s]||0) + 1;
   });
-  const sessoLabels = { M:'🧑 Uomo', F:'👩 Donna', A:'🏳️ Altro', '—':'Non specificato' };
+  const sessoLabels = { M:'♂ M', F:'♀ F', A:'⚧ Altro', '—':'Non specificato' };
   const sessoColors = { M:'#2196f3', F:'#e91e63', A:'#9c27b0', '—':'#666' };
   const totSesso = utenti.length || 1;
   document.getElementById('social-sesso').innerHTML = Object.entries(perSesso)
@@ -6765,7 +6765,7 @@ controllaReferral();
 <script>
 // Mappa con canvas flood-fill sull'immagine reale
 
-const MAP_SEEDS = {"Valle d'Aosta": [95, 77], "Piemonte": [81, 135], "Liguria": [163, 189], "Lombardia": [185, 117], "Trentino-Alto Adige": [216, 64], "Veneto": [252, 94], "Friuli-Venezia Giulia": [300, 93], "Emilia-Romagna": [187, 166], "Toscana": [211, 238], "Marche": [280, 219], "Umbria": [262, 257], "Lazio": [269, 302], "Abruzzo": [299, 265], "Molise": [333, 310], "Campania": [343, 346], "Puglia": [383, 364], "Basilicata": [385, 394], "Calabria": [406, 452], "Sicilia": [319, 532], "Sardegna": [104, 408]};
+const MAP_SEEDS = {"Valle d'Aosta": [85, 71], "Piemonte": [87, 130], "Liguria": [171, 194], "Lombardia": [193, 119], "Trentino-Alto Adige": [222, 63], "Veneto": [259, 86], "Friuli-Venezia Giulia": [301, 93], "Emilia-Romagna": [189, 170], "Toscana": [220, 241], "Marche": [277, 224], "Umbria": [261, 262], "Lazio": [275, 302], "Abruzzo": [293, 270], "Molise": [331, 317], "Campania": [360, 356], "Puglia": [385, 370], "Basilicata": [390, 394], "Calabria": [405, 463], "Sicilia": [323, 532], "Sardegna": [104, 408]};
 
 function regioneColorSVG(n) {
   if (n <= 0) return null;
