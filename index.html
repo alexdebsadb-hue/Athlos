@@ -5995,6 +5995,23 @@ function renderNavUser() {
 
 // ============ INIT ============
 async function init() {
+  // Se URL ha ?admin, mostra subito pagina admin e non fare altro
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    // Nascondi navbar normale
+    document.querySelector('.nav-links').style.display = 'none';
+    document.querySelector('.nav-right').style.display = 'none';
+    // Mostra solo pagina admin
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.remove('active');
+      p.style.display = 'none';
+    });
+    const adminPage = document.getElementById('page-admin');
+    if (adminPage) {
+      adminPage.classList.add('active');
+      adminPage.style.display = 'block';
+    }
+    return; // stop — non eseguire il resto di init()
+  }
   renderNavUser();
 
   // Carica config dal foglio (await — aspettiamo prima di procedere)
@@ -6580,6 +6597,7 @@ const _salvaGaraOrig = window.salvaGara;
 // ============================================================
 // NAVIGAZIONE ADMIN — accessibile da URL ?admin
 // ============================================================
+// controllaAdmin: ora gestita in init()
 function controllaAdmin() {
   const params = new URLSearchParams(window.location.search);
   if (!params.has('admin')) return;
@@ -6604,7 +6622,6 @@ function controllaAdmin() {
 
 init();
 controllaReferral();
-controllaAdmin();
 </script>
 
 <!-- D3 + Mappa Italia -->
