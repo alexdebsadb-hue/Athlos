@@ -2780,7 +2780,18 @@ function salvaGara() {
   if (getUtenteId()) {
     const action = isEdit ? 'updateGara' : 'saveGara';
     gsPost(action, gara).then(r => { if (r) showSyncBadge('ok'); });
-    // Se nome gara non era nel dropdown (inserimento manuale), segnala all'admin
+
+    // Controlla regione conquistata (solo inserimento manuale, non edit)
+    if (!isEdit && gara.regione && gara.regione !== 'Estero') {
+      const regioniPrecedenti = new Set(
+        getGare().filter(g => g.id !== gara.id).map(g => g.regione).filter(Boolean)
+      );
+      if (!regioniPrecedenti.has(gara.regione)) {
+        setTimeout(() => mostraRegionConquistata(gara.regione), 800);
+      }
+    }
+
+    // Segnala gara non censita all'admin
     const nomeSel = document.getElementById('f-nome-sel');
     const garaCensita = nomeSel && nomeSel.style.display !== 'none' &&
                         nomeSel.value && nomeSel.value !== '__altro__';
@@ -3647,6 +3658,51 @@ function setMapColor(color) {
   updateMapLegend(color);
   // Ridisegna mappa
   updateMapColors();
+  renderMappaMondo();
+}
+
+function renderMappaMondo() {
+  const gare = getGare();
+  const continentiVisitati = {};
+
+  // Emoji e nome per ogni continente
+  const continentiInfo = {
+    'EUROPA':           { emoji: '🇪🇺', label: 'Europa' },
+    'AMERICA DEL NORD': { emoji: '🌎', label: 'America del Nord' },
+    'AMERICA DEL SUD':  { emoji: '🌎', label: 'America del Sud' },
+    'ASIA':             { emoji: '🌏', label: 'Asia' },
+    'AFRICA':           { emoji: '🌍', label: 'Africa' },
+    'AUSTRALIA':        { emoji: '🌏', label: 'Oceania' },
+  };
+
+  gare.forEach(g => {
+    const cont = (g.continente || '').toUpperCase() || 
+                 (g.nazione === 'ITALIA' || !g.nazione ? 'EUROPA' : null);
+    if (!cont) return;
+    if (!continentiVisitati[cont]) continentiVisitati[cont] = { gare: 0, nazioni: new Set() };
+    continentiVisitati[cont].gare++;
+    if (g.nazione) continentiVisitati[cont].nazioni.add(g.nazione);
+  });
+
+  const el = document.getElementById('world-map-continents');
+  if (!el) return;
+
+  el.innerHTML = Object.entries(continentiInfo).map(([cont, info]) => {
+    const dati = continentiVisitati[cont];
+    const visitato = !!dati;
+    return `<div style="background:${visitato ? 'linear-gradient(135deg,rgba(255,87,34,0.15),rgba(255,138,101,0.1))' : 'var(--bg3)'};
+      border:1px solid ${visitato ? 'var(--accent)' : 'var(--border)'};
+      border-radius:14px;padding:20px;text-align:center;transition:all 0.3s;">
+      <div style="font-size:36px;margin-bottom:8px;">${info.emoji}</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:700;
+        color:${visitato ? '#f5f5f5' : 'var(--text3)'};">${info.label}</div>
+      ${visitato ? `
+        <div style="font-family:Barlow Condensed,sans-serif;font-size:28px;font-weight:900;
+          color:var(--accent);margin-top:4px;">${dati.gare}</div>
+        <div style="font-size:11px;color:var(--text3);">${dati.gare === 1 ? 'gara' : 'gare'} · ${dati.nazioni.size} ${dati.nazioni.size === 1 ? 'nazione' : 'nazioni'}</div>
+      ` : `<div style="font-size:12px;color:var(--text3);margin-top:8px;">Non ancora visitato</div>`}
+    </div>`;
+  }).join('');
 }
 
 function hexToRgb(hex) {
@@ -5817,6 +5873,26 @@ function closeLoginModal() {
   document.getElementById('login-overlay').classList.remove('open');
 }
 
+// ── REGIONE CONQUISTATA ──
+function mostraRegionConquistata(regione) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
+  modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:2px solid var(--accent);border-radius:24px;padding:48px 40px;max-width:440px;text-align:center;box-shadow:0 0 60px rgba(255,87,34,0.3);">
+      <div style="font-size:64px;margin-bottom:16px;animation:bounce 0.6s ease;">🏴</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:600;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;">Nuova conquista!</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:900;color:#f5f5f5;margin-bottom:8px;">${regione}</div>
+      <div style="font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.6;">Hai appena gareggiato per la prima volta in questa regione.<br>Una nuova terra conquistata! 🎉</div>
+      <button onclick="this.closest('div[style]').remove()"
+        style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+        Vai! 💪
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+  // Auto-chiudi dopo 8 secondi
+  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 8000);
+}
+
 function svuotaCacheConfig() {
   localStorage.removeItem('irun_config');
   localStorage.removeItem('irun_social_cache');
@@ -6856,11 +6932,24 @@ const _blacklist = [
   'bitcoin','criptovalute','investiment facil','mlm','guadagno facile',
 ];
 
+// Domini accettabili (hotel, ristoranti, gare, sport)
+const _whitelist_domini = [
+  'booking.com','hotels.com','tripadvisor','airbnb','expedia','hostelworld',
+  'thefork','theforkit','yelp','zomato','deliveroo','justeat',
+  'strava.com','garmin.com','suunto.com','polar.com','runkeeper',
+  'maratona','marathon','ironman','triathlonlive','sportive','gara',
+  'comune.','provincia.','regione.','endu.net','wedosport','icron',
+  'finp.it','fidal.it','fitri.it','fitp.it','triathlonlive'
+];
+
 function contenutoOffensivo(testo) {
   if (!testo) return false;
   const t = testo.toLowerCase();
-  // Blocca se contiene URL
-  if (/https?:\/\/|www\./i.test(testo)) return true;
+  // Se contiene URL, verifica se è in whitelist
+  if (/https?:\/\/|www\./i.test(testo)) {
+    const isWhitelisted = _whitelist_domini.some(d => t.includes(d));
+    if (!isWhitelisted) return true; // URL non in whitelist = spam
+  }
   return _blacklist.some(p => t.includes(p));
 }
 
