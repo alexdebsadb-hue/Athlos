@@ -2381,23 +2381,39 @@ function popolaSelectConfig() {
 const REGIONI_DEFAULT = []; // Dati dal foglio Google
 
 // ── Cascata Area → Regione → Città → NomeGara ──
-function onNazioneChange(area) {
+// ── Cascata form GARA: Continente→Nazione→Regione→Città→NomeGara ──
+function onContinenteChange(cont) {
+  const c = getConfig();
+  const contNaz = c.cont_nazioni || {};
+  const nazioni = cont ? (contNaz[cont] || []) : [];
+  const fNaz = document.getElementById('f-nazione');
+  const fReg = document.getElementById('f-regione');
+  const fCitta = document.getElementById('f-citta-sel');
+  const fLuogo = document.getElementById('f-luogo');
+  const fNomeSel = document.getElementById('f-nome-sel');
+  const fNome = document.getElementById('f-nome');
+  if (fNaz) fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+    + nazioni.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (fReg) fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
+  if (fCitta) fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+  if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+}
+
+function onNazioneChange(nazione) {
   const c = getConfig();
   const fReg = document.getElementById('f-regione');
   if (!fReg) return;
-
-  const areaRegioni = c.area_regioni || {};
-  let regioni = area ? (areaRegioni[area] || []) : (c.regioni || []);
-  // Se area estera senza regioni censite, mostra campo libero invece del dropdown vuoto
-  if (area && !regioni.length) {
+  const nazReg = c.naz_regioni || c.area_regioni || {};
+  const regioni = nazione ? (nazReg[nazione] || []) : [];
+  if (nazione && !regioni.length) {
     fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
     onRegioneChange('');
     return;
   }
-
   fReg.innerHTML = '<option value="">Seleziona regione...</option>'
     + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
-  // Reset a valle
   onRegioneChange('');
 }
 
@@ -4776,18 +4792,18 @@ function onPSportChange(sport) {
 }
 
 // Cascata programma — speculare alla cascata del form gara
+// ── Cascata form PROGRAMMA: Continente→Nazione→Regione→Città→NomeGara ──
 function onPContinenteChange(cont) {
   const c = getConfig();
+  const contNaz = c.cont_nazioni || {};
+  const nazioni = cont ? (contNaz[cont] || []) : [];
   const fNaz = document.getElementById('p-nazione');
   const fReg = document.getElementById('p-regione');
   const fCitta = document.getElementById('p-citta-sel');
   const fLuogo = document.getElementById('p-luogo');
   const fNomeSel = document.getElementById('p-nome-sel');
   const fNome = document.getElementById('p-nome-gara');
-  if (!fNaz) return;
-  const contNaz = c.cont_nazioni || {};
-  const nazioni = cont ? (contNaz[cont] || []) : [];
-  fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+  if (fNaz) fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
     + nazioni.map(n => `<option value="${n}">${n}</option>`).join('');
   if (fReg) fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
   if (fCitta) fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
@@ -4800,8 +4816,13 @@ function onPNazioneChange(nazione) {
   const c = getConfig();
   const fReg = document.getElementById('p-regione');
   if (!fReg) return;
-  const nazReg = c.naz_regioni || {};
+  const nazReg = c.naz_regioni || c.area_regioni || {};
   const regioni = nazione ? (nazReg[nazione] || []) : [];
+  if (nazione && !regioni.length) {
+    fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
+    onPRegioneChange('');
+    return;
+  }
   fReg.innerHTML = '<option value="">Seleziona regione...</option>'
     + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
   onPRegioneChange('');
