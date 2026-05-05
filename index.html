@@ -954,19 +954,6 @@
           </div>
         </div>
 
-        <!-- PROSSIMI PASSI -->
-        <div style="margin-bottom:24px;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;text-align:center;">🚧 Stiamo lavorando per te</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🗺️</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Gare estere</div><div style="font-size:12px;color:var(--text3);">Statistiche e mappa anche per le gare fuori dall&apos;Italia</div></div></div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🤝</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Società sportive</div><div style="font-size:12px;color:var(--text3);">Sezione dedicata a club e team con contatti e info</div></div></div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">📥</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Export Excel</div><div style="font-size:12px;color:var(--text3);">Scarica il tuo archivio gare in un click</div></div></div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🏠</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Home personalizzata</div><div style="font-size:12px;color:var(--text3);">Dashboard su misura con feed e ultime gare per sport</div></div></div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">💬</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">I tuoi consigli</div><div style="font-size:12px;color:var(--text3);">Presto potrai inviarci suggerimenti direttamente dal sito</div></div></div>
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🌐</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Dominio athlos.run</div><div style="font-size:12px;color:var(--text3);">Il sito avrà presto un indirizzo dedicato</div></div></div>
-          </div>
-        </div>
-
         <!-- CTA FINALE -->
         <div style="text-align:center;padding:32px;background:linear-gradient(135deg,rgba(255,87,34,0.08),rgba(255,87,34,0.03));border:1px solid rgba(255,87,34,0.2);border-radius:16px;">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:900;margin-bottom:8px;">Unisciti alla community</div>
@@ -1923,6 +1910,31 @@
     </div>
     <div class="form-actions" style="margin-top:20px;">
       <button class="btn-primary" onclick="window.open('https://docs.google.com/document/d/e/2PACX-1vRAK8UIOOB4ROPCs2bvsmDmaV4V24RAhFlaAnaC8PQ0GUwD7HgYvG-2bGhMS9bc4w/pub','_blank');document.getElementById('privacy-overlay').classList.remove('open');document.getElementById('reg-privacy').checked=true;" style="flex:1;">Ho letto — Accetto</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL "I TUOI CONSIGLI" -->
+<div class="form-overlay" id="consigli-overlay" onclick="if(event.target===this)chiudiConsigli()">
+  <div class="form-box" style="max-width:500px;">
+    <div class="form-title">I tuoi <span>consigli</span></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;">
+      Cosa vorresti trovare su Athlos? Un'idea, una funzione, un miglioramento — tutto fa la differenza.
+    </p>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">Nome (opzionale)</label>
+      <input class="form-input" id="consiglio-nome" placeholder="Il tuo nome">
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">Il tuo messaggio *</label>
+      <textarea class="form-textarea" id="consiglio-testo" rows="5"
+        placeholder="Scrivi qui la tua idea o suggerimento..."></textarea>
+    </div>
+    <div id="consiglio-esito" style="font-size:13px;margin-bottom:12px;display:none;"></div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="chiudiConsigli()">Annulla</button>
+      <button class="btn-primary" onclick="inviaConsiglio()">Invia 💬</button>
     </div>
   </div>
 </div>
@@ -3236,55 +3248,96 @@ function renderGare(tipo) {
       `).join('');
 
   } else if (tipo === 'italia' || tipo === 'estero') {
-    const gareArea = gare.filter(g => tipo === 'estero' ? g.regione === 'Estero' : g.regione && g.regione !== 'Estero');
-    const perRegione = {};
-    gareArea.forEach(g => {
-      const r = g.regione || 'Senza regione';
-      if (!perRegione[r]) perRegione[r] = {};
-      const s = g.sport || 'altro';
-      if (!perRegione[r][s]) perRegione[r][s] = {};
-      const t = g.tipo_gara || g.nome || 'Altro';
-      if (!perRegione[r][s][t]) perRegione[r][s][t] = [];
-      perRegione[r][s][t].push(g);
-    });
+    const gareArea = gare.filter(g => tipo === 'estero'
+      ? (g.continente && g.continente !== '' && g.regione === 'Estero')
+      : (g.regione && g.regione !== 'Estero' && g.regione !== ''));
 
-    if (!Object.keys(perRegione).length) {
-      cont.innerHTML = `<div class="empty-state"><div class="empty-icon">${tipo==='estero'?'🌍':'🗺️'}</div><div class="empty-title">Nessuna gara ${tipo==='estero'?'all\u2019estero':'in Italia'}</div></div>`;
+    if (!gareArea.length) {
+      cont.innerHTML = `<div class="empty-state"><div class="empty-icon">${tipo==='estero'?'🌍':'🗺️'}</div><div class="empty-title">Nessuna gara ${tipo==='estero'?'all\'estero':'in Italia'}</div></div>`;
       return;
     }
 
-    cont.innerHTML = Object.entries(perRegione)
-      .sort((a,b) => {
-        const na = Object.values(a[1]).flatMap(s=>Object.values(s)).flat().length;
-        const nb = Object.values(b[1]).flatMap(s=>Object.values(s)).flat().length;
-        return nb - na;
-      })
-      .map(([regione, perSport]) => {
-        const totRegione = Object.values(perSport).flatMap(s=>Object.values(s)).flat().length;
-        const sportBlocks = Object.entries(perSport).map(([sport, perTipoG]) => {
-          const totSport = Object.values(perTipoG).flat().length;
-          const tipoBlocks = Object.entries(perTipoG).map(([tipoG, list]) =>
-            `<details style="margin-left:16px;margin-bottom:6px;">
-              <summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;">
-                <span>${tipoG}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span>
-              </summary>
-              <div style="margin-top:6px;">${list.map(garaCard).join('')}</div>
-            </details>`
-          ).join('');
-          return `<details style="margin-left:12px;margin-bottom:8px;">
-            <summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;">
-              <span>${sportIcon(sport)} ${sportLabel(sport)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totSport} gare</span>
+    if (tipo === 'estero') {
+      // Raggruppa per Continente → Nazione
+      const perCont = {};
+      gareArea.forEach(g => {
+        const cont2 = g.continente || 'Altro';
+        const naz = g.nazione || 'Nazione non specificata';
+        if (!perCont[cont2]) perCont[cont2] = {};
+        if (!perCont[cont2][naz]) perCont[cont2][naz] = [];
+        perCont[cont2][naz].push(g);
+      });
+      cont.innerHTML = Object.entries(perCont)
+        .sort((a,b) => {
+          const na = Object.values(a[1]).flat().length;
+          const nb = Object.values(b[1]).flat().length;
+          return nb - na;
+        })
+        .map(([continente, perNaz]) => {
+          const totCont = Object.values(perNaz).flat().length;
+          const nazBlocks = Object.entries(perNaz)
+            .sort((a,b) => b[1].length - a[1].length)
+            .map(([nazione, list]) =>
+              `<details style="margin-left:12px;margin-bottom:8px;">
+                <summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+                  <span>🏳️ ${nazione}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span>
+                </summary>
+                <div style="margin-top:8px;">${list.map(garaCard).join('')}</div>
+              </details>`
+            ).join('');
+          return `<details open style="margin-bottom:16px;">
+            <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+              <span>🌍 ${continente}</span><span style="color:var(--accent);font-size:16px;">${totCont} gar${totCont===1?'a':'e'}</span>
             </summary>
-            <div style="margin-top:8px;">${tipoBlocks}</div>
+            <div style="margin-top:10px;">${nazBlocks}</div>
           </details>`;
         }).join('');
-        return `<details open style="margin-bottom:16px;">
-          <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-            <span>📍 ${regione}</span><span style="color:var(--accent);font-size:16px;">${totRegione} gare</span>
-          </summary>
-          <div style="margin-top:10px;">${sportBlocks}</div>
-        </details>`;
-      }).join('');
+
+    } else {
+      // Italia: raggruppa per regione → sport → tipo gara
+      const perRegione = {};
+      gareArea.forEach(g => {
+        const r = g.regione || 'Senza regione';
+        if (!perRegione[r]) perRegione[r] = {};
+        const s = g.sport || 'altro';
+        if (!perRegione[r][s]) perRegione[r][s] = {};
+        const t = g.tipo_gara || g.nome || 'Altro';
+        if (!perRegione[r][s][t]) perRegione[r][s][t] = [];
+        perRegione[r][s][t].push(g);
+      });
+      cont.innerHTML = Object.entries(perRegione)
+        .sort((a,b) => {
+          const na = Object.values(a[1]).flatMap(s=>Object.values(s)).flat().length;
+          const nb = Object.values(b[1]).flatMap(s=>Object.values(s)).flat().length;
+          return nb - na;
+        })
+        .map(([regione, perSport]) => {
+          const totRegione = Object.values(perSport).flatMap(s=>Object.values(s)).flat().length;
+          const sportBlocks = Object.entries(perSport).map(([sport, perTipoG]) => {
+            const totSport = Object.values(perTipoG).flat().length;
+            const tipoBlocks = Object.entries(perTipoG).map(([tipoG, list]) =>
+              `<details style="margin-left:16px;margin-bottom:6px;">
+                <summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+                  <span>${tipoG}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span>
+                </summary>
+                <div style="margin-top:6px;">${list.map(garaCard).join('')}</div>
+              </details>`
+            ).join('');
+            return `<details style="margin-left:12px;margin-bottom:8px;">
+              <summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+                <span>${sportIcon(sport)} ${sportLabel(sport)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totSport} gare</span>
+              </summary>
+              <div style="margin-top:8px;">${tipoBlocks}</div>
+            </details>`;
+          }).join('');
+          return `<details open style="margin-bottom:16px;">
+            <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+              <span>📍 ${regione}</span><span style="color:var(--accent);font-size:16px;">${totRegione} gare</span>
+            </summary>
+            <div style="margin-top:10px;">${sportBlocks}</div>
+          </details>`;
+        }).join('');
+    }
 
   } else if (tipo === 'pb') {
     // Calcola PB automatici: un solo record per ogni sport+tipo_gara
@@ -3984,9 +4037,9 @@ function renderProfiloPB() {
     .sort((a,b) => (a.sport||'').localeCompare(b.sport||''))
     .map(g => `
       <div class="pb-card" onclick="openDetail(${g.id})" style="cursor:pointer;" title="Clicca per vedere la gara">
-        <div class="pb-dist">${sportIcon(g.sport)} ${g.tipo_gara||g.nome||''}</div>
-        <div class="pb-time">${tempoGara(g)}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:3px;font-weight:500;">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
+        <div class="pb-dist" style="font-size:13px;font-weight:700;margin-bottom:4px;">${sportIcon(g.sport)} ${g.tipo_gara||g.nome||''}</div>
+        <div class="pb-time" style="font-size:22px;font-weight:900;color:var(--accent);line-height:1.1;">${tempoGara(g)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;font-weight:500;">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
       </div>
     `).join('');
 }
@@ -6613,7 +6666,7 @@ async function renderSocial() {
         <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:900;color:var(--text3);min-width:16px;">${i+1}</div>
         <div style="flex:1;">
           <div style="font-size:12px;font-weight:600;">${g.nome}</div>
-          <div style="font-size:10px;color:var(--text3);">${g.count} atleti</div>
+          <div style="font-size:10px;color:var(--text3);">${g.count} partecipazioni</div>
         </div>
         <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:var(--accent);">${secsToHMS(g.media)}</div>
       </div>`).join('');
@@ -6874,7 +6927,7 @@ async function caricaDatiAdmin() {
 
   // Gare non censite
   window._gareNonCensiteData = nonCensite;
-  const elGNC = document.getElementById('admin-gare-non-censite');
+  const elGNC = document.getElementById('admin-non-censite');
   elGNC.innerHTML = nonCensite.length
     ? `<table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead><tr style="color:var(--text3);text-align:left;">
@@ -7149,9 +7202,101 @@ function loadMap() {
   document.querySelectorAll('.map-color-btn').forEach(b => {
     b.classList.toggle('active', b.style.background === saved);
   });
-  updateMapColors();
+  // Assicura che l'immagine sia caricata prima di colorare
+  const img = document.getElementById('italy-bg');
+  if (img) {
+    if (img.complete && img.naturalWidth > 0) {
+      updateMapColors();
+    } else {
+      img.onload = () => updateMapColors();
+      // Fallback: riprova dopo 300ms
+      setTimeout(() => { if (!img.complete || img.naturalWidth === 0) updateMapColors(); }, 300);
+    }
+  } else {
+    setTimeout(updateMapColors, 200);
+  }
 }
+
+// ── CONSIGLI ──
+function apriConsigli() {
+  document.getElementById('consigli-overlay').classList.add('open');
+  document.getElementById('consiglio-esito').style.display = 'none';
+  document.getElementById('consiglio-testo').value = '';
+  document.getElementById('consiglio-nome').value = '';
+}
+function chiudiConsigli() {
+  document.getElementById('consigli-overlay').classList.remove('open');
+}
+async function inviaConsiglio() {
+  const testo = (document.getElementById('consiglio-testo').value || '').trim();
+  const nome  = (document.getElementById('consiglio-nome').value || '').trim();
+  const esito = document.getElementById('consiglio-esito');
+  if (!testo) { esito.style.color='#ef5350'; esito.textContent='⚠️ Scrivi un messaggio prima di inviare.'; esito.style.display='block'; return; }
+  esito.style.color='var(--text2)'; esito.textContent='Invio in corso...'; esito.style.display='block';
+  try {
+    await gsPost({ action: 'inviaConsiglio', nome: nome || 'Anonimo', testo, ts: new Date().toISOString() });
+    esito.style.color='#4caf50'; esito.textContent='✓ Grazie! Il tuo consiglio è stato inviato.';
+    document.getElementById('consiglio-testo').value = '';
+    setTimeout(chiudiConsigli, 2000);
+  } catch(e) {
+    esito.style.color='#ef5350'; esito.textContent='✗ Errore nell\'invio. Riprova o scrivici via email.';
+  }
+}
+
 </script>
+</div>
+
+
+<!-- ── PAGINA ADMIN ── -->
+<div id="page-admin" class="page">
+  <div class="profile-wrap" style="max-width:900px;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:4px;">⚙️ Pannello Admin</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:28px;">Accesso riservato — <span id="admin-date"></span></div>
+
+    <!-- Login admin -->
+    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">🔐 Accedi come Admin</div>
+      <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin"
+        style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
+      <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
+      <button class="btn-primary" onclick="loginAdmin()">Accedi</button>
+    </div>
+
+    <!-- Contenuto admin (nascosto finché non loggato) -->
+    <div id="admin-content" style="display:none;">
+
+      <!-- Cards riassunto -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+        <!-- Ultimi utenti -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">👥 Ultimi utenti registrati</div>
+          <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <!-- Ultime gare -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">🏅 Gare inserite oggi</div>
+          <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <!-- Ultime recensioni -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">⭐ Ultime recensioni</div>
+          <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <!-- Gare non censite -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">📋 Gare non censite</div>
+          <div id="admin-non-censite" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- PIÈ DI PAGINA -->
@@ -7170,6 +7315,13 @@ function loadMap() {
      onmouseenter="this.style.textDecoration='underline'"
      onmouseleave="this.style.textDecoration='none'">
     ✉️ Contattaci
+  </a>
+  <span> &nbsp;·&nbsp; </span>
+  <a href="#" onclick="apriConsigli();return false;"
+     style="color:var(--accent);text-decoration:none;font-weight:500;"
+     onmouseenter="this.style.textDecoration='underline'"
+     onmouseleave="this.style.textDecoration='none'">
+    💬 I tuoi consigli
   </a>
   <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
 </footer>
