@@ -591,7 +591,7 @@
 
 <!-- NAVBAR -->
 <nav class="nav">
-  <div class="nav-logo" onclick="showPage('home')">I<span>-Run</span></div>
+  <div class="nav-logo" onclick="showPage('home')" style="display:flex;align-items:center;gap:6px;"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 3 L29 27 L3 27 Z" fill="none" stroke="#ff5722" stroke-width="2.5" stroke-linejoin="round"/><line x1="3" y1="20" x2="29" y2="20" stroke="#ff5722" stroke-width="2" stroke-linecap="round"/></svg><span style="color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-1px;">Athlos</span></div>
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home',this)">Home</button>
     <button class="nav-link" onclick="showPage('profilo',this)">Il mio profilo</button>
@@ -951,6 +951,19 @@
             <div id="landing-top-rating" style="display:flex;flex-direction:column;gap:8px;">
               <div style="color:var(--text3);font-size:13px;">Caricamento...</div>
             </div>
+          </div>
+        </div>
+
+        <!-- PROSSIMI PASSI -->
+        <div style="margin-bottom:24px;">
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;text-align:center;">🚧 Stiamo lavorando per te</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🗺️</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Gare estere</div><div style="font-size:12px;color:var(--text3);">Statistiche e mappa anche per le gare fuori dall&apos;Italia</div></div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🤝</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Società sportive</div><div style="font-size:12px;color:var(--text3);">Sezione dedicata a club e team con contatti e info</div></div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">📥</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Export Excel</div><div style="font-size:12px;color:var(--text3);">Scarica il tuo archivio gare in un click</div></div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🏠</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Home personalizzata</div><div style="font-size:12px;color:var(--text3);">Dashboard su misura con feed e ultime gare per sport</div></div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">💬</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">I tuoi consigli</div><div style="font-size:12px;color:var(--text3);">Presto potrai inviarci suggerimenti direttamente dal sito</div></div></div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:22px;">🌐</span><div><div style="font-weight:600;font-size:14px;margin-bottom:3px;">Dominio athlos.run</div><div style="font-size:12px;color:var(--text3);">Il sito avrà presto un indirizzo dedicato</div></div></div>
           </div>
         </div>
 
