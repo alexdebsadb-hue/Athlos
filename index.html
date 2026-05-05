@@ -202,10 +202,11 @@
   .pb-card {
     background: var(--bg3); border: 1px solid var(--border);
     border-radius: 10px; padding: 14px 16px;
-    display:flex; justify-content:space-between; align-items:center;
+    display:flex; flex-direction:column; gap:4px;
   }
-  .pb-dist { font-size:13px; color:var(--text2); }
-  .pb-time { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--text); }
+  .pb-dist { font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pb-time { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:900; color:var(--accent); line-height:1.1; }
+  .pb-year { font-size:11px; color:var(--text3); }
 
   /* SEZIONE TITOLO */
   .section-title {
@@ -591,7 +592,7 @@
 
 <!-- NAVBAR -->
 <nav class="nav">
-  <div class="nav-logo" onclick="showPage('home')" style="display:flex;align-items:center;gap:6px;"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 3 L29 27 L3 27 Z" fill="none" stroke="#ff5722" stroke-width="2.5" stroke-linejoin="round"/><line x1="3" y1="20" x2="29" y2="20" stroke="#ff5722" stroke-width="2" stroke-linecap="round"/></svg><span style="color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-1px;">Athlos</span></div>
+  <div class="nav-logo" onclick="showPage('home')">I<span>-Run</span></div>
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home',this)">Home</button>
     <button class="nav-link" onclick="showPage('profilo',this)">Il mio profilo</button>
@@ -1915,30 +1916,26 @@
 </div>
 
 
-<!-- MODAL "I TUOI CONSIGLI" -->
+<!-- MODAL CONSIGLI -->
 <div class="form-overlay" id="consigli-overlay" onclick="if(event.target===this)chiudiConsigli()">
   <div class="form-box" style="max-width:500px;">
     <div class="form-title">I tuoi <span>consigli</span></div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;">
-      Cosa vorresti trovare su Athlos? Un'idea, una funzione, un miglioramento — tutto fa la differenza.
-    </p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;">Cosa vorresti trovare su Athlos? Ogni idea conta.</p>
     <div class="form-group" style="margin-bottom:14px;">
       <label class="form-label">Nome (opzionale)</label>
       <input class="form-input" id="consiglio-nome" placeholder="Il tuo nome">
     </div>
     <div class="form-group" style="margin-bottom:14px;">
       <label class="form-label">Il tuo messaggio *</label>
-      <textarea class="form-textarea" id="consiglio-testo" rows="5"
-        placeholder="Scrivi qui la tua idea o suggerimento..."></textarea>
+      <textarea class="form-textarea" id="consiglio-testo" rows="5" placeholder="Scrivi qui la tua idea..."></textarea>
     </div>
     <div id="consiglio-esito" style="font-size:13px;margin-bottom:12px;display:none;"></div>
     <div class="form-actions">
       <button class="btn-secondary" onclick="chiudiConsigli()">Annulla</button>
-      <button class="btn-primary" onclick="inviaConsiglio()">Invia 💬</button>
+      <button class="btn-primary" onclick="inviaConsiglio()">Invia</button>
     </div>
   </div>
 </div>
-
 <!-- MODIFICA PROFILO MODAL -->
 <div class="form-overlay" id="edit-profile-overlay" onclick="if(event.target===this)closeEditProfile()">
   <div class="form-box" style="max-width:500px;">
@@ -3194,15 +3191,17 @@ function renderGare(tipo) {
 
   // Costruisci i tab dinamicamente
   const sport_presenti = [...new Set(gare.map(g => g.sport).filter(Boolean))];
-  const ha_estero = gare.some(g => g.regione === 'Estero');
+  const REGIONI_IT_TABS = new Set(['Valle d\'Aosta','Piemonte','Liguria','Lombardia','Trentino-Alto Adige','Veneto','Friuli-Venezia Giulia','Emilia-Romagna','Toscana','Marche','Umbria','Lazio','Abruzzo','Molise','Campania','Puglia','Basilicata','Calabria','Sicilia','Sardegna']);
+  const ha_italia = gare.some(g => REGIONI_IT_TABS.has(g.regione));
+  const ha_estero = gare.some(g => g.regione === 'Estero' || (g.nazione && g.nazione !== 'Italia' && g.nazione !== 'ITALIA'));
 
   const tabsEl = document.getElementById('gare-tabs');
   if (tabsEl) {
     const tabList = [
       { id: 'tutte', label: 'Tutte (' + gare.length + ')' },
       ...sport_presenti.map(s => ({ id: 'sport_' + s, label: sportLabel(s) + ' (' + gare.filter(g=>g.sport===s).length + ')' })),
-      { id: 'italia', label: 'Italia' },
-      ...(ha_estero ? [{ id: 'estero', label: 'Estero' }] : []),
+      ...(ha_italia ? [{ id: 'italia', label: '🇮🇹 Italia' }] : []),
+      ...(ha_estero ? [{ id: 'estero', label: '🌍 Estero' }] : []),
       { id: 'pb', label: 'Personal Best' },
     ];
     // Costruisci tab senza onclick inline per evitare conflitti di apici
@@ -3247,97 +3246,89 @@ function renderGare(tipo) {
         </div>
       `).join('');
 
-  } else if (tipo === 'italia' || tipo === 'estero') {
-    const gareArea = gare.filter(g => tipo === 'estero'
-      ? (g.continente && g.continente !== '' && g.regione === 'Estero')
-      : (g.regione && g.regione !== 'Estero' && g.regione !== ''));
-
-    if (!gareArea.length) {
-      cont.innerHTML = `<div class="empty-state"><div class="empty-icon">${tipo==='estero'?'🌍':'🗺️'}</div><div class="empty-title">Nessuna gara ${tipo==='estero'?'all\'estero':'in Italia'}</div></div>`;
+  } else if (tipo === 'italia') {
+    // ITALIA: solo gare con regione italiana ufficiale
+    const _REG_IT = new Set(['Valle d\'Aosta','Piemonte','Liguria','Lombardia','Trentino-Alto Adige','Veneto','Friuli-Venezia Giulia','Emilia-Romagna','Toscana','Marche','Umbria','Lazio','Abruzzo','Molise','Campania','Puglia','Basilicata','Calabria','Sicilia','Sardegna']);
+    const gareIt = gare.filter(g => _REG_IT.has(g.regione));
+    if (!gareIt.length) {
+      cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">Nessuna gara in Italia</div></div>';
       return;
     }
-
-    if (tipo === 'estero') {
-      // Raggruppa per Continente → Nazione
-      const perCont = {};
-      gareArea.forEach(g => {
-        const cont2 = g.continente || 'Altro';
-        const naz = g.nazione || 'Nazione non specificata';
-        if (!perCont[cont2]) perCont[cont2] = {};
-        if (!perCont[cont2][naz]) perCont[cont2][naz] = [];
-        perCont[cont2][naz].push(g);
-      });
-      cont.innerHTML = Object.entries(perCont)
-        .sort((a,b) => {
-          const na = Object.values(a[1]).flat().length;
-          const nb = Object.values(b[1]).flat().length;
-          return nb - na;
-        })
-        .map(([continente, perNaz]) => {
-          const totCont = Object.values(perNaz).flat().length;
-          const nazBlocks = Object.entries(perNaz)
-            .sort((a,b) => b[1].length - a[1].length)
-            .map(([nazione, list]) =>
-              `<details style="margin-left:12px;margin-bottom:8px;">
-                <summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-                  <span>🏳️ ${nazione}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span>
-                </summary>
-                <div style="margin-top:8px;">${list.map(garaCard).join('')}</div>
-              </details>`
-            ).join('');
-          return `<details open style="margin-bottom:16px;">
-            <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-              <span>🌍 ${continente}</span><span style="color:var(--accent);font-size:16px;">${totCont} gar${totCont===1?'a':'e'}</span>
-            </summary>
-            <div style="margin-top:10px;">${nazBlocks}</div>
-          </details>`;
-        }).join('');
-
-    } else {
-      // Italia: raggruppa per regione → sport → tipo gara
-      const perRegione = {};
-      gareArea.forEach(g => {
-        const r = g.regione || 'Senza regione';
-        if (!perRegione[r]) perRegione[r] = {};
-        const s = g.sport || 'altro';
-        if (!perRegione[r][s]) perRegione[r][s] = {};
-        const t = g.tipo_gara || g.nome || 'Altro';
-        if (!perRegione[r][s][t]) perRegione[r][s][t] = [];
-        perRegione[r][s][t].push(g);
-      });
-      cont.innerHTML = Object.entries(perRegione)
-        .sort((a,b) => {
-          const na = Object.values(a[1]).flatMap(s=>Object.values(s)).flat().length;
-          const nb = Object.values(b[1]).flatMap(s=>Object.values(s)).flat().length;
-          return nb - na;
-        })
-        .map(([regione, perSport]) => {
-          const totRegione = Object.values(perSport).flatMap(s=>Object.values(s)).flat().length;
-          const sportBlocks = Object.entries(perSport).map(([sport, perTipoG]) => {
-            const totSport = Object.values(perTipoG).flat().length;
-            const tipoBlocks = Object.entries(perTipoG).map(([tipoG, list]) =>
-              `<details style="margin-left:16px;margin-bottom:6px;">
-                <summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;">
-                  <span>${tipoG}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span>
-                </summary>
-                <div style="margin-top:6px;">${list.map(garaCard).join('')}</div>
-              </details>`
-            ).join('');
-            return `<details style="margin-left:12px;margin-bottom:8px;">
-              <summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;">
-                <span>${sportIcon(sport)} ${sportLabel(sport)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totSport} gare</span>
+    const perRegione = {};
+    gareIt.forEach(g => {
+      const r = g.regione;
+      if (!perRegione[r]) perRegione[r] = {};
+      const s = g.sport || 'altro';
+      if (!perRegione[r][s]) perRegione[r][s] = {};
+      const t = g.tipo_gara || g.nome || 'Altro';
+      if (!perRegione[r][s][t]) perRegione[r][s][t] = [];
+      perRegione[r][s][t].push(g);
+    });
+    cont.innerHTML = Object.entries(perRegione)
+      .sort((a,b) => Object.values(b[1]).flatMap(s=>Object.values(s)).flat().length - Object.values(a[1]).flatMap(s=>Object.values(s)).flat().length)
+      .map(([regione, perSport]) => {
+        const tot = Object.values(perSport).flatMap(s=>Object.values(s)).flat().length;
+        const sportBlocks = Object.entries(perSport).map(([sport, perTipoG]) => {
+          const totS = Object.values(perTipoG).flat().length;
+          const tipoBlocks = Object.entries(perTipoG).map(([tipoG, list]) =>
+            `<details style="margin-left:16px;margin-bottom:6px;">
+              <summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+                <span>${tipoG}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span>
               </summary>
-              <div style="margin-top:8px;">${tipoBlocks}</div>
-            </details>`;
-          }).join('');
-          return `<details open style="margin-bottom:16px;">
-            <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
-              <span>📍 ${regione}</span><span style="color:var(--accent);font-size:16px;">${totRegione} gare</span>
+              <div style="margin-top:6px;">${list.map(garaCard).join('')}</div>
+            </details>`).join('');
+          return `<details style="margin-left:12px;margin-bottom:8px;">
+            <summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+              <span>${sportIcon(sport)} ${sportLabel(sport)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totS} gare</span>
             </summary>
-            <div style="margin-top:10px;">${sportBlocks}</div>
+            <div style="margin-top:8px;">${tipoBlocks}</div>
           </details>`;
         }).join('');
+        return `<details open style="margin-bottom:16px;">
+          <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+            <span>📍 ${regione}</span><span style="color:var(--accent);font-size:16px;">${tot} gare</span>
+          </summary>
+          <div style="margin-top:10px;">${sportBlocks}</div>
+        </details>`;
+      }).join('');
+
+  } else if (tipo === 'estero') {
+    // ESTERO: raggruppa per Continente → Nazione
+    const gareEst = gare.filter(g => g.regione === 'Estero' || (g.nazione && g.nazione !== 'Italia' && g.nazione !== 'ITALIA'));
+    if (!gareEst.length) {
+      cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🌍</div><div class="empty-title">Nessuna gara all\'estero</div></div>';
+      return;
     }
+    // Mappa nazione→continente
+    const _NAZ_CONT = {'Spagna':'Europa','Francia':'Europa','Germania':'Europa','Gran Bretagna':'Europa','Olanda':'Europa','Portogallo':'Europa','Svizzera':'Europa','Austria':'Europa','Belgio':'Europa','Grecia':'Europa','Polonia':'Europa','Svezia':'Europa','Norvegia':'Europa','Danimarca':'Europa','Finlandia':'Europa','Irlanda':'Europa','Repubblica Ceca':'Europa','Slovacchia':'Europa','Croazia':'Europa','Slovenia':'Europa','Malta':'Europa','USA':'America del Nord','Canada':'America del Nord','Messico':'America del Nord','Brasile':'America del Sud','Argentina':'America del Sud','Cile':'America del Sud','Colombia':'America del Sud','Giappone':'Asia','Cina':'Asia','Corea del Sud':'Asia','Emirati Arabi':'Asia','Tailandia':'Asia','India':'Asia','Singapore':'Asia','Malaysia':'Asia','Turchia':'Asia','Sudafrica':'Africa','Marocco':'Africa','Egitto':'Africa','Kenya':'Africa','Australia':'Oceania','Nuova Zelanda':'Oceania'};
+    const perCont = {};
+    gareEst.forEach(g => {
+      const naz = (g.nazione||'').trim() || 'Nazione non specificata';
+      const cont2 = _NAZ_CONT[naz] || 'Altro';
+      if (!perCont[cont2]) perCont[cont2] = {};
+      if (!perCont[cont2][naz]) perCont[cont2][naz] = [];
+      perCont[cont2][naz].push(g);
+    });
+    cont.innerHTML = Object.entries(perCont)
+      .sort((a,b) => Object.values(b[1]).flat().length - Object.values(a[1]).flat().length)
+      .map(([continente, perNaz]) => {
+        const totC = Object.values(perNaz).flat().length;
+        const nazBlocks = Object.entries(perNaz)
+          .sort((a,b) => b[1].length - a[1].length)
+          .map(([naz, list]) =>
+            `<details style="margin-left:12px;margin-bottom:8px;">
+              <summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+                <span>🏳️ ${naz}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span>
+              </summary>
+              <div style="margin-top:8px;">${list.map(garaCard).join('')}</div>
+            </details>`).join('');
+        return `<details open style="margin-bottom:16px;">
+          <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+            <span>🌍 ${continente}</span><span style="color:var(--accent);font-size:16px;">${totC} gar${totC===1?'a':'e'}</span>
+          </summary>
+          <div style="margin-top:10px;">${nazBlocks}</div>
+        </details>`;
+      }).join('');
 
   } else if (tipo === 'pb') {
     // Calcola PB automatici: un solo record per ogni sport+tipo_gara
@@ -3815,16 +3806,20 @@ function regioneColor(n) {
 
 function renderMappa() {
   const gare = getGare();
+  const REGIONI_IT_SET = new Set(Object.keys(MAP_SEEDS));
   const regioniMap = {};
   gare.forEach(g => {
-    if (g.regione && g.regione !== 'Estero') {
+    // Solo regioni italiane ufficiali (le 20 del MAP_SEEDS)
+    if (g.regione && REGIONI_IT_SET.has(g.regione)) {
       if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
       regioniMap[g.regione].push(g);
     }
   });
 
-  const nRegioni = Object.keys(regioniMap).length;
-  const kmTot = gare.reduce((s,g) => s + (g.distanza||0), 0);
+  // Conta SOLO le 20 regioni italiane ufficiali
+  const REGIONI_IT = new Set(Object.keys(MAP_SEEDS));
+  const nRegioni = Object.keys(regioniMap).filter(r => REGIONI_IT.has(r)).length;
+  const kmTot = gare.filter(g => !g.nazione || g.nazione === 'Italia' || g.nazione === 'ITALIA').reduce((s,g) => s + (g.distanza||0), 0);
   const statsEl = document.getElementById('mappa-stats');
   if (statsEl) statsEl.textContent = nRegioni + ' regioni · ' + Math.round(kmTot).toLocaleString('it') + ' km totali';
 
@@ -3919,6 +3914,8 @@ function renderMappa() {
 
   // Carica mappa D3
   loadMap();
+  // Mappa del mondo
+  renderMappaMondo();
 }
 
 // ============ RENDER PROFILO ============
@@ -4037,9 +4034,9 @@ function renderProfiloPB() {
     .sort((a,b) => (a.sport||'').localeCompare(b.sport||''))
     .map(g => `
       <div class="pb-card" onclick="openDetail(${g.id})" style="cursor:pointer;" title="Clicca per vedere la gara">
-        <div class="pb-dist" style="font-size:13px;font-weight:700;margin-bottom:4px;">${sportIcon(g.sport)} ${g.tipo_gara||g.nome||''}</div>
-        <div class="pb-time" style="font-size:22px;font-weight:900;color:var(--accent);line-height:1.1;">${tempoGara(g)}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:6px;font-weight:500;">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
+        <div class="pb-dist">${sportIcon(g.sport)} ${g.tipo_gara||g.nome||''}</div>
+        <div class="pb-time">${tempoGara(g)}</div>
+        <div class="pb-year">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
       </div>
     `).join('');
 }
@@ -6563,15 +6560,16 @@ async function renderSocial() {
 
   // Conteggio gare per regione italiana
   const garePerRegione = {};
-  const gareEstero = {};
+    const gareEstero = {};
   gare.forEach(g => {
     const naz = (g.nazione||'').trim();
     const isItalia = !naz || naz === 'ITALIA' || naz === 'Italia' || (!naz && g.regione && g.regione !== 'Estero');
     if (isItalia && g.regione && g.regione !== 'Estero') {
       garePerRegione[g.regione] = (garePerRegione[g.regione]||0) + 1;
     } else if (!isItalia || g.regione === 'Estero') {
-      const continente = continenteMap[naz] || (naz ? '🌐 ' + naz : '🌐 Estero');
-      gareEstero[continente] = (gareEstero[continente]||0) + 1;
+      // Raggruppa per NAZIONE (non continente)
+      const nomeNaz = naz || 'Estero (nazione non specificata)';
+      gareEstero[nomeNaz] = (gareEstero[nomeNaz]||0) + 1;
     }
   });
 
@@ -6666,7 +6664,7 @@ async function renderSocial() {
         <div style="font-family:Barlow Condensed,sans-serif;font-size:16px;font-weight:900;color:var(--text3);min-width:16px;">${i+1}</div>
         <div style="flex:1;">
           <div style="font-size:12px;font-weight:600;">${g.nome}</div>
-          <div style="font-size:10px;color:var(--text3);">${g.count} partecipazioni</div>
+          <div style="font-size:10px;color:var(--text3);">${g.count} atleti</div>
         </div>
         <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:700;color:var(--accent);">${secsToHMS(g.media)}</div>
       </div>`).join('');
@@ -7103,9 +7101,10 @@ function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
 
 function updateMapColors() {
   const gare = getGare();
+  const _REGIT = new Set(Object.keys(MAP_SEEDS));
   const regioniMap = {};
   gare.forEach(g => {
-    if (g.regione && g.regione !== 'Estero') {
+    if (g.regione && _REGIT.has(g.regione)) {
       if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
       regioniMap[g.regione].push(g);
     }
@@ -7193,7 +7192,6 @@ function updateMapColors() {
 }
 
 function loadMap() {
-  // Inizializza colore e legenda
   const saved = localStorage.getItem('irun_map_color') || '#ff5722';
   _mapColor = saved;
   const picker = document.getElementById('map-color-custom');
@@ -7202,98 +7200,112 @@ function loadMap() {
   document.querySelectorAll('.map-color-btn').forEach(b => {
     b.classList.toggle('active', b.style.background === saved);
   });
-  // Assicura che l'immagine sia caricata prima di colorare
+  // Aspetta che l'immagine sia pronta prima di colorare
   const img = document.getElementById('italy-bg');
-  if (img) {
-    if (img.complete && img.naturalWidth > 0) {
-      updateMapColors();
-    } else {
-      img.onload = () => updateMapColors();
-      // Fallback: riprova dopo 300ms
-      setTimeout(() => { if (!img.complete || img.naturalWidth === 0) updateMapColors(); }, 300);
-    }
+  if (!img) { setTimeout(updateMapColors, 300); return; }
+  if (img.complete && img.naturalWidth > 0) {
+    updateMapColors();
   } else {
-    setTimeout(updateMapColors, 200);
+    img.onload = updateMapColors;
+    setTimeout(updateMapColors, 500); // fallback
   }
 }
 
-// ── CONSIGLI ──
+// ── MAPPA DEL MONDO ──
+function renderMappaMondo() {
+  const el = document.getElementById('world-map-continents');
+  if (!el) return;
+  const gare = getGare();
+  const continentiInfo = {
+    'Europa':         { emoji:'🌍', label:'Europa' },
+    'America del Nord':{ emoji:'🌎', label:'America del Nord' },
+    'America del Sud':{ emoji:'🌎', label:'America del Sud' },
+    'Asia':           { emoji:'🌏', label:'Asia' },
+    'Africa':         { emoji:'🌍', label:'Africa' },
+    'Oceania':        { emoji:'🌏', label:'Oceania' },
+  };
+  const _NAZ2CONT = {'Spagna':'Europa','Francia':'Europa','Germania':'Europa','Gran Bretagna':'Europa','Olanda':'Europa','Portogallo':'Europa','Svizzera':'Europa','Austria':'Europa','Belgio':'Europa','Grecia':'Europa','Polonia':'Europa','Svezia':'Europa','Norvegia':'Europa','Danimarca':'Europa','Finlandia':'Europa','Irlanda':'Europa','Croazia':'Europa','Slovenia':'Europa','Malta':'Europa','USA':'America del Nord','Canada':'America del Nord','Messico':'America del Nord','Brasile':'America del Sud','Argentina':'America del Sud','Cile':'America del Sud','Colombia':'America del Sud','Giappone':'Asia','Cina':'Asia','Corea del Sud':'Asia','Emirati Arabi':'Asia','Tailandia':'Asia','India':'Asia','Singapore':'Asia','Turchia':'Asia','Sudafrica':'Africa','Marocco':'Africa','Egitto':'Africa','Australia':'Oceania','Nuova Zelanda':'Oceania'};
+  const dati = {};
+  gare.forEach(g => {
+    const naz = (g.nazione||'').trim();
+    if (!naz || naz === 'Italia' || naz === 'ITALIA') return;
+    const cont = _NAZ2CONT[naz] || null;
+    if (!cont) return;
+    if (!dati[cont]) dati[cont] = { gare:0, nazioni:new Set() };
+    dati[cont].gare++;
+    dati[cont].nazioni.add(naz);
+  });
+  el.innerHTML = Object.entries(continentiInfo).map(([cont, info]) => {
+    const d = dati[cont];
+    const visitato = !!d;
+    return `<div style="background:${visitato?'linear-gradient(135deg,rgba(255,87,34,0.18),rgba(255,138,101,0.08))':'var(--bg3)'};border:1px solid ${visitato?'var(--accent)':'var(--border)'};border-radius:14px;padding:18px;text-align:center;transition:all 0.3s;">
+      <div style="font-size:32px;margin-bottom:6px;">${info.emoji}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${visitato?'#f5f5f5':'var(--text3)'};">${info.label}</div>
+      ${visitato
+        ? `<div style="font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;color:var(--accent);margin-top:4px;">${d.gare}</div><div style="font-size:11px;color:var(--text3);">${d.gare===1?'gara':'gare'} · ${d.nazioni.size} ${d.nazioni.size===1?'nazione':'nazioni'}</div>`
+        : '<div style="font-size:11px;color:var(--text3);margin-top:8px;">Non ancora visitato</div>'
+      }
+    </div>`;
+  }).join('');
+}
+
 function apriConsigli() {
-  document.getElementById('consigli-overlay').classList.add('open');
-  document.getElementById('consiglio-esito').style.display = 'none';
-  document.getElementById('consiglio-testo').value = '';
-  document.getElementById('consiglio-nome').value = '';
+  const ov = document.getElementById('consigli-overlay');
+  if (ov) ov.classList.add('open');
 }
 function chiudiConsigli() {
-  document.getElementById('consigli-overlay').classList.remove('open');
+  const ov = document.getElementById('consigli-overlay');
+  if (ov) ov.classList.remove('open');
 }
 async function inviaConsiglio() {
-  const testo = (document.getElementById('consiglio-testo').value || '').trim();
-  const nome  = (document.getElementById('consiglio-nome').value || '').trim();
+  const testo = (document.getElementById('consiglio-testo').value||'').trim();
+  const nome  = (document.getElementById('consiglio-nome').value||'').trim();
   const esito = document.getElementById('consiglio-esito');
-  if (!testo) { esito.style.color='#ef5350'; esito.textContent='⚠️ Scrivi un messaggio prima di inviare.'; esito.style.display='block'; return; }
-  esito.style.color='var(--text2)'; esito.textContent='Invio in corso...'; esito.style.display='block';
+  if (!testo) { esito.style.color='#ef5350'; esito.textContent='Scrivi un messaggio prima di inviare.'; esito.style.display='block'; return; }
+  esito.style.color='var(--text2)'; esito.textContent='Invio...'; esito.style.display='block';
   try {
-    await gsPost({ action: 'inviaConsiglio', nome: nome || 'Anonimo', testo, ts: new Date().toISOString() });
-    esito.style.color='#4caf50'; esito.textContent='✓ Grazie! Il tuo consiglio è stato inviato.';
-    document.getElementById('consiglio-testo').value = '';
+    await gsPost({ action:'inviaConsiglio', nome:nome||'Anonimo', testo, ts:new Date().toISOString() });
+    esito.style.color='#4caf50'; esito.textContent='Grazie! Il tuo consiglio è stato inviato.';
+    document.getElementById('consiglio-testo').value='';
     setTimeout(chiudiConsigli, 2000);
   } catch(e) {
-    esito.style.color='#ef5350'; esito.textContent='✗ Errore nell\'invio. Riprova o scrivici via email.';
+    esito.style.color='#ef5350'; esito.textContent='Errore nell invio. Riprova o scrivici via email.';
   }
 }
-
 </script>
 </div>
 
 
-<!-- ── PAGINA ADMIN ── -->
+<!-- PAGINA ADMIN -->
 <div id="page-admin" class="page">
-  <div class="profile-wrap" style="max-width:900px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:4px;">⚙️ Pannello Admin</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:28px;">Accesso riservato — <span id="admin-date"></span></div>
-
-    <!-- Login admin -->
+  <div class="profile-wrap" style="max-width:960px;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:4px;">&#9881;&#65039; Pannello Admin</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:28px;" id="admin-date"></div>
     <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;">
-      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">🔐 Accedi come Admin</div>
-      <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin"
-        style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Accedi come Admin</div>
+      <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
       <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
       <button class="btn-primary" onclick="loginAdmin()">Accedi</button>
     </div>
-
-    <!-- Contenuto admin (nascosto finché non loggato) -->
     <div id="admin-content" style="display:none;">
-
-      <!-- Cards riassunto -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-
-        <!-- Ultimi utenti -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">👥 Ultimi utenti registrati</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Ultimi utenti registrati</div>
           <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
-
-        <!-- Ultime gare -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">🏅 Gare inserite oggi</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Gare inserite oggi</div>
           <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
-
-        <!-- Ultime recensioni -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">⭐ Ultime recensioni</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Ultime recensioni</div>
           <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
-
-        <!-- Gare non censite -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">📋 Gare non censite</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Gare non censite</div>
           <div id="admin-non-censite" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
-
       </div>
     </div>
   </div>
@@ -7315,13 +7327,6 @@ async function inviaConsiglio() {
      onmouseenter="this.style.textDecoration='underline'"
      onmouseleave="this.style.textDecoration='none'">
     ✉️ Contattaci
-  </a>
-  <span> &nbsp;·&nbsp; </span>
-  <a href="#" onclick="apriConsigli();return false;"
-     style="color:var(--accent);text-decoration:none;font-weight:500;"
-     onmouseenter="this.style.textDecoration='underline'"
-     onmouseleave="this.style.textDecoration='none'">
-    💬 I tuoi consigli
   </a>
   <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
 </footer>
