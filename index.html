@@ -5840,26 +5840,32 @@ function _OLD_renderStats_UNUSED() {
 }
 
 function populateComparator(gare) {
-  const byNome = {};
+  const byChiave = {};
   gare.filter(g => g.esito === 'finisher').forEach(g => {
-    // Usa nome gara come chiave (fallback su tipo_gara)
-    const k = (g.nome||g.tipo_gara||'').trim();
-    if (!k) return;
-    if (!byNome[k]) byNome[k] = [];
-    byNome[k].push(g);
+    const sport    = (g.sport||'').trim().toLowerCase();
+    const tipo     = (g.tipo_gara||'').trim();
+    const nome     = (g.nome||'').trim();
+    // Chiave univoca: sport + tipo_gara + nome_gara
+    // Così "Maratona di Roma" e "Mezza Maratona di Roma" restano separate
+    const k = sport + '|||' + tipo + '|||' + nome;
+    if (!tipo && !nome) return;
+    if (!byChiave[k]) byChiave[k] = { sport, tipo, nome, list: [] };
+    byChiave[k].list.push(g);
   });
 
-  const ripetute = Object.entries(byNome)
-    .filter(([,gs]) => gs.length > 1)
-    .sort((a,b) => b[1].length - a[1].length);
+  const ripetute = Object.entries(byChiave)
+    .filter(([,v]) => v.list.length > 1)
+    .sort((a,b) => b[1].list.length - a[1].list.length);
 
   const sel = document.getElementById('comp-selector');
   const currentVal = sel.value;
   sel.innerHTML = '<option value="">— Seleziona una gara ripetuta —</option>';
-  ripetute.forEach(([nome, gs]) => {
+  ripetute.forEach(([k, v]) => {
     const opt = document.createElement('option');
-    opt.value = nome;
-    opt.textContent = `${nome} (${gs.length}x)`;
+    opt.value = k;
+    // Label: icona sport + tipo gara + nome gara (se diverso dal tipo)
+    const labelNome = v.nome && v.nome !== v.tipo ? ` · ${v.nome}` : '';
+    opt.textContent = `${sportIcon(v.sport)} ${v.tipo}${labelNome} (${v.list.length}x)`;
     sel.appendChild(opt);
   });
   if (currentVal) sel.value = currentVal;
@@ -5873,13 +5879,17 @@ function renderComparator() {
     return;
   }
   const gare = calcolaPBAutomatici(getGare());
+  // Chiave composita: sport|||tipo_gara|||nome_gara
+  const [chSport, chTipo, chNome] = chiave.split('|||');
   const filtrate = gare
     .filter(g =>
       g.esito === 'finisher' &&
-      (g.nome||g.tipo_gara||'') === chiave
+      (g.sport||'').toLowerCase() === chSport &&
+      (g.tipo_gara||'').trim() === chTipo &&
+      (g.nome||'').trim() === chNome
     )
     .sort((a,b) => String(a.data||'').localeCompare(String(b.data||'')));
-  const tipoGara = filtrate[0] ? (filtrate[0].tipo_gara||filtrate[0].nome||'') : chiave;
+  const tipoGara = chTipo || chNome || chiave;
   const luogo = filtrate[0] ? (filtrate[0].luogo||'') : '';
 
   if (filtrate.length < 2) {
