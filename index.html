@@ -2685,47 +2685,76 @@ function openForm(garaEdit) {
 }
 
 function _riempiFormEdit(g) {
-  // Chiamata DOPO popolaSelectConfig() — i select sono già pronti
-  // 1. Sport
+  const c = getConfig();
+  // ── Sport ──
   const fSport = document.getElementById('f-sport');
   if (fSport) { fSport.value = g.sport || ''; onSportChange(g.sport || ''); }
-  // 2. Tipo gara (dopo onSportChange che popola le opzioni)
+  // ── Tipo gara ──
   setTimeout(() => {
     const fTipo = document.getElementById('f-tipo-gara');
     if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
-    // 3. Cascata geografica
-    setTimeout(() => {
-      const fCont = document.getElementById('f-continente');
-      if (fCont && g.continente) { fCont.value = g.continente; onContinenteChange(g.continente); }
-      setTimeout(() => {
-        const fNaz = document.getElementById('f-nazione');
-        if (fNaz && g.nazione) { fNaz.value = g.nazione; onNazioneChange(g.nazione); }
-        setTimeout(() => {
-          const fReg = document.getElementById('f-regione');
-          if (fReg && g.regione) { fReg.value = g.regione; onRegioneChange(g.regione); }
-          setTimeout(() => {
-            // Città
-            const fCS = document.getElementById('f-citta-sel');
-            if (fCS) {
-              const optC = [...fCS.options].find(o => o.value === g.luogo);
-              if (optC) { fCS.value = g.luogo; onCittaSelChange(g.luogo); }
-              else if (g.luogo) { fCS.value='__altra__'; const fl=document.getElementById('f-luogo'); if(fl){fl.value=g.luogo;fl.style.display='block';} }
-            } else { const fl=document.getElementById('f-luogo'); if(fl) fl.value=g.luogo||''; }
-            // Nome gara
-            setTimeout(() => {
-              const fNS = document.getElementById('f-nome-sel');
-              const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara||'');
-              if (fNS) {
-                const optN = [...fNS.options].find(o => o.value === nomeCercato);
-                if (optN) { fNS.value = nomeCercato; }
-                else if (nomeCercato) { fNS.value='__altro__'; const fn=document.getElementById('f-nome'); if(fn){fn.value=nomeCercato;fn.style.display='block';} }
-              } else { const fn=document.getElementById('f-nome'); if(fn) fn.value=nomeCercato; }
-            }, 80);
-          }, 80);
-        }, 80);
-      }, 80);
-    }, 80);
   }, 80);
+
+  // ── Cascata geografica: popola direttamente senza on*Change che resetta ──
+  const fCont = document.getElementById('f-continente');
+  if (fCont && g.continente) fCont.value = g.continente;
+
+  const fNaz = document.getElementById('f-nazione');
+  if (fNaz && g.nazione) {
+    const contNaz = c.cont_nazioni || {};
+    const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
+    fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('');
+  }
+
+  const fReg = document.getElementById('f-regione');
+  if (fReg && g.regione) {
+    const nazReg = c.naz_regioni || c.area_regioni || {};
+    const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
+    if (regioniNaz.length) {
+      fReg.innerHTML = '<option value="">Seleziona regione...</option>'
+        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('');
+    } else {
+      fReg.innerHTML = `<option value="${g.regione}" selected>${g.regione}</option>`;
+    }
+  }
+
+  const fCS = document.getElementById('f-citta-sel');
+  const fLuogo = document.getElementById('f-luogo');
+  if (fCS && g.luogo) {
+    const gareCensite = c.gare_censite || [];
+    const citta = [...new Set(
+      gareCensite.filter(gc => !g.regione || gc.regione === g.regione).map(gc => gc.citta).filter(Boolean)
+    )].sort();
+    fCS.innerHTML = '<option value="">Seleziona città...</option>'
+      + citta.map(cc => `<option value="${cc}"${cc===g.luogo?' selected':''}>${cc}</option>`).join('')
+      + '<option value="__altra__">✏️ Altra città...</option>';
+    if (!citta.includes(g.luogo)) {
+      fCS.value = '__altra__';
+      if (fLuogo) { fLuogo.value = g.luogo; fLuogo.style.display = 'block'; }
+    }
+  } else if (fLuogo && g.luogo) {
+    fLuogo.value = g.luogo;
+  }
+
+  const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
+  const fNS = document.getElementById('f-nome-sel');
+  const fNome = document.getElementById('f-nome');
+  if (fNS && nomeCercato) {
+    const gareCensite = c.gare_censite || [];
+    const nomiGare = gareCensite
+      .filter(gc => gc.citta === g.luogo || gc.regione === g.regione)
+      .map(gc => gc.nome).filter(Boolean);
+    fNS.innerHTML = '<option value="">Seleziona gara...</option>'
+      + nomiGare.map(n => `<option value="${n}"${n===nomeCercato?' selected':''}>${n}</option>`).join('')
+      + '<option value="__altro__">✏️ Altra gara...</option>';
+    if (!nomiGare.includes(nomeCercato)) {
+      fNS.value = '__altro__';
+      if (fNome) { fNome.value = nomeCercato; fNome.style.display = 'block'; }
+    }
+  } else if (fNome) {
+    fNome.value = nomeCercato;
+  }
 }
 
 function apriModificaGara(id) {
@@ -2923,57 +2952,80 @@ function _popolaFormProgramma() {
 }
 
 function _riempiFormProgrammaEdit(g) {
-  // Sport
-  const pSportEl = document.getElementById('p-sport');
-  if (pSportEl) { pSportEl.value = (g.sport||'').toLowerCase(); onPSportChange(pSportEl.value); }
-  // Tipo gara
+  const c = getConfig();
+  // ── Sport ──
+  const pSport = document.getElementById('p-sport');
+  if (pSport) { pSport.value = (g.sport||'').toLowerCase(); onPSportChange(pSport.value); }
+  // ── Tipo gara ──
   setTimeout(() => {
-    const pTipoEl = document.getElementById('p-tipo-gara');
-    if (pTipoEl) pTipoEl.value = g.tipo_gara || g.nome || '';
-    // Cascata geografica: continente → nazione → regione → città → nome gara
-    setTimeout(() => {
-      const pCont = document.getElementById('p-continente');
-      if (pCont && g.continente) { pCont.value = g.continente; onPContinenteChange(g.continente); }
-      setTimeout(() => {
-        const pNazEl = document.getElementById('p-nazione');
-        if (pNazEl && g.nazione) { pNazEl.value = g.nazione; onPNazioneChange(g.nazione); }
-        setTimeout(() => {
-          const pRegEl = document.getElementById('p-regione');
-          if (pRegEl && g.regione) { pRegEl.value = g.regione; onPRegioneChange(g.regione); }
-          setTimeout(() => {
-            // Città
-            const pCS = document.getElementById('p-citta-sel');
-            if (pCS) {
-              const optC = [...pCS.options].find(o => o.value === g.luogo);
-              if (optC) { pCS.value = g.luogo; onPCittaSelChange(g.luogo); }
-              else if (g.luogo) {
-                pCS.value = '__altra__';
-                const pl = document.getElementById('p-luogo');
-                if (pl) { pl.value = g.luogo; pl.style.display = 'block'; }
-              }
-            } else {
-              const pl = document.getElementById('p-luogo');
-              if (pl) pl.value = g.luogo || '';
-            }
-            // Nome gara
-            setTimeout(() => {
-              const pNS = document.getElementById('p-nome-sel');
-              const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
-              if (pNS) {
-                const optN = [...pNS.options].find(o => o.value === nomeCercato);
-                if (optN) { pNS.value = nomeCercato; }
-                else if (nomeCercato) {
-                  pNS.value = '__altro__';
-                  const pNG = document.getElementById('p-nome-gara');
-                  if (pNG) { pNG.value = nomeCercato; pNG.style.display = 'block'; }
-                }
-              }
-            }, 100);
-          }, 100);
-        }, 100);
-      }, 100);
-    }, 100);
-  }, 100);
+    const pTipo = document.getElementById('p-tipo-gara');
+    if (pTipo) pTipo.value = g.tipo_gara || g.nome || '';
+  }, 80);
+
+  // ── Cascata geografica: popola direttamente senza usare on*Change che resetta ──
+  // Continente: setta il valore (le opzioni sono già state popolate da _popolaFormProgramma)
+  const pCont = document.getElementById('p-continente');
+  if (pCont && g.continente) pCont.value = g.continente;
+
+  // Nazione: popola le opzioni per il continente scelto, poi setta il valore
+  const pNaz = document.getElementById('p-nazione');
+  if (pNaz && g.nazione) {
+    const contNaz = c.cont_nazioni || {};
+    const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
+    pNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('');
+  }
+
+  // Regione: popola le opzioni per la nazione scelta, poi setta il valore
+  const pReg = document.getElementById('p-regione');
+  if (pReg && g.regione) {
+    const nazReg = c.naz_regioni || c.area_regioni || {};
+    const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
+    if (regioniNaz.length) {
+      pReg.innerHTML = '<option value="">Seleziona regione...</option>'
+        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('');
+    } else {
+      pReg.innerHTML = `<option value="${g.regione}" selected>${g.regione}</option>`;
+    }
+  }
+
+  // Città: popola le opzioni per la regione scelta, poi setta il valore
+  const pCS = document.getElementById('p-citta-sel');
+  const pLuogo = document.getElementById('p-luogo');
+  if (pCS && g.luogo) {
+    const gareCensite = c.gare_censite || [];
+    const citta = [...new Set(
+      gareCensite.filter(gc => !g.regione || gc.regione === g.regione).map(gc => gc.citta).filter(Boolean)
+    )].sort();
+    pCS.innerHTML = '<option value="">Seleziona città...</option>'
+      + citta.map(cc => `<option value="${cc}"${cc===g.luogo?' selected':''}>${cc}</option>`).join('')
+      + '<option value="__altra__">✏️ Altra città...</option>';
+    if (!citta.includes(g.luogo)) {
+      // Città non censita — mostra campo libero
+      pCS.value = '__altra__';
+      if (pLuogo) { pLuogo.value = g.luogo; pLuogo.style.display = 'block'; }
+    }
+  } else if (pLuogo && g.luogo) {
+    pLuogo.value = g.luogo;
+  }
+
+  // Nome gara: popola le opzioni per la città scelta, poi setta il valore
+  const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
+  const pNS = document.getElementById('p-nome-sel');
+  const pNG = document.getElementById('p-nome-gara');
+  if (pNS && nomeCercato) {
+    const gareCensite = c.gare_censite || [];
+    const nomiGare = gareCensite
+      .filter(gc => gc.citta === g.luogo || gc.regione === g.regione)
+      .map(gc => gc.nome).filter(Boolean);
+    pNS.innerHTML = '<option value="">Seleziona gara...</option>'
+      + nomiGare.map(n => `<option value="${n}"${n===nomeCercato?' selected':''}>${n}</option>`).join('')
+      + '<option value="__altro__">✏️ Altra gara...</option>';
+    if (!nomiGare.includes(nomeCercato)) {
+      pNS.value = '__altro__';
+      if (pNG) { pNG.value = nomeCercato; pNG.style.display = 'block'; }
+    }
+  }
 }
 function closeFormProgramma() { document.getElementById('form-programma-overlay').classList.remove('open'); }
 function closeFormProgrammaOutside(e) { if(e.target === document.getElementById('form-programma-overlay')) closeFormProgramma(); }
