@@ -2625,7 +2625,8 @@ function openForm(garaEdit) {
   document.getElementById('form-title-label').innerHTML = isEdit
     ? 'Modifica <span>gara</span>'
     : 'Aggiungi <span>gara</span>';
-  document.getElementById('f-edit-id').value = isEdit ? garaEdit.id : '';
+  // Per archivia usa '' come edit-id (è una nuova gara, non un aggiornamento)
+  document.getElementById('f-edit-id').value = (isEdit && garaEdit.id !== '__archivia__') ? garaEdit.id : '';
   document.getElementById('form-save-btn').textContent = isEdit ? 'Salva modifiche' : 'Salva gara';
 
   resetRatings();
@@ -2798,7 +2799,7 @@ function salvaGara() {
   const isTri = isTriFlag;
   const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
   const gara = {
-    id: isEdit ? parseInt(editId) : Date.now(),
+    id: (isEdit && editId !== '__archivia__') ? parseInt(editId) : Date.now(),
     utente_id: getUtenteId(),
     sport: sportVal,
     tipo_gara: tipoGara,
@@ -2849,7 +2850,7 @@ function salvaGara() {
   if (currentPage === 'gare') renderGare('tutte');
   if (currentPage === 'mappa') renderMappa();
   if (getUtenteId()) {
-    const action = isEdit ? 'updateGara' : 'saveGara';
+    const action = (isEdit && gara.id && gara.id !== '__archivia__') ? 'updateGara' : 'saveGara';
     gsPost(action, gara).then(r => { if (r) showSyncBadge('ok'); });
 
     // Controlla regione conquistata (solo inserimento manuale, non edit)
@@ -4296,18 +4297,22 @@ function sposta2Gare(id) {
   // La gara viene rimossa solo quando si salva il form gara completata
   _archiviandoProgrammaId = id;
   // Apri il form gara pre-popolato con i dati della gara in programma
+  // Bozza con tutti i dati della gara programmata
+  // id = '__archivia__' forza _riempiFormEdit anche senza id reale
   const bozza = {
-    id: null,
+    id:         '__archivia__',
     sport:      garaP.sport || '',
-    tipo_gara:  garaP.tipo_gara || garaP.nome || '',
-    nome:       garaP.tipo_gara || garaP.nome || '',
-    data:       '',
+    tipo_gara:  garaP.tipo_gara || '',
+    nome:       garaP.nome || garaP.tipo_gara || '',
+    data:       garaP.data || '',   // data programmata come suggerimento
     luogo:      garaP.luogo || '',
     regione:    garaP.regione || '',
     nazione:    garaP.nazione || '',
     continente: garaP.continente || '',
     distanza:   garaP.distanza || 0,
     note:       garaP.note || '',
+    esito:      'finisher',
+    tempo:      '',
   };
   openForm(bozza);
   showToast('Completa il risultato e salva! 🏅');
