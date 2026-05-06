@@ -3339,8 +3339,28 @@ function renderGare(tipo) {
       if (!perTipo[k]) perTipo[k] = [];
       perTipo[k].push(g);
     });
+    // Ordine distanza per triathlon (dalla più lunga alla più corta)
+    const TRI_ORDER = [
+      'long distance','ironman','iron','full distance',
+      'half distance','half iron','70.3',
+      'olympic','olimpico','middle distance',
+      'sprint','super sprint','altro'
+    ];
+    function triSortKey(tipoNome) {
+      const t = (tipoNome||'').toLowerCase();
+      const idx = TRI_ORDER.findIndex(k => t.includes(k));
+      return idx === -1 ? TRI_ORDER.length : idx;
+    }
+    const isTri = ['triathlon','ironman','duathlon','tri703']
+      .some(k => sportFiltro.toLowerCase().includes(k));
+    // Dentro ogni gruppo ordina per data decrescente (più recente prima)
+    Object.values(perTipo).forEach(list =>
+      list.sort((a,b) => (b.data||'').localeCompare(a.data||''))
+    );
     cont.innerHTML = Object.entries(perTipo)
-      .sort((a,b) => b[1].length - a[1].length)
+      .sort((a,b) => isTri
+        ? triSortKey(a[0]) - triSortKey(b[0])   // triathlon: per distanza
+        : b[1].length - a[1].length)             // altri sport: per numero gare
       .map(([tipo_gara, list]) => `
         <div style="margin-bottom:24px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
