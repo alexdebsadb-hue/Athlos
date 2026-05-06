@@ -3666,33 +3666,8 @@ function renderStats() {
 
   // ── Evoluzione Tempo ──
   renderEvoluzioneSelector(gare);
-  // ── Popola selector comparatore ──
-  const sel = document.getElementById('comp-selector');
-  if (sel) {
-    // Raggruppa per sport+tipo_gara+luogo
-    const gruppi = {};
-    gare.filter(g => g.esito === 'finisher' && garaTempoSecs(g) > 0).forEach(g => {
-      const sport    = (g.sport    || '').toLowerCase();
-      const tipo     = (g.tipo_gara || g.nome || '').trim();
-      const luogo    = (g.luogo    || '').trim();
-      if (!tipo || !luogo) return;
-      const k = sport + '|||' + tipo + '|||' + luogo;
-      if (!gruppi[k]) gruppi[k] = { sport, tipo, luogo, count: 0 };
-      gruppi[k].count++;
-    });
-    const opzioni = Object.entries(gruppi)
-      .filter(([,v]) => v.count >= 2)
-      .sort((a,b) => b[1].count - a[1].count);
-    const curVal = sel.value;
-    sel.innerHTML = '<option value="">— Seleziona gara ripetuta —</option>'
-      + opzioni.map(([k,v]) =>
-          `<option value="${k}">${sportIcon(v.sport)} ${v.tipo} · ${v.luogo} (${v.count}x)</option>`
-        ).join('');
-    if (curVal) sel.value = curVal;
-    if (!opzioni.length) {
-      sel.innerHTML = '<option value="">— Nessuna gara ripetuta nella stessa città —</option>';
-    }
-  }
+  // ── Popola selector comparatore (usa nome gara) ──
+  populateComparator(gare);
   renderComparator();
 }
 
