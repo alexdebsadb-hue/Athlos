@@ -2868,112 +2868,112 @@ function openFormProgramma(garaEdit) {
   const pData = document.getElementById('p-data');
   if (pData) pData.min = domani.toISOString().slice(0,10);
 
-  // Assicura config aggiornata con sport_distanze
-  const cfgP = getConfig();
-  const loadAndFill = () => {
-    const cc = getConfig();
-    const pSport = document.getElementById('p-sport');
-    if (pSport) {
-      pSport.innerHTML = '<option value="">Seleziona sport...</option>';
-      (cc.sport || []).forEach(s => {
-        const o = document.createElement('option');
-        o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
-      });
-    }
-    const pNazInner = document.getElementById('p-nazione');
-    if (pNazInner) {
-      pNazInner.innerHTML = '<option value="">Seleziona...</option>';
-      (cc.nazioni || []).forEach(n => {
-        const o = document.createElement('option'); o.value = n; o.textContent = n; pNazInner.appendChild(o);
-      });
-    }
-    const pRegInner = document.getElementById('p-regione');
-    if (pRegInner) {
-      pRegInner.innerHTML = '<option value="">Seleziona...</option>';
-      (cc.regioni || []).forEach(r => {
-        const o = document.createElement('option'); o.value = r; o.textContent = r; pRegInner.appendChild(o);
-      });
-    }
-  };
-  if (!cfgP.sport_distanze || Object.keys(cfgP.sport_distanze).length === 0) {
-    caricaConfigurazione().then(loadAndFill);
-  } else {
-    loadAndFill();
-  }
-
-  // Popola nazione e regione
-  const pNaz = document.getElementById('p-nazione');
-  if (pNaz) {
-    const c = getConfig();
-    pNaz.innerHTML = '<option value="">Seleziona...</option>';
-    (c.nazioni || []).forEach(n => {
-      const o = document.createElement('option'); o.value = n; o.textContent = n; pNaz.appendChild(o);
-    });
-  }
-  const pReg = document.getElementById('p-regione');
-  if (pReg) {
-    const c = getConfig();
-    pReg.innerHTML = '<option value="">Seleziona...</option>';
-    (c.regioni || []).forEach(r => {
-      const o = document.createElement('option'); o.value = r; o.textContent = r; pReg.appendChild(o);
-    });
-  }
-
-  // Reset tipo gara
-  const pTipo = document.getElementById('p-tipo-gara');
-  if (pTipo) pTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
-
+  // Popola campi semplici subito (non dipendono dalla config)
   if (isEdit) {
     const g = garaEdit;
-    // Campi semplici subito
     if (pData) pData.value = g.data || '';
     const pDistEl = document.getElementById('p-distanza'); if (pDistEl) pDistEl.value = g.distanza || '';
     const pNoteEl = document.getElementById('p-note'); if (pNoteEl) pNoteEl.value = g.note || '';
-    // Sport + cascata dopo che la config è caricata
-    setTimeout(() => {
-      const pSportEl = document.getElementById('p-sport');
-      if (pSportEl) { pSportEl.value = (g.sport||'').toLowerCase(); onPSportChange(pSportEl.value); }
-      setTimeout(() => {
-        const pTipoEl = document.getElementById('p-tipo-gara');
-        if (pTipoEl) pTipoEl.value = g.tipo_gara || '';
-        // Cascata geografica
-        const pCont = document.getElementById('p-continente');
-        if (pCont && g.continente) { pCont.value = g.continente; onPContinenteChange(g.continente); }
-        setTimeout(() => {
-          const pNazEl = document.getElementById('p-nazione');
-          if (pNazEl && g.nazione) { pNazEl.value = g.nazione; onPNazioneChange(g.nazione); }
-          setTimeout(() => {
-            const pRegEl = document.getElementById('p-regione');
-            if (pRegEl && g.regione) { pRegEl.value = g.regione; onPRegioneChange(g.regione); }
-            setTimeout(() => {
-              // Città
-              const pCS = document.getElementById('p-citta-sel');
-              if (pCS) {
-                const optC = [...pCS.options].find(o => o.value === g.luogo);
-                if (optC) { pCS.value = g.luogo; onPCittaSelChange(g.luogo); }
-                else if (g.luogo) { pCS.value='__altra__'; const pl=document.getElementById('p-luogo'); if(pl){pl.value=g.luogo;pl.style.display='block';} }
-              } else { const pl=document.getElementById('p-luogo'); if(pl) pl.value=g.luogo||''; }
-              // Nome gara
-              setTimeout(() => {
-                const pNS = document.getElementById('p-nome-sel');
-                const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara||'');
-                if (pNS) {
-                  const optN = [...pNS.options].find(o => o.value === nomeCercato);
-                  if (optN) { pNS.value = nomeCercato; }
-                  else if (nomeCercato) { pNS.value='__altro__'; const pNG=document.getElementById('p-nome-gara'); if(pNG){pNG.value=nomeCercato;pNG.style.display='block';} }
-                }
-              }, 80);
-            }, 80);
-          }, 80);
-        }, 80);
-      }, 80);
-    }, 150);
   } else {
+    if (pData) pData.value = '';
     ['p-nome-gara','p-luogo','p-distanza','p-note'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
-    if (pData) pData.value = '';
   }
+
+  // Carica config e poi popola tutti i select + cascata
+  caricaConfigurazione().then(() => {
+    _popolaFormProgramma();
+    if (isEdit) _riempiFormProgrammaEdit(garaEdit);
+  });
+}
+
+function _popolaFormProgramma() {
+  const cc = getConfig();
+  // Sport
+  const pSport = document.getElementById('p-sport');
+  if (pSport) {
+    pSport.innerHTML = '<option value="">Seleziona sport...</option>';
+    (cc.sport || []).forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
+    });
+  }
+  // Reset tipo gara
+  const pTipo = document.getElementById('p-tipo-gara');
+  if (pTipo) pTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
+  // Continente
+  const pCont = document.getElementById('p-continente');
+  if (pCont) {
+    const continenti = cc.continenti || Object.keys(cc.cont_nazioni || {});
+    pCont.innerHTML = '<option value="">Seleziona...</option>';
+    continenti.forEach(c => {
+      const o = document.createElement('option'); o.value = c; o.textContent = c; pCont.appendChild(o);
+    });
+  }
+  // Reset nazione/regione/città/nome
+  const pNaz = document.getElementById('p-nazione');
+  if (pNaz) pNaz.innerHTML = '<option value="">Prima seleziona continente...</option>';
+  const pReg = document.getElementById('p-regione');
+  if (pReg) pReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
+  const pCS = document.getElementById('p-citta-sel');
+  if (pCS) pCS.innerHTML = '<option value="">Prima seleziona regione...</option>';
+  const pNS = document.getElementById('p-nome-sel');
+  if (pNS) pNS.innerHTML = '<option value="">Prima seleziona città...</option>';
+}
+
+function _riempiFormProgrammaEdit(g) {
+  // Sport
+  const pSportEl = document.getElementById('p-sport');
+  if (pSportEl) { pSportEl.value = (g.sport||'').toLowerCase(); onPSportChange(pSportEl.value); }
+  // Tipo gara
+  setTimeout(() => {
+    const pTipoEl = document.getElementById('p-tipo-gara');
+    if (pTipoEl) pTipoEl.value = g.tipo_gara || g.nome || '';
+    // Cascata geografica: continente → nazione → regione → città → nome gara
+    setTimeout(() => {
+      const pCont = document.getElementById('p-continente');
+      if (pCont && g.continente) { pCont.value = g.continente; onPContinenteChange(g.continente); }
+      setTimeout(() => {
+        const pNazEl = document.getElementById('p-nazione');
+        if (pNazEl && g.nazione) { pNazEl.value = g.nazione; onPNazioneChange(g.nazione); }
+        setTimeout(() => {
+          const pRegEl = document.getElementById('p-regione');
+          if (pRegEl && g.regione) { pRegEl.value = g.regione; onPRegioneChange(g.regione); }
+          setTimeout(() => {
+            // Città
+            const pCS = document.getElementById('p-citta-sel');
+            if (pCS) {
+              const optC = [...pCS.options].find(o => o.value === g.luogo);
+              if (optC) { pCS.value = g.luogo; onPCittaSelChange(g.luogo); }
+              else if (g.luogo) {
+                pCS.value = '__altra__';
+                const pl = document.getElementById('p-luogo');
+                if (pl) { pl.value = g.luogo; pl.style.display = 'block'; }
+              }
+            } else {
+              const pl = document.getElementById('p-luogo');
+              if (pl) pl.value = g.luogo || '';
+            }
+            // Nome gara
+            setTimeout(() => {
+              const pNS = document.getElementById('p-nome-sel');
+              const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
+              if (pNS) {
+                const optN = [...pNS.options].find(o => o.value === nomeCercato);
+                if (optN) { pNS.value = nomeCercato; }
+                else if (nomeCercato) {
+                  pNS.value = '__altro__';
+                  const pNG = document.getElementById('p-nome-gara');
+                  if (pNG) { pNG.value = nomeCercato; pNG.style.display = 'block'; }
+                }
+              }
+            }, 100);
+          }, 100);
+        }, 100);
+      }, 100);
+    }, 100);
+  }, 100);
 }
 function closeFormProgramma() { document.getElementById('form-programma-overlay').classList.remove('open'); }
 function closeFormProgrammaOutside(e) { if(e.target === document.getElementById('form-programma-overlay')) closeFormProgramma(); }
