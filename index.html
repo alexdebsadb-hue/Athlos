@@ -5866,9 +5866,12 @@ function _OLD_renderStats_UNUSED() {
 
 function populateComparator(gare) {
   const byNome = {};
-  gare.forEach(g => {
-    if (!byNome[g.nome]) byNome[g.nome] = [];
-    byNome[g.nome].push(g);
+  gare.filter(g => g.esito === 'finisher').forEach(g => {
+    // Usa nome gara come chiave (fallback su tipo_gara)
+    const k = (g.nome||g.tipo_gara||'').trim();
+    if (!k) return;
+    if (!byNome[k]) byNome[k] = [];
+    byNome[k].push(g);
   });
 
   const ripetute = Object.entries(byNome)
@@ -5929,12 +5932,13 @@ function renderComparator() {
       type: 'bar',
       data: {
         labels: filtrate.map(g => {
-          const anno = (g.data||'').slice(0,4);
-          const nome2 = (g.nome||g.tipo_gara||'').slice(0,20);
-          return [nome2 ? nome2 : anno, anno];
+          const anno  = (g.data||'').slice(0,4);
+          const luogo2 = (g.luogo||'').slice(0,18);
+          // sull'asse X: Anno · Luogo (così si distinguono le edizioni)
+          return luogo2 ? [anno, luogo2] : anno;
         }),
         datasets: [{
-          label: tipoGara + ' · ' + luogo,
+          label: chiave,
           data: secsArr,
           backgroundColor: isBest.map(b => b ? '#ffd54f' : CHART_COLORS.accent),
           borderRadius: 6,
