@@ -592,7 +592,7 @@
 
 <!-- NAVBAR -->
 <nav class="nav">
-  <div class="nav-logo" onclick="showPage('home')" style="display:flex;align-items:center;gap:6px;"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 3 L29 27 L3 27 Z" fill="none" stroke="#ff5722" stroke-width="2.5" stroke-linejoin="round"/><line x1="3" y1="20" x2="29" y2="20" stroke="#ff5722" stroke-width="2" stroke-linecap="round"/></svg><span style="color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-1px;">Athlos</span></div>
+  <div class="nav-logo" onclick="showPage('home')" style="display:flex;align-items:center;gap:6px;"><svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M16 3 L29 27 L3 27 Z" fill="none" stroke="#ff5722" stroke-width="2.5" stroke-linejoin="round"/><line x1="3" y1="20" x2="29" y2="20" stroke="#ff5722" stroke-width="2" stroke-linecap="round"/></svg><span style="color:var(--text);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;letter-spacing:-1px;">Athlos</span></div>
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home',this)">Home</button>
     <button class="nav-link" onclick="showPage('profilo',this)">Il mio profilo</button>
@@ -1287,12 +1287,6 @@
 
       <!-- EVOLUZIONE TEMPO -->
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;">
-        <!-- Gare estero per continente -->
-        <div id="stats-estero-wrap" style="margin-bottom:28px;display:none;">
-          <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 Gare all'estero</div>
-          <div id="stats-estero-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;"></div>
-        </div>
-
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Evoluzione tempo</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">Seleziona un tipo di gara per vedere l'andamento del tempo nel corso degli anni</div>
         <select class="form-select" id="evoluzione-selector" style="max-width:320px;margin-bottom:16px;" onchange="renderEvoluzioneChart(calcolaPBAutomatici(getGare()), this.value)">
@@ -2626,17 +2620,15 @@ function openForm(garaEdit) {
   document.getElementById('form-save-btn').textContent = isEdit ? 'Salva modifiche' : 'Salva gara';
 
   resetRatings();
-  // Ricarica sempre la config se manca sport_distanze
-  const c = getConfig();
-  // Popola sempre — caricaConfigurazione è idempotente (usa cache se fresca)
-  caricaConfigurazione().then(() => popolaSelectConfig());
+  // Popola select dal foglio, poi (se edit) ri-applica i valori della gara
+  caricaConfigurazione().then(() => {
+    popolaSelectConfig();
+    if (isEdit) _riempiFormEdit(garaEdit);
+  });
 
   if (isEdit) {
+    // Popola subito i campi semplici (non dipendono dalla config)
     const g = garaEdit;
-    // Pre-popola sport subito
-    const fSportEdit = document.getElementById('f-sport');
-    if (fSportEdit) { fSportEdit.value = g.sport || ''; onSportChange(g.sport || ''); }
-    // Pre-popola tutti i campi semplici subito
     document.getElementById('f-data').value     = g.data     || '';
     document.getElementById('f-distanza').value = g.distanza || '';
     document.getElementById('f-esito').value    = g.esito    || 'finisher';
@@ -2650,42 +2642,11 @@ function openForm(garaEdit) {
         if (el) el.value = g.frazioni[k] || '';
       });
     }
-    if (g.rating) ['percorso','ristori','organizzazione','posizione','pulizia','colazione'].forEach(k => { if (g.rating[k]) setStars(k, g.rating[k], null); });
-    // Tipo gara (dopo onSportChange)
-    setTimeout(() => {
-      const fTipo = document.getElementById('f-tipo-gara');
-      if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
-    }, 80);
-    // Ripristina cascata geografica
-    setTimeout(() => {
-      const fCont = document.getElementById('f-continente');
-      if (fCont && g.continente) { fCont.value = g.continente; onContinenteChange(g.continente); }
-      setTimeout(() => {
-        const fNaz = document.getElementById('f-nazione');
-        if (fNaz && g.nazione) { fNaz.value = g.nazione; onNazioneChange(g.nazione); }
-        setTimeout(() => {
-          const fReg = document.getElementById('f-regione');
-          if (fReg && g.regione) { fReg.value = g.regione; onRegioneChange(g.regione); }
-          setTimeout(() => {
-            const fCS = document.getElementById('f-citta-sel');
-            if (fCS) {
-              const optC = [...fCS.options].find(o => o.value === g.luogo);
-              if (optC) { fCS.value = g.luogo; onCittaSelChange(g.luogo); }
-              else if (g.luogo) { fCS.value = '__altra__'; const fl = document.getElementById('f-luogo'); if(fl){fl.value=g.luogo;fl.style.display='block';} }
-            } else { const fl = document.getElementById('f-luogo'); if(fl) fl.value=g.luogo||''; }
-            setTimeout(() => {
-              const fNS = document.getElementById('f-nome-sel');
-              if (fNS) {
-                const nome = g.nome||g.tipo_gara||'';
-                const optN = [...fNS.options].find(o => o.value === nome);
-                if (optN) { fNS.value = nome; }
-                else if (nome) { fNS.value='__altro__'; const fn=document.getElementById('f-nome'); if(fn){fn.value=nome;fn.style.display='block';} }
-              } else { const fn = document.getElementById('f-nome'); if(fn) fn.value=g.nome&&g.nome!==g.tipo_gara?g.nome:''; }
-            }, 80);
-          }, 80);
-        }, 80);
-      }, 80);
-    }, 120);
+    if (g.rating) {
+      ['percorso','ristori','organizzazione','posizione','pulizia','colazione'].forEach(k => {
+        if (g.rating[k]) setStars(k, g.rating[k], null);
+      });
+    }
   } else {
     document.getElementById('f-data').valueAsDate = new Date();
     ['f-luogo','f-distanza','f-tempo','f-note','f-hotel',
@@ -2712,6 +2673,50 @@ function openForm(garaEdit) {
     const fNome2 = document.getElementById('f-nome');
     if (fNome2) { fNome2.style.display = 'none'; fNome2.value = ''; }
   }
+}
+
+function _riempiFormEdit(g) {
+  // Chiamata DOPO popolaSelectConfig() — i select sono già pronti
+  // 1. Sport
+  const fSport = document.getElementById('f-sport');
+  if (fSport) { fSport.value = g.sport || ''; onSportChange(g.sport || ''); }
+  // 2. Tipo gara (dopo onSportChange che popola le opzioni)
+  setTimeout(() => {
+    const fTipo = document.getElementById('f-tipo-gara');
+    if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
+    // 3. Cascata geografica
+    setTimeout(() => {
+      const fCont = document.getElementById('f-continente');
+      if (fCont && g.continente) { fCont.value = g.continente; onContinenteChange(g.continente); }
+      setTimeout(() => {
+        const fNaz = document.getElementById('f-nazione');
+        if (fNaz && g.nazione) { fNaz.value = g.nazione; onNazioneChange(g.nazione); }
+        setTimeout(() => {
+          const fReg = document.getElementById('f-regione');
+          if (fReg && g.regione) { fReg.value = g.regione; onRegioneChange(g.regione); }
+          setTimeout(() => {
+            // Città
+            const fCS = document.getElementById('f-citta-sel');
+            if (fCS) {
+              const optC = [...fCS.options].find(o => o.value === g.luogo);
+              if (optC) { fCS.value = g.luogo; onCittaSelChange(g.luogo); }
+              else if (g.luogo) { fCS.value='__altra__'; const fl=document.getElementById('f-luogo'); if(fl){fl.value=g.luogo;fl.style.display='block';} }
+            } else { const fl=document.getElementById('f-luogo'); if(fl) fl.value=g.luogo||''; }
+            // Nome gara
+            setTimeout(() => {
+              const fNS = document.getElementById('f-nome-sel');
+              const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara||'');
+              if (fNS) {
+                const optN = [...fNS.options].find(o => o.value === nomeCercato);
+                if (optN) { fNS.value = nomeCercato; }
+                else if (nomeCercato) { fNS.value='__altro__'; const fn=document.getElementById('f-nome'); if(fn){fn.value=nomeCercato;fn.style.display='block';} }
+              } else { const fn=document.getElementById('f-nome'); if(fn) fn.value=nomeCercato; }
+            }, 80);
+          }, 80);
+        }, 80);
+      }, 80);
+    }, 80);
+  }, 80);
 }
 
 function apriModificaGara(id) {
@@ -2911,42 +2916,49 @@ function openFormProgramma(garaEdit) {
 
   if (isEdit) {
     const g = garaEdit;
-    const pSportEl = document.getElementById('p-sport');
-    if (pSportEl) { pSportEl.value = (g.sport||'').toLowerCase(); onPSportChange(pSportEl.value); }
+    // Campi semplici subito
     if (pData) pData.value = g.data || '';
     const pDistEl = document.getElementById('p-distanza'); if (pDistEl) pDistEl.value = g.distanza || '';
     const pNoteEl = document.getElementById('p-note'); if (pNoteEl) pNoteEl.value = g.note || '';
-    setTimeout(() => { if (pTipo) pTipo.value = g.tipo_gara || ''; }, 80);
-    // Cascata geografica
+    // Sport + cascata dopo che la config è caricata
     setTimeout(() => {
-      const pCont = document.getElementById('p-continente');
-      if (pCont && g.continente) { pCont.value = g.continente; onPContinenteChange(g.continente); }
+      const pSportEl = document.getElementById('p-sport');
+      if (pSportEl) { pSportEl.value = (g.sport||'').toLowerCase(); onPSportChange(pSportEl.value); }
       setTimeout(() => {
-        const pNazEl = document.getElementById('p-nazione');
-        if (pNazEl && g.nazione) { pNazEl.value = g.nazione; onPNazioneChange(g.nazione); }
+        const pTipoEl = document.getElementById('p-tipo-gara');
+        if (pTipoEl) pTipoEl.value = g.tipo_gara || '';
+        // Cascata geografica
+        const pCont = document.getElementById('p-continente');
+        if (pCont && g.continente) { pCont.value = g.continente; onPContinenteChange(g.continente); }
         setTimeout(() => {
-          const pRegEl = document.getElementById('p-regione');
-          if (pRegEl && g.regione) { pRegEl.value = g.regione; onPRegioneChange(g.regione); }
+          const pNazEl = document.getElementById('p-nazione');
+          if (pNazEl && g.nazione) { pNazEl.value = g.nazione; onPNazioneChange(g.nazione); }
           setTimeout(() => {
-            const pCS = document.getElementById('p-citta-sel');
-            if (pCS) {
-              const optC = [...pCS.options].find(o => o.value === g.luogo);
-              if (optC) { pCS.value = g.luogo; onPCittaSelChange(g.luogo); }
-              else if (g.luogo) { pCS.value='__altra__'; const pl=document.getElementById('p-luogo'); if(pl){pl.value=g.luogo;pl.style.display='block';} }
-            } else { const pl=document.getElementById('p-luogo'); if(pl) pl.value=g.luogo||''; }
+            const pRegEl = document.getElementById('p-regione');
+            if (pRegEl && g.regione) { pRegEl.value = g.regione; onPRegioneChange(g.regione); }
             setTimeout(() => {
-              const pNS = document.getElementById('p-nome-sel');
-              if (pNS) {
-                const nome = g.nome||g.tipo_gara||'';
-                const optN = [...pNS.options].find(o => o.value === nome);
-                if (optN) { pNS.value = nome; }
-                else if (nome) { pNS.value='__altro__'; const pNG=document.getElementById('p-nome-gara'); if(pNG){pNG.value=nome;pNG.style.display='block';} }
-              }
+              // Città
+              const pCS = document.getElementById('p-citta-sel');
+              if (pCS) {
+                const optC = [...pCS.options].find(o => o.value === g.luogo);
+                if (optC) { pCS.value = g.luogo; onPCittaSelChange(g.luogo); }
+                else if (g.luogo) { pCS.value='__altra__'; const pl=document.getElementById('p-luogo'); if(pl){pl.value=g.luogo;pl.style.display='block';} }
+              } else { const pl=document.getElementById('p-luogo'); if(pl) pl.value=g.luogo||''; }
+              // Nome gara
+              setTimeout(() => {
+                const pNS = document.getElementById('p-nome-sel');
+                const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara||'');
+                if (pNS) {
+                  const optN = [...pNS.options].find(o => o.value === nomeCercato);
+                  if (optN) { pNS.value = nomeCercato; }
+                  else if (nomeCercato) { pNS.value='__altro__'; const pNG=document.getElementById('p-nome-gara'); if(pNG){pNG.value=nomeCercato;pNG.style.display='block';} }
+                }
+              }, 80);
             }, 80);
           }, 80);
         }, 80);
       }, 80);
-    }, 120);
+    }, 150);
   } else {
     ['p-nome-gara','p-luogo','p-distanza','p-note'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
@@ -3258,24 +3270,15 @@ function renderGare(tipo) {
   } else if (tipo && tipo.startsWith('sport_')) {
     const sportFiltro = tipo.replace('sport_', '');
     const gareSport = gare.filter(g => g.sport === sportFiltro);
-    // Per triathlon: ordina per lunghezza (long→half→olympic→sprint), poi per data desc
-    const isTri = sportFiltro === 'triathlon';
-    const TRI_ORDER2 = ['ironman','long distance','long','full','iron','half distance','half','70.3','olympic','middle','sprint','super sprint','altro'];
-    function triSortKey(tipo2) {
-      const t = (tipo2||'').toLowerCase();
-      const idx = TRI_ORDER2.findIndex(k => t.includes(k));
-      return idx === -1 ? TRI_ORDER2.length : idx;
-    }
+    // Raggruppa per tipo_gara
     const perTipo = {};
     gareSport.forEach(g => {
       const k = g.tipo_gara || g.nome || 'Altro';
       if (!perTipo[k]) perTipo[k] = [];
       perTipo[k].push(g);
     });
-    // Per ogni gruppo ordina gare per data desc
-    Object.values(perTipo).forEach(list => list.sort((a,b) => (b.data||'').localeCompare(a.data||'')));
     cont.innerHTML = Object.entries(perTipo)
-      .sort((a,b) => isTri ? triSortKey(a[0]) - triSortKey(b[0]) : b[1].length - a[1].length)
+      .sort((a,b) => b[1].length - a[1].length)
       .map(([tipo_gara, list]) => `
         <div style="margin-bottom:24px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
@@ -3288,54 +3291,26 @@ function renderGare(tipo) {
 
   } else if (tipo === 'italia') {
     const gareIt = gare.filter(g => g.regione && MAP_SEEDS.hasOwnProperty(g.regione));
-    if (!gareIt.length) { cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">Nessuna gara in Italia</div></div>'; return; }
-    const perReg = {};
-    gareIt.forEach(g => {
-      const r = g.regione;
-      if (!perReg[r]) perReg[r] = {};
-      const s = g.sport||'altro';
-      if (!perReg[r][s]) perReg[r][s] = {};
-      const t = g.tipo_gara||g.nome||'Altro';
-      if (!perReg[r][s][t]) perReg[r][s][t] = [];
-      perReg[r][s][t].push(g);
-    });
-    cont.innerHTML = Object.entries(perReg)
-      .sort((a,b)=>Object.values(b[1]).flatMap(x=>Object.values(x)).flat().length-Object.values(a[1]).flatMap(x=>Object.values(x)).flat().length)
-      .map(([reg,perSport])=>{
-        const tot=Object.values(perSport).flatMap(x=>Object.values(x)).flat().length;
-        const sportBlocks=Object.entries(perSport).map(([spt,perTG])=>{
-          const totS=Object.values(perTG).flat().length;
-          const tipoBlocks=Object.entries(perTG).map(([tg,list])=>
-            `<details style="margin-left:16px;margin-bottom:6px;"><summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;"><span>${tg}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span></summary><div style="margin-top:6px;">${list.map(garaCard).join('')}</div></details>`
-          ).join('');
-          return `<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;"><span>${sportIcon(spt)} ${sportLabel(spt)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totS} gare</span></summary><div style="margin-top:8px;">${tipoBlocks}</div></details>`;
-        }).join('');
-        return `<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>📍 ${reg}</span><span style="color:var(--accent);font-size:16px;">${tot} gare</span></summary><div style="margin-top:10px;">${sportBlocks}</div></details>`;
-      }).join('');
+    if (!gareIt.length) { cont.innerHTML='<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">Nessuna gara in Italia</div></div>'; return; }
+    const perReg={};
+    gareIt.forEach(g=>{const r=g.regione;if(!perReg[r])perReg[r]={};const s=g.sport||'altro';if(!perReg[r][s])perReg[r][s]={};const t=g.tipo_gara||g.nome||'Altro';if(!perReg[r][s][t])perReg[r][s][t]=[];perReg[r][s][t].push(g);});
+    cont.innerHTML=Object.entries(perReg).sort((a,b)=>Object.values(b[1]).flatMap(x=>Object.values(x)).flat().length-Object.values(a[1]).flatMap(x=>Object.values(x)).flat().length).map(([reg,perSport])=>{
+      const tot=Object.values(perSport).flatMap(x=>Object.values(x)).flat().length;
+      const sB=Object.entries(perSport).map(([spt,pTG])=>{const tS=Object.values(pTG).flat().length;const tB=Object.entries(pTG).map(([tg,list])=>`<details style="margin-left:16px;margin-bottom:6px;"><summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;"><span>${tg}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span></summary><div style="margin-top:6px;">${list.map(garaCard).join('')}</div></details>`).join('');return`<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;"><span>${sportIcon(spt)} ${sportLabel(spt)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${tS} gare</span></summary><div style="margin-top:8px;">${tB}</div></details>`;}).join('');
+      return`<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>📍 ${reg}</span><span style="color:var(--accent);font-size:16px;">${tot} gare</span></summary><div style="margin-top:10px;">${sB}</div></details>`;
+    }).join('');
 
   } else if (tipo === 'estero') {
-    // Raggruppa per Continente → Nazione — usa i valori ESATTI dal foglio Google
+    // Raggruppa per Continente → Nazione — nomi ESATTI dal foglio Google
     const gareEst = gare.filter(g => g.nazione && g.nazione.toUpperCase() !== 'ITALIA');
-    if (!gareEst.length) { cont.innerHTML = '<div class="empty-state"><div class="empty-icon">🌍</div><div class="empty-title">Nessuna gara all\'estero</div></div>'; return; }
-    const perCont = {};
-    gareEst.forEach(g => {
-      const cont2 = (g.continente||'').trim() || 'Altro';
-      const naz = (g.nazione||'').trim() || 'Non specificata';
-      if (!perCont[cont2]) perCont[cont2] = {};
-      if (!perCont[cont2][naz]) perCont[cont2][naz] = [];
-      perCont[cont2][naz].push(g);
-    });
-    cont.innerHTML = Object.entries(perCont)
-      .sort((a,b)=>Object.values(b[1]).flat().length-Object.values(a[1]).flat().length)
-      .map(([continente,perNaz])=>{
-        const totC=Object.values(perNaz).flat().length;
-        const nazBlocks=Object.entries(perNaz)
-          .sort((a,b)=>b[1].length-a[1].length)
-          .map(([naz2,list])=>
-            `<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🏳️ ${naz2}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span></summary><div style="margin-top:8px;">${list.map(garaCard).join('')}</div></details>`
-          ).join('');
-        return `<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🌍 ${continente}</span><span style="color:var(--accent);font-size:16px;">${totC} gar${totC===1?'a':'e'}</span></summary><div style="margin-top:10px;">${nazBlocks}</div></details>`;
-      }).join('');
+    if (!gareEst.length) { cont.innerHTML='<div class="empty-state"><div class="empty-icon">🌍</div><div class="empty-title">Nessuna gara all\'estero</div></div>'; return; }
+    const perCont={};
+    gareEst.forEach(g=>{const c2=(g.continente||'').trim()||'Altro';const nz=(g.nazione||'').trim()||'Non specificata';if(!perCont[c2])perCont[c2]={};if(!perCont[c2][nz])perCont[c2][nz]=[];perCont[c2][nz].push(g);});
+    cont.innerHTML=Object.entries(perCont).sort((a,b)=>Object.values(b[1]).flat().length-Object.values(a[1]).flat().length).map(([cont2,perNaz])=>{
+      const totC=Object.values(perNaz).flat().length;
+      const nB=Object.entries(perNaz).sort((a,b)=>b[1].length-a[1].length).map(([nz2,list])=>`<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🏳️ ${nz2}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span></summary><div style="margin-top:8px;">${list.map(garaCard).join('')}</div></details>`).join('');
+      return`<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🌍 ${cont2}</span><span style="color:var(--accent);font-size:16px;">${totC} gar${totC===1?'a':'e'}</span></summary><div style="margin-top:10px;">${nB}</div></details>`;
+    }).join('');
 
   } else if (tipo === 'pb') {
     // Calcola PB automatici: un solo record per ogni sport+tipo_gara
@@ -3479,28 +3454,6 @@ function renderStats() {
     statCard('🗺️', 'Regioni coperte', regioni, 'regioni d\u0027Italia', '#4caf50'),
     statCard('⚡', 'Finish Rate', (gare.length ? Math.round(finisher.length/gare.length*100) : 100) + '%', `${pb} Personal Best`, '#9c27b0'),
   ].join('');
-
-  // Card gare all'estero per continente
-  const _gareEsteroStats = {};
-  gare.forEach(g => {
-    const naz = (g.nazione||'').trim();
-    if (!naz || naz.toUpperCase() === 'ITALIA') return;
-    const cont = (g.continente||'').trim() || 'Estero';
-    if (!_gareEsteroStats[cont]) _gareEsteroStats[cont] = 0;
-    _gareEsteroStats[cont]++;
-  });
-  if (Object.keys(_gareEsteroStats).length) {
-    const wrapEl = document.getElementById('stats-estero-wrap');
-    if (wrapEl) wrapEl.style.display = 'block';
-    const esteroEl = document.getElementById('stats-estero-cards');
-    if (esteroEl) {
-      esteroEl.innerHTML = Object.entries(_gareEsteroStats)
-        .sort((a,b)=>b[1]-a[1])
-        .map(([cont,n]) => statCard('🌍', cont, n, n===1?'gara':'gare', '#2196f3'))
-        .join('');
-      esteroEl.closest('[id]')?.parentElement?.style && (esteroEl.closest('.stats-section') || esteroEl.parentElement).style && '';
-    }
-  }
 
   // ── Per Anno — solo Finisher, colori per sport ──
   const sportColorMap = {
@@ -3682,8 +3635,8 @@ function renderEvoluzioneChart(gare, tipoGara) {
     type: 'line',
     data: {
       labels: filtrate.map(g => {
-        const anno  = (g.data||'').slice(0,4);
-        const nome  = (g.nome||g.tipo_gara||'').slice(0,20);
+        const anno = (g.data||'').slice(0,4);
+        const nome = (g.nome||g.tipo_gara||'').slice(0,20);
         return nome ? [nome, anno] : anno;
       }),
       datasets: [{
@@ -5873,7 +5826,7 @@ function renderComparator() {
         labels: filtrate.map(g => {
           const anno  = (g.data||'').slice(0,4);
           const luogo = (g.luogo||'');
-          return [nome ? nome.slice(0,18) : anno, anno];
+          return [nome ? nome.slice(0,22) : anno, anno];
         }),
         datasets: [{
           label: tipoGara + ' · ' + luogo,
@@ -6543,26 +6496,7 @@ async function renderSocial() {
   const nCitta   = [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
   const nRegioni = [...new Set(gare.map(g=>g.regione).filter(r => r && MAP_SEEDS.hasOwnProperty(r)))].length;
 
-
-  // Km per sesso
-  const kmM = Math.round(gare.filter(g => { const u = utenti.find(u=>u.id===g.utente_id); return u && (u.sesso||'').toUpperCase()==='M'; }).reduce((s,g)=>s+(g.distanza||0),0));
-  const kmF = Math.round(gare.filter(g => { const u = utenti.find(u=>u.id===g.utente_id); return u && (u.sesso||'').toUpperCase()==='F'; }).reduce((s,g)=>s+(g.distanza||0),0));
-  const elKmSesso = document.getElementById('social-km-sesso');
-  if (elKmSesso) elKmSesso.innerHTML = `
-    <div style="display:flex;gap:16px;flex-wrap:wrap;">
-      <div style="background:var(--bg4);border-radius:10px;padding:14px 20px;text-align:center;flex:1;min-width:120px;">
-        <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Uomini</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:#2196f3;">${kmM.toLocaleString('it')}</div>
-        <div style="font-size:11px;color:var(--text3);">km</div>
-      </div>
-      <div style="background:var(--bg4);border-radius:10px;padding:14px 20px;text-align:center;flex:1;min-width:120px;">
-        <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Donne</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:#e91e8c;">${kmF.toLocaleString('it')}</div>
-        <div style="font-size:11px;color:var(--text3);">km</div>
-      </div>
-    </div>`;
-
-    document.getElementById('social-gare-cards').innerHTML = [
+  document.getElementById('social-gare-cards').innerHTML = [
     { n: nGareTot.toLocaleString('it'), label: 'Gare registrate', icon: '🏅',
       sub: sportSorted.map(([s,n])=>`${sportIcon(s)} ${n}`).join('  ') },
     { n: kmTot.toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km gareggiati' },
@@ -6598,7 +6532,6 @@ async function renderSocial() {
   gare.forEach(g => {
     const naz = (g.nazione||'').trim();
     if (naz && naz.toUpperCase() !== 'ITALIA') {
-      // Usa nome nazione ESATTO dal foglio Google
       gareEstero[naz] = (gareEstero[naz]||0) + 1;
     } else if (MAP_SEEDS.hasOwnProperty(g.regione)) {
       garePerRegione[g.regione] = (garePerRegione[g.regione]||0) + 1;
@@ -7153,15 +7086,16 @@ function updateMapColors() {
     path.onmouseenter = function(e) {
       if (gs.length) path.style.fillOpacity = '0.9';
       if (!tooltip) return;
-      if (!gs.length) { tooltip.innerHTML = `<div style="font-weight:600;">${regName}</div><div style="font-size:12px;color:var(--text3);">Nessuna gara</div>`; }
-      else {
+      if (!gs.length) {
+        tooltip.innerHTML = `<div style="font-weight:600;">${regName}</div><div style="font-size:12px;color:var(--text3);">Nessuna gara</div>`;
+      } else {
         const kmR = gs.reduce((s,g)=>s+(g.distanza||0),0);
         const items = gs.slice(0,5).map(g=>`<div style="font-size:11px;color:var(--text3);margin-top:3px;">${(g.data||'').slice(0,4)} · ${g.nome||g.tipo_gara||''}</div>`).join('');
         tooltip.innerHTML = `<div style="font-weight:600;font-size:14px;margin-bottom:4px;">${regName}</div><div style="color:var(--accent);font-weight:600;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>${items}${gs.length>5?`<div style="font-size:11px;color:var(--accent);margin-top:3px;">+${gs.length-5} altre</div>`:''}`;
       }
       const box = document.getElementById('italy-map-container').getBoundingClientRect();
       let tx=e.clientX-box.left+14, ty=e.clientY-box.top+14;
-      if (tx+220>box.width) tx-=230; if (ty+160>box.height) ty-=165;
+      if(tx+220>box.width) tx-=230; if(ty+160>box.height) ty-=165;
       tooltip.style.left=Math.max(0,tx)+'px'; tooltip.style.top=Math.max(0,ty)+'px'; tooltip.style.opacity='1';
     };
     path.onmouseleave = function() {
@@ -7179,6 +7113,7 @@ function updateMapColors() {
   });
 }
 function loadMap() {
+  // Inizializza colore e legenda
   const saved = localStorage.getItem('irun_map_color') || '#ff5722';
   _mapColor = saved;
   const picker = document.getElementById('map-color-custom');
@@ -7196,10 +7131,24 @@ async function inviaConsiglio(){
   const testo=(document.getElementById('consiglio-testo').value||'').trim();
   const nome=(document.getElementById('consiglio-nome').value||'').trim();
   const esito=document.getElementById('consiglio-esito');
-  if(!testo){esito.style.color='#ef5350';esito.textContent='Scrivi un messaggio.';esito.style.display='block';return;}
-  esito.style.color='var(--text2)';esito.textContent='Invio...';esito.style.display='block';
-  try{await gsPost('inviaConsiglio',{nome:nome||'Anonimo',testo,ts:new Date().toISOString()});esito.style.color='#4caf50';esito.textContent='Grazie!';document.getElementById('consiglio-testo').value='';setTimeout(chiudiConsigli,2000);}
-  catch(e){esito.style.color='#ef5350';esito.textContent='Errore. Riprova o scrivici via email.';}
+  if(!testo){esito.style.color='#ef5350';esito.textContent='Scrivi un messaggio prima di inviare.';esito.style.display='block';return;}
+  esito.style.color='var(--text2)';esito.textContent='Invio in corso...';esito.style.display='block';
+  try{
+    // Invia al foglio Google tramite Apps Script
+    await gsPost('inviaConsiglio',{
+      nome: nome||'Anonimo',
+      testo,
+      ts: new Date().toISOString(),
+      utente_id: getUtenteId()||'anonimo'
+    });
+    esito.style.color='#4caf50';
+    esito.textContent='Grazie! Il tuo consiglio è stato inviato.';
+    document.getElementById('consiglio-testo').value='';
+    setTimeout(chiudiConsigli,2000);
+  }catch(e){
+    esito.style.color='#ef5350';
+    esito.textContent='Errore nell\'invio. Riprova o scrivici via email.';
+  }
 }
 </script>
 </div>
@@ -7207,9 +7156,10 @@ async function inviaConsiglio(){
 
 <div id="page-admin" class="page">
   <div class="profile-wrap" style="max-width:960px;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:4px;">Pannello Admin</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:4px;">⚙️ Pannello Admin</div>
     <div style="font-size:13px;color:var(--text3);margin-bottom:28px;" id="admin-date"></div>
     <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px;">🔐 Accedi come Admin</div>
       <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
       <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
       <button class="btn-primary" onclick="loginAdmin()">Accedi</button>
@@ -7217,10 +7167,11 @@ async function inviaConsiglio(){
     <div id="admin-content" style="display:none;">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Ultimi utenti</div><div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div></div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Gare inserite oggi</div><div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div></div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Ultime recensioni</div><div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div></div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">Gare non censite</div><div id="admin-non-censite" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">👥 Ultimi utenti</div><div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">🏅 Gare oggi</div><div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">⭐ Ultime recensioni</div><div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">📋 Gare non censite</div><div id="admin-non-censite" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;grid-column:1/-1;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px;">💬 I tuoi consigli</div><div id="admin-consigli" style="display:flex;flex-direction:column;gap:6px;"></div></div>
       </div>
     </div>
   </div>
