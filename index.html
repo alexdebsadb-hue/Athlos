@@ -3315,15 +3315,31 @@ function salvaGaraProgramma() {
   };
 
   // Segnala campi non censiti
+  // Leggi città e nome gara dal form (anche se inseriti manualmente)
+  const _pCittaSel = (document.getElementById('p-citta-sel')||{}).value || '';
+  const cittaP = _pCittaSel === '__altra__'
+    ? ((document.getElementById('p-luogo')||{}).value||'').trim() : _pCittaSel;
+  const _pNomeSel = (document.getElementById('p-nome-sel')||{}).value || '';
+  const nomeGaraP2 = _pNomeSel === '__altro__'
+    ? ((document.getElementById('p-nome-gara')||{}).value||'').trim() : _pNomeSel;
+  const continenteP = (document.getElementById('p-continente')||{}).value || '';
+
+  const _pCittaNonCensita = _pCittaSel === '__altra__';
+  const _pNomeNonCensito  = _pNomeSel  === '__altro__';
+
   if (_pSportSel==='__altro_sport__' || _pTipoSel==='__altro__' ||
-      _pNazSel==='__altra_naz__' || _pRegSel==='__altra_reg__') {
+      _pNazSel==='__altra_naz__'     || _pRegSel==='__altra_reg__' ||
+      _pCittaNonCensita              || _pNomeNonCensito) {
     gsPost('segnalaGaraNonCensita', {
-      utente_id: getUtenteId(),
-      sport:     _pSportSel==='__altro_sport__' ? sportP    : '',
-      tipo_gara: _pTipoSel==='__altro__'        ? tipoGaraP : '',
-      nazione:   _pNazSel==='__altra_naz__'     ? nazP      : '',
-      regione:   _pRegSel==='__altra_reg__'     ? regP      : '',
-      luogo: '', nome: '', continente: '', distanza: ''
+      utente_id:  getUtenteId(),
+      sport:      _pSportSel==='__altro_sport__' ? sportP      : '',
+      tipo_gara:  _pTipoSel==='__altro__'        ? tipoGaraP   : '',
+      continente: continenteP,
+      nazione:    _pNazSel==='__altra_naz__'     ? nazP        : '',
+      regione:    _pRegSel==='__altra_reg__'     ? regP        : '',
+      luogo:      _pCittaNonCensita              ? cittaP      : '',
+      nome:       _pNomeNonCensito               ? nomeGaraP2  : '',
+      distanza:   (document.getElementById('p-distanza')||{}).value || ''
     }).catch(() => {});
   }
   const p = getProgramma();
@@ -7642,7 +7658,7 @@ async function inviaConsiglio(){
     </div>
 
     <!-- Login box -->
-    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin-top:24px;">
+    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin-top:0;">
       <div style="font-size:18px;font-weight:700;margin-bottom:6px;">🔐 Accesso Admin</div>
       <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Inserisci la password per accedere al pannello</div>
       <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin"
