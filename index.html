@@ -3057,14 +3057,14 @@ function salvaGara() {
     if (!isEdit && (_sportNonCensito || _tipoNonCensito || _nazNonCensita || _regNonCensita || _nomeNonCensito || _cittaNonCensita)) {
       gsPost('segnalaGaraNonCensita', {
         utente_id: gara.utente_id,
-        sport:      gara.sport || '',  // passa sempre lo sport
+        sport:      _sportNonCensito  ? gara.sport      : '',
         tipo_gara:  _tipoNonCensito   ? gara.tipo_gara  : '',
         nazione:    _nazNonCensita    ? gara.nazione     : '',
         regione:    _regNonCensita    ? gara.regione     : '',
         luogo:      _cittaNonCensita  ? gara.luogo       : '',
         nome:       _nomeNonCensito   ? gara.nome        : '',
-        continente: gara.continente || '',
-        distanza:   gara.distanza || ''
+        continente: '',
+        distanza:   ''
       }).catch(() => {});
     }
   }
@@ -3302,14 +3302,14 @@ function salvaGaraProgramma() {
   if (haAltro) {
     gsPost('segnalaGaraNonCensita', {
       utente_id:  gara.utente_id,
-      sport:      sportP || '',  // passa sempre lo sport
-      tipo_gara:  _pTipoSel==='__altro__'        ? tipoGaraP : '',
-      continente: continenteP,
-      nazione:    _pNazSel==='__altra_naz__'     ? nazP      : '',
-      regione:    _pRegSel==='__altra_reg__'     ? regP      : '',
-      luogo:      _pCittaSel==='__altra__'       ? cittaVal  : '',
-      nome:       _pNomeSel==='__altro__'        ? nomeGaraP : '',
-      distanza:   String(gara.distanza)
+      sport:      _pSportSel==='__altro_sport__'  ? sportP    : '',
+      tipo_gara:  _pTipoSel==='__altro__'         ? tipoGaraP : '',
+      continente: '',
+      nazione:    _pNazSel==='__altra_naz__'      ? nazP      : '',
+      regione:    _pRegSel==='__altra_reg__'      ? regP      : '',
+      luogo:      _pCittaSel==='__altra__'        ? cittaVal  : '',
+      nome:       _pNomeSel==='__altro__'         ? nomeGaraP : '',
+      distanza:   ''
     }).catch(() => {});
   }
   const p = getProgramma();
