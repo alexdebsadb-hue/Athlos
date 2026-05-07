@@ -7042,33 +7042,41 @@ function loginAdmin() {
 }
 
 async function caricaDatiAdmin() {
-  // Carica utenti e gare freschi (senza cache)
-  const [utentiRes, gareRes, nonCensiteRes] = await Promise.allSettled([
-    gsGet({ action: 'getAllUtenti', utente_id: '' }),
-    gsGet({ action: 'getAllGare',   utente_id: '' }),
-    gsGet({ action: 'getGareNonCensite', admin_token: ADMIN_PWD, utente_id: '' }),
+  // Carica tutti i dati freschi dal foglio Google (no cache)
+  const [utentiRes, gareRes, segnalazioniRes, accessiRes] = await Promise.allSettled([
+    gsGet({ action: 'getAllUtenti',    utente_id: '' }),
+    gsGet({ action: 'getAllGare',      utente_id: '' }),
+    gsGet({ action: 'getSegnalazioni', utente_id: '' }),
+    gsGet({ action: 'getAccessi',      utente_id: '' }),
   ]);
 
-  const utenti    = (utentiRes.status==='fulfilled'    && Array.isArray(utentiRes.value))    ? utentiRes.value    : [];
-  const gare      = (gareRes.status==='fulfilled'      && Array.isArray(gareRes.value))      ? gareRes.value.map(normalizzaGara) : [];
-  const nonCensite= (nonCensiteRes.status==='fulfilled'&& Array.isArray(nonCensiteRes.value))? nonCensiteRes.value : [];
+  const utenti       = (utentiRes.status==='fulfilled'       && Array.isArray(utentiRes.value))       ? utentiRes.value                      : [];
+  const gare         = (gareRes.status==='fulfilled'         && Array.isArray(gareRes.value))         ? gareRes.value.map(normalizzaGara)    : [];
+  const segnalazioni = (segnalazioniRes.status==='fulfilled' && Array.isArray(segnalazioniRes.value)) ? segnalazioniRes.value                : [];
+  const accessi      = (accessiRes.status==='fulfilled'      && Array.isArray(accessiRes.value))      ? accessiRes.value                     : [];
 
   const oggi = new Date().toISOString().slice(0,10);
+  const ieri = new Date(Date.now() - 86400000).toISOString().slice(0,10);
 
-  // Nuovi utenti oggi — non abbiamo timestamp ma mostriamo gli ultimi
+  // Ultimi 10 utenti registrati
   const nuoviUtenti = utenti.slice(-10).reverse();
-  // Nuove gare oggi
+  // Gare inserite oggi
   const nuoveGare = gare.filter(g => (g.data||'').slice(0,10) === oggi).slice(0,20);
+  // Utenti unici che hanno fatto login ieri (dal foglio ACCESSI)
+  const utentiIeri = new Set(
+    accessi.filter(a => String(a.ts||'').slice(0,10) === ieri).map(a => a.utente_id)
+  ).size;
   // Recensioni con rating
   const recensioni = gare.filter(g => g.rating && (g.rating.percorso||g.rating.ristori||g.rating.organizzazione))
     .sort((a,b) => String(b.data||'').localeCompare(String(a.data||''))).slice(0,10);
 
   // Cards riassunto
   document.getElementById('admin-cards').innerHTML = [
-    { n: utenti.length,    label: 'Utenti totali',      icon: '👥' },
-    { n: gare.length,      label: 'Gare totali',         icon: '🏅' },
-    { n: nuoveGare.length, label: 'Gare inserite oggi',  icon: '📅' },
-    { n: nonCensite.length,label: 'Gare non censite',    icon: '📋' },
+    { n: utenti.length,    label: 'Utenti totali',         icon: '👥' },
+    { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
+    { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
+    { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
+    { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
       <div style="font-size:24px;margin-bottom:6px;">${icon}</div>
@@ -7099,25 +7107,32 @@ async function caricaDatiAdmin() {
       </div>`).join('')
     : '<div style="color:var(--text3);font-size:13px;">Nessuna gara inserita oggi</div>';
 
-  // Gare non censite
-  window._gareNonCensiteData = nonCensite;
+  // Inserimenti manuali (gare con campi liberi)
+  window._gareNonCensiteData = segnalazioni;
   const elGNC = document.getElementById('admin-non-censite');
-  elGNC.innerHTML = nonCensite.length
-    ? `<table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr style="color:var(--text3);text-align:left;">
-          <th style="padding:6px 8px;">Data</th><th style="padding:6px 8px;">Utente</th>
-          <th style="padding:6px 8px;">Sport</th><th style="padding:6px 8px;">Nome gara</th>
-          <th style="padding:6px 8px;">Città</th><th style="padding:6px 8px;">Regione</th>
+  elGNC.innerHTML = segnalazioni.length
+    ? `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="color:var(--text3);text-align:left;border-bottom:2px solid var(--border);">
+          <th style="padding:8px;">Data</th>
+          <th style="padding:8px;">Utente</th>
+          <th style="padding:8px;color:var(--accent);">Sport ⬅</th>
+          <th style="padding:8px;color:var(--accent);">Continente ⬅</th>
+          <th style="padding:8px;color:var(--accent);">Nazione ⬅</th>
+          <th style="padding:8px;color:var(--accent);">Regione ⬅</th>
+          <th style="padding:8px;color:var(--accent);">Città ⬅</th>
+          <th style="padding:8px;color:var(--accent);">Nome gara ⬅</th>
         </tr></thead>
-        <tbody>${nonCensite.map(g => `<tr style="border-top:1px solid var(--border);">
-          <td style="padding:6px 8px;color:var(--text3);">${(g.ts||'').slice(0,10)}</td>
-          <td style="padding:6px 8px;">${g.utente||'—'}</td>
-          <td style="padding:6px 8px;">${g.sport||'—'}</td>
-          <td style="padding:6px 8px;font-weight:600;">${g.nome||'—'}</td>
-          <td style="padding:6px 8px;">${g.citta||'—'}</td>
-          <td style="padding:6px 8px;">${g.regione||'—'}</td>
+        <tbody>${segnalazioni.map(s => `<tr style="border-top:1px solid var(--border);">
+          <td style="padding:8px;color:var(--text3);white-space:nowrap;">${String(s.ts||'').slice(0,10)}</td>
+          <td style="padding:8px;">${s.utente_id||'—'}</td>
+          <td style="padding:8px;font-weight:600;">${s.sport||'—'}</td>
+          <td style="padding:8px;">${s.continente||'—'}</td>
+          <td style="padding:8px;font-weight:600;">${s.nazione||'—'}</td>
+          <td style="padding:8px;">${s.regione||'—'}</td>
+          <td style="padding:8px;font-weight:600;">${s.citta||'—'}</td>
+          <td style="padding:8px;font-weight:700;color:var(--accent);">${s.nome||'—'}</td>
         </tr>`).join('')}</tbody>
-      </table>`
+      </table></div>`
     : '<div style="color:var(--text3);font-size:13px;">Nessuna gara non censita — ottimo!</div>';
 
   // Consigli dal foglio Google
@@ -7159,7 +7174,9 @@ function copiaGareNonCensite() {
   const lista = window._gareNonCensiteData || [];
   if (!lista.length) { showToast('Nessuna gara da copiare'); return; }
   const sep = String.fromCharCode(9); const nl = String.fromCharCode(10);
-  const testo = lista.map(g => [g.sport,g.nome,g.citta,g.regione].join(sep)).join(nl);
+  const testo = ['SPORT	CONTINENTE	NAZIONE	REGIONE	CITTA	NOME_GARA'].concat(
+    lista.map(s => [s.sport,s.continente,s.nazione,s.regione,s.citta,s.nome].join(sep))
+  ).join(nl);
   navigator.clipboard.writeText(testo).then(() => showToast('Lista copiata negli appunti! 📋'));
 }
 
@@ -7386,8 +7403,8 @@ async function inviaConsiglio(){
 </div>
 
 
-<div id="page-admin" class="page">
-  <div class="profile-wrap" style="max-width:1100px;">
+<div id="page-admin" class="page" style="padding-top:0;">
+  <div style="max-width:1100px;margin:0 auto;padding:16px 24px;">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -7409,7 +7426,7 @@ async function inviaConsiglio(){
     <div id="admin-content" style="display:none;">
 
       <!-- Cards riassunto -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;" id="admin-cards"></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
 
       <!-- Riga 1: Ultimi utenti + Campi non censiti -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
@@ -7428,12 +7445,12 @@ async function inviaConsiglio(){
 
       </div>
 
-      <!-- Riga 2: Campi inseriti manualmente (non censiti) -->
+      <!-- Riga 2: Inserimenti manuali -->
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">📋 Campi inseriti manualmente</div>
-            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Nazioni, città e gare non presenti nel foglio Configurazione — da integrare se necessario</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">📋 Inserimenti manuali</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Gare salvate con nome, nazione o città <strong>non presenti nel foglio Configurazione</strong>. Integralo per renderli disponibili a tutti gli utenti.</div>
           </div>
           <button class="btn-secondary" onclick="copiaGareNonCensite()" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📋 Copia lista</button>
         </div>
