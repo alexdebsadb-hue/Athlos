@@ -1217,75 +1217,58 @@
         <!-- SVG ITALIA -->
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;">
           <div id="italy-map-container" style="width:100%;position:relative;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" style="width:100%;height:auto;display:block;">
-            <defs>
-              <style>
-                .reg { fill:#2a2a3a; stroke:#0a0a1a; stroke-width:1.5; cursor:default; transition:fill 0.2s, fill-opacity 0.2s; }
-                .reg:hover { stroke:#ff5722; stroke-width:2; }
-              </style>
-            </defs>
-            
-            <!-- Valle d Aosta -->
-            <path class="reg" data-region="Valle d'Aosta" d="M 107,76 L 115,80 L 128,75 L 140,82 L 152,79 L 158,85 L 148,95 L 135,98 L 120,102 L 108,96 L 107,76 Z"/>
-            
-            <!-- Piemonte -->
-            <path class="reg" data-region="Piemonte" d="M 60,140 L 95,108 L 108,96 L 120,102 L 135,98 L 148,95 L 158,85 L 172,90 L 185,88 L 195,100 L 200,120 L 195,145 L 185,160 L 170,170 L 155,185 L 140,188 L 120,175 L 100,168 L 80,155 L 60,140 Z"/>
-            
-            <!-- Liguria -->
-            <path class="reg" data-region="Liguria" d="M 95,175 L 120,175 L 140,188 L 155,185 L 170,170 L 185,160 L 200,162 L 220,168 L 238,162 L 250,170 L 240,185 L 220,192 L 200,188 L 180,195 L 155,198 L 130,195 L 110,190 L 95,175 Z"/>
-            
-            <!-- Lombardia -->
-            <path class="reg" data-region="Lombardia" d="M 172,90 L 158,85 L 148,95 L 170,90 L 195,85 L 225,82 L 255,88 L 275,95 L 290,105 L 295,120 L 285,140 L 270,152 L 250,158 L 230,155 L 210,148 L 195,145 L 200,120 L 195,100 L 185,88 L 172,90 Z"/>
-            
-            <!-- Trentino-Alto Adige -->
-            <path class="reg" data-region="Trentino-Alto Adige" d="M 255,88 L 225,82 L 195,85 L 195,65 L 210,52 L 235,48 L 260,55 L 275,68 L 290,75 L 290,105 L 275,95 L 255,88 Z"/>
-            
-            <!-- Veneto -->
-            <path class="reg" data-region="Veneto" d="M 290,105 L 290,75 L 305,65 L 330,60 L 355,65 L 370,75 L 375,90 L 368,108 L 355,120 L 340,130 L 318,132 L 300,128 L 295,120 L 290,105 Z"/>
-            
-            <!-- Friuli-Venezia Giulia -->
-            <path class="reg" data-region="Friuli-Venezia Giulia" d="M 370,75 L 355,65 L 380,55 L 405,58 L 415,72 L 408,88 L 395,95 L 380,92 L 368,108 L 375,90 L 370,75 Z"/>
-            
-            <!-- Emilia-Romagna -->
-            <path class="reg" data-region="Emilia-Romagna" d="M 200,162 L 185,160 L 195,145 L 210,148 L 230,155 L 250,158 L 270,152 L 285,140 L 300,128 L 318,132 L 340,130 L 355,120 L 368,108 L 380,92 L 370,138 L 355,150 L 335,162 L 310,170 L 285,175 L 260,175 L 238,170 L 218,168 L 200,162 Z"/>
-            
-            <!-- Toscana -->
-            <path class="reg" data-region="Toscana" d="M 195,188 L 218,168 L 238,170 L 260,175 L 285,175 L 295,188 L 305,205 L 300,225 L 288,242 L 270,255 L 248,260 L 225,255 L 205,242 L 192,225 L 190,205 L 195,188 Z"/>
-            
-            <!-- Marche -->
-            <path class="reg" data-region="Marche" d="M 335,162 L 355,150 L 370,138 L 380,92 L 395,95 L 400,115 L 398,140 L 390,162 L 378,178 L 362,190 L 345,195 L 330,188 L 318,175 L 320,162 L 335,162 Z"/>
-            
-            <!-- Umbria -->
-            <path class="reg" data-region="Umbria" d="M 285,175 L 310,170 L 320,162 L 318,175 L 330,188 L 322,205 L 308,218 L 292,222 L 278,215 L 270,200 L 272,185 L 285,175 Z"/>
-            
-            <!-- Lazio -->
-            <path class="reg" data-region="Lazio" d="M 270,255 L 288,242 L 300,225 L 305,205 L 292,222 L 308,218 L 322,205 L 330,188 L 345,195 L 355,212 L 362,230 L 358,250 L 345,268 L 328,280 L 308,285 L 285,280 L 268,268 L 265,252 L 270,255 Z"/>
-            
-            <!-- Abruzzo -->
-            <path class="reg" data-region="Abruzzo" d="M 362,190 L 378,178 L 390,162 L 398,140 L 410,155 L 418,172 L 415,192 L 405,210 L 390,222 L 372,228 L 358,222 L 355,212 L 362,190 Z"/>
-            
-            <!-- Molise -->
-            <path class="reg" data-region="Molise" d="M 372,228 L 390,222 L 405,210 L 415,220 L 418,235 L 408,248 L 392,252 L 378,248 L 368,238 L 372,228 Z"/>
-            
-            <!-- Campania -->
-            <path class="reg" data-region="Campania" d="M 308,285 L 328,280 L 345,268 L 358,250 L 368,238 L 378,248 L 392,252 L 400,268 L 398,285 L 385,300 L 368,310 L 348,315 L 328,308 L 312,295 L 308,285 Z"/>
-            
-            <!-- Puglia -->
-            <path class="reg" data-region="Puglia" d="M 405,210 L 418,172 L 430,160 L 450,158 L 468,168 L 480,185 L 488,205 L 485,228 L 472,248 L 455,262 L 438,270 L 418,268 L 408,255 L 408,248 L 418,235 L 415,220 L 405,210 Z"/>
-            
-            <!-- Basilicata -->
-            <path class="reg" data-region="Basilicata" d="M 348,315 L 368,310 L 385,300 L 398,285 L 408,295 L 418,310 L 415,328 L 400,340 L 382,345 L 362,340 L 348,328 L 345,315 L 348,315 Z"/>
-            
-            <!-- Calabria -->
-            <path class="reg" data-region="Calabria" d="M 382,345 L 400,340 L 415,328 L 425,342 L 430,360 L 425,380 L 412,398 L 395,410 L 378,415 L 362,408 L 350,392 L 348,372 L 355,355 L 368,348 L 382,345 Z"/>
-            
-            <!-- Sicilia -->
-            <path class="reg" data-region="Sicilia" d="M 235,488 L 265,478 L 300,475 L 335,480 L 362,492 L 378,510 L 375,528 L 358,542 L 335,548 L 305,548 L 278,540 L 255,525 L 238,508 L 232,495 L 235,488 Z"/>
-            
-            <!-- Sardegna -->
-            <path class="reg" data-region="Sardegna" d="M 95,330 L 118,315 L 135,318 L 148,332 L 152,352 L 148,375 L 138,395 L 122,408 L 105,410 L 90,398 L 82,378 L 82,355 L 88,338 L 95,330 Z"/>
-            </svg>
-            <div id="map-tooltip" style="position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:220px;font-size:13px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>
+            <svg id="italy-map-svg" viewBox="0 0 460 620" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <clipPath id="clip-0"><circle cx="77" cy="72" r="22"/></clipPath>
+  <clipPath id="clip-1"><circle cx="81" cy="133" r="22"/></clipPath>
+  <clipPath id="clip-2"><circle cx="171" cy="192" r="22"/></clipPath>
+  <clipPath id="clip-3"><circle cx="193" cy="115" r="22"/></clipPath>
+  <clipPath id="clip-4"><circle cx="222" cy="63" r="22"/></clipPath>
+  <clipPath id="clip-5"><circle cx="254" cy="84" r="22"/></clipPath>
+  <clipPath id="clip-6"><circle cx="293" cy="78" r="22"/></clipPath>
+  <clipPath id="clip-7"><circle cx="189" cy="170" r="22"/></clipPath>
+  <clipPath id="clip-8"><circle cx="210" cy="243" r="22"/></clipPath>
+  <clipPath id="clip-9"><circle cx="277" cy="224" r="22"/></clipPath>
+  <clipPath id="clip-10"><circle cx="261" cy="262" r="22"/></clipPath>
+  <clipPath id="clip-11"><circle cx="261" cy="304" r="22"/></clipPath>
+  <clipPath id="clip-12"><circle cx="290" cy="256" r="22"/></clipPath>
+  <clipPath id="clip-13"><circle cx="333" cy="315" r="22"/></clipPath>
+  <clipPath id="clip-14"><circle cx="360" cy="356" r="22"/></clipPath>
+  <clipPath id="clip-15"><circle cx="378" cy="347" r="22"/></clipPath>
+  <clipPath id="clip-16"><circle cx="377" cy="393" r="22"/></clipPath>
+  <clipPath id="clip-17"><circle cx="405" cy="463" r="22"/></clipPath>
+  <clipPath id="clip-18"><circle cx="323" cy="532" r="22"/></clipPath>
+  <clipPath id="clip-19"><circle cx="104" cy="408" r="22"/></clipPath>
+    <style>
+      .map-bubble { transition: r 0.15s ease; }
+      .map-img    { transition: opacity 0.2s; }
+      .map-reg:hover .map-bubble  { r: 26; }
+      .map-reg:hover .map-img     { opacity: 1; }
+      .map-reg:hover .map-border  { stroke: #ff5722; stroke-width: 2.5; }
+    </style>
+  </defs>
+  <g class="map-reg" data-region="Valle d'Aosta" data-label="Monte Bianco" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="77" cy="72" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Mont_Blanc_depuis_Planpraz.jpg/80px-Mont_Blanc_depuis_Planpraz.jpg" x="55" y="50" width="44" height="44" clip-path="url(#clip-0)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="77" cy="72" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Piemonte" data-label="Mole Antonelliana" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="81" cy="133" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Mole_Antonelliana_%28Turin%29.jpg/80px-Mole_Antonelliana_%28Turin%29.jpg" x="59" y="111" width="44" height="44" clip-path="url(#clip-1)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="81" cy="133" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Liguria" data-label="Cinque Terre" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="171" cy="192" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Vernazza_Cinque_Terre.jpg/80px-Vernazza_Cinque_Terre.jpg" x="149" y="170" width="44" height="44" clip-path="url(#clip-2)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="171" cy="192" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Lombardia" data-label="Duomo di Milano" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="193" cy="115" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Milan_Cathedral_from_Piazza_del_Duomo.jpg/80px-Milan_Cathedral_from_Piazza_del_Duomo.jpg" x="171" y="93" width="44" height="44" clip-path="url(#clip-3)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="193" cy="115" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Trentino-Alto Adige" data-label="Tre Cime" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="222" cy="63" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/A_foggy_morning_at_Tre_Cime_di_Lavaredo%2C_Dolomites.jpg/80px-A_foggy_morning_at_Tre_Cime_di_Lavaredo%2C_Dolomites.jpg" x="200" y="41" width="44" height="44" clip-path="url(#clip-4)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="222" cy="63" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Veneto" data-label="Ponte di Rialto" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="254" cy="84" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Canal_Grande_Ponte_di_Rialto.jpg/80px-Canal_Grande_Ponte_di_Rialto.jpg" x="232" y="62" width="44" height="44" clip-path="url(#clip-5)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="254" cy="84" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Friuli-Venezia Giulia" data-label="Trieste" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="293" cy="78" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Trieste_-_Piazza_Unit%C3%A0_d%27Italia2.jpg/80px-Trieste_-_Piazza_Unit%C3%A0_d%27Italia2.jpg" x="271" y="56" width="44" height="44" clip-path="url(#clip-6)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="293" cy="78" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Emilia-Romagna" data-label="Ferrari" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="189" cy="170" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Ferrari_Logo.svg/80px-Ferrari_Logo.svg.png" x="167" y="148" width="44" height="44" clip-path="url(#clip-7)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="189" cy="170" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Toscana" data-label="Torre di Pisa" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="210" cy="243" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Leaning_tower_of_pisa_2.jpg/80px-Leaning_tower_of_pisa_2.jpg" x="188" y="221" width="44" height="44" clip-path="url(#clip-8)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="210" cy="243" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Marche" data-label="Riviera del Conero" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="277" cy="224" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Conero_promontory.jpg/80px-Conero_promontory.jpg" x="255" y="202" width="44" height="44" clip-path="url(#clip-9)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="277" cy="224" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Umbria" data-label="Assisi" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="261" cy="262" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Assisi_dusk.jpg/80px-Assisi_dusk.jpg" x="239" y="240" width="44" height="44" clip-path="url(#clip-10)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="261" cy="262" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Lazio" data-label="Colosseo" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="261" cy="304" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/80px-Colosseo_2020.jpg" x="239" y="282" width="44" height="44" clip-path="url(#clip-11)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="261" cy="304" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Abruzzo" data-label="Arrosticini" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="290" cy="256" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Arrosticini_abruzzesi.jpg/80px-Arrosticini_abruzzesi.jpg" x="268" y="234" width="44" height="44" clip-path="url(#clip-12)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="290" cy="256" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Molise" data-label="Campobasso" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="333" cy="315" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Campobasso_Molise.jpg/80px-Campobasso_Molise.jpg" x="311" y="293" width="44" height="44" clip-path="url(#clip-13)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="333" cy="315" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Campania" data-label="Napoli & Vesuvio" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="360" cy="356" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Napoli_e_Vesuvio.jpg/80px-Napoli_e_Vesuvio.jpg" x="338" y="334" width="44" height="44" clip-path="url(#clip-14)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="360" cy="356" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Puglia" data-label="Trulli di Alberobello" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="378" cy="347" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Alberobello_Trulli_aN.jpg/80px-Alberobello_Trulli_aN.jpg" x="356" y="325" width="44" height="44" clip-path="url(#clip-15)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="378" cy="347" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Basilicata" data-label="Sassi di Matera" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="377" cy="393" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Sassi_di_Matera.jpg/80px-Sassi_di_Matera.jpg" x="355" y="371" width="44" height="44" clip-path="url(#clip-16)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="377" cy="393" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Calabria" data-label="Tropea" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="405" cy="463" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Tropea_Calabria_Italy_-_Creative_Commons_by_gnuckx.jpg/80px-Tropea_Calabria_Italy_-_Creative_Commons_by_gnuckx.jpg" x="383" y="441" width="44" height="44" clip-path="url(#clip-17)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="405" cy="463" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Sicilia" data-label="Etna" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="323" cy="532" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Etna_eruption_seen_from_the_International_Space_Station.jpg/80px-Etna_eruption_seen_from_the_International_Space_Station.jpg" x="301" y="510" width="44" height="44" clip-path="url(#clip-18)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="323" cy="532" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+<g class="map-reg" data-region="Sardegna" data-label="Arcipelago Maddalena" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="104" cy="408" r="22" fill="#2a2a3a" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-bubble"/><image href="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Maddalena_archipelago.jpg/80px-Maddalena_archipelago.jpg" x="82" y="386" width="44" height="44" clip-path="url(#clip-19)" preserveAspectRatio="xMidYMid slice" style="opacity:0.75;" class="map-img"/><circle cx="104" cy="408" r="22" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" class="map-border"/></g>
+</svg>
+                        <div id="map-tooltip" style="position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:220px;font-size:13px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>
           </div>
 
           <!-- TOOLTIP -->
@@ -7546,6 +7529,55 @@ function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
   }
 }
 
+function mapRegHover(el, e) {
+  const regName = el.getAttribute('data-region');
+  const regLabel = el.getAttribute('data-label') || regName;
+  const gare = getGare().filter(g => g.regione === regName);
+  const tooltip = document.getElementById('map-tooltip');
+  const bubble  = el.querySelector('.map-bubble');
+  if (bubble) bubble.setAttribute('r', '26');
+  if (!tooltip) return;
+  if (!gare.length) {
+    tooltip.innerHTML = '<div style="font-weight:600;">'+regName+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Nessuna gara ancora</div>';
+  } else {
+    const kmR = gare.reduce((s,g)=>s+(g.distanza||0),0);
+    const items = gare.slice(0,5).map(g=>'<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+(g.data||'').slice(0,4)+' · '+(g.nome||g.tipo_gara||'')+'</div>').join('');
+    tooltip.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+regName+'</div><div style="font-size:11px;color:var(--accent);margin-bottom:4px;">'+regLabel+'</div>'
+      +'<div style="color:var(--accent);font-weight:600;margin-bottom:3px;">'+gare.length+' gar'+(gare.length===1?'a':'e')+' · '+Math.round(kmR)+' km</div>'+items
+      +(gare.length>5?'<div style="font-size:11px;color:var(--accent);margin-top:3px;">+'+(gare.length-5)+' altre</div>':'');
+  }
+  const cont = document.getElementById('italy-map-container');
+  const box  = cont.getBoundingClientRect();
+  let tx = e.clientX-box.left+14, ty = e.clientY-box.top+14;
+  if (tx+230>box.width)  tx -= 245;
+  if (ty+160>box.height) ty -= 170;
+  tooltip.style.left=Math.max(0,tx)+'px'; tooltip.style.top=Math.max(0,ty)+'px'; tooltip.style.opacity='1';
+}
+
+function mapRegLeave(el) {
+  const bubble = el.querySelector('.map-bubble');
+  if (bubble) bubble.setAttribute('r', '22');
+  const tooltip = document.getElementById('map-tooltip');
+  if (tooltip) tooltip.style.opacity='0';
+}
+
+function mapRegClick(el) {
+  const regName = el.getAttribute('data-region');
+  const gs = getGare().filter(g => g.regione === regName);
+  if (!gs.length) return;
+  const cards = gs.map(g=>'<div style="padding:8px;background:var(--bg4);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;" onclick="openDetail('+g.id+')">'
+    +'<div style="font-weight:600;">'+sportIcon(g.sport)+' '+(g.nome||g.tipo_gara||'')+'</div>'
+    +'<div style="color:var(--text3);font-size:12px;">'+(g.data||'').slice(0,10)+' · '+(g.luogo||'')+'</div></div>').join('');
+  const modal = document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;">'
+    +'<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:900;margin-bottom:16px;">📍 '+regName+'</div>'
+    +cards+'<button id="map-modal-close-btn" class="btn-secondary" style="margin-top:12px;width:100%">Chiudi</button></div>';
+  modal.onclick=ev=>{if(ev.target===modal)modal.remove();};
+  modal.querySelector('#map-modal-close-btn').onclick=()=>modal.remove();
+  document.body.appendChild(modal);
+}
+
 function updateMapColors() {
   const gare = getGare();
   const regioniMap = {};
@@ -7555,57 +7587,36 @@ function updateMapColors() {
       regioniMap[g.regione].push(g);
     }
   });
-  const tooltip = document.getElementById('map-tooltip');
-  document.querySelectorAll('#italy-map-container .reg').forEach(path => {
-    const regName = path.getAttribute('data-region');
+  document.querySelectorAll('#italy-map-svg .map-reg').forEach(el => {
+    const regName = el.getAttribute('data-region');
     if (!regName) return;
     const gs = regioniMap[regName] || [];
     const color = regioneColorSVG(gs.length);
-    path.style.fill        = color || '#2a2a3a';
-    path.style.fillOpacity = gs.length ? '0.75' : '0.35';
-    path.style.cursor      = gs.length ? 'pointer' : 'default';
-    path.onmouseenter = function(e) {
-      path.style.fillOpacity = '0.95';
-      if (!tooltip) return;
-      if (!gs.length) {
-        tooltip.innerHTML = '<div style="font-weight:600;">' + regName + '</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Nessuna gara ancora</div>';
-      } else {
-        const kmR = gs.reduce((s,g) => s+(g.distanza||0), 0);
-        const items = gs.slice(0,5).map(g => '<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+(g.data||'').slice(0,4)+' · '+(g.nome||g.tipo_gara||'')+'</div>').join('');
-        const more  = gs.length>5 ? '<div style="font-size:11px;color:var(--accent);margin-top:3px;">+'+(gs.length-5)+' altre</div>' : '';
-        tooltip.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">'+regName+'</div><div style="color:var(--accent);font-weight:600;margin-bottom:3px;">'+gs.length+' gar'+(gs.length===1?'a':'e')+' · '+Math.round(kmR)+' km</div>'+items+more;
-      }
-      const cont = document.getElementById('italy-map-container');
-      const box  = cont.getBoundingClientRect();
-      let tx = e.clientX - box.left + 14, ty = e.clientY - box.top + 14;
-      if (tx+225>box.width)  tx -= 240;
-      if (ty+175>box.height) ty -= 185;
-      tooltip.style.left    = Math.max(0,tx)+'px';
-      tooltip.style.top     = Math.max(0,ty)+'px';
-      tooltip.style.opacity = '1';
-    };
-    path.onmouseleave = function() {
-      path.style.fillOpacity = gs.length ? '0.75' : '0.35';
-      if (tooltip) tooltip.style.opacity = '0';
-    };
-    path.onclick = function() {
-      if (!gs.length) return;
-      const modal = document.createElement('div');
-      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-      const cards = gs.map(g => {
-        const kmG = (g.distanza||0);
-        return '<div style="padding:8px;background:var(--bg4);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;" onclick="openDetail('+g.id+')">'
-          +'<div style="font-weight:600;">'+sportIcon(g.sport)+' '+(g.nome||g.tipo_gara||'')+'</div>'
-          +'<div style="color:var(--text3);font-size:12px;">'+(g.data||'').slice(0,10)+' · '+(g.luogo||'')+'</div></div>';
-      }).join('');
-      modal.innerHTML = '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;">'
-        +'<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:900;margin-bottom:16px;">📍 '+regName+'</div>'
-        +cards
-        +'<button class="btn-secondary" style="margin-top:12px;width:100%" id="map-modal-close-btn">Chiudi</button></div>';
-      modal.onclick=ev=>{if(ev.target===modal)modal.remove();};
-      modal.querySelector('#map-modal-close-btn').onclick=()=>modal.remove();
-      document.body.appendChild(modal);
-    };
+    const bubble = el.querySelector('.map-bubble');
+    const border = el.querySelector('.map-border');
+    const img    = el.querySelector('.map-img');
+    const r = gs.length ? Math.min(22 + gs.length * 1.5, 30) : 22;
+    if (bubble) {
+      bubble.setAttribute('r', r);
+      bubble.setAttribute('fill', '#1a1a2a');
+    }
+    if (border) {
+      // Bordo colorato per le regioni visitate
+      border.setAttribute('r', r);
+      border.setAttribute('stroke', gs.length ? (color || '#ff5722') : 'rgba(255,255,255,0.15)');
+      border.setAttribute('stroke-width', gs.length ? '3' : '1.5');
+    }
+    if (img) {
+      img.setAttribute('x', String(MAP_SEEDS[regName][0] - r));
+      img.setAttribute('y', String(MAP_SEEDS[regName][1] - r));
+      img.setAttribute('width',  String(r * 2));
+      img.setAttribute('height', String(r * 2));
+      img.style.opacity = gs.length ? '1' : '0.4';
+    }
+    // Aggiorna clipPath
+    const clipCircle = document.querySelector('#clip-' + Array.from(document.querySelectorAll('#italy-map-svg .map-reg')).indexOf(el) + ' circle');
+    if (clipCircle) clipCircle.setAttribute('r', r);
+    el.style.cursor = gs.length ? 'pointer' : 'default';
   });
 }
 function loadMap() {
