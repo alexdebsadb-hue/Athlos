@@ -3796,11 +3796,19 @@ function renderStats() {
   }
 
   // ── Per Anno — solo Finisher, colori per sport ──
-  const sportColorMap = {
-    corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
-    bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
-    duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
+  // Mappa colori sport — chiavi in minuscolo per match case-insensitive
+  const _buildSportColorMap = () => {
+    const base = {
+      corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
+      bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
+      duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
+      ciclismo:'#ffc107', nuoto:'#00bcd4', marcia:'#ff8a65',
+    };
+    return base;
   };
+  const sportColorMap = _buildSportColorMap();
+  // Helper per lookup case-insensitive
+  const getSportColor = s => sportColorMap[(s||'').toLowerCase()] || '#888';
   // Raggruppa per anno+sport (solo finisher)
   const anniSet = new Set();
   const sportSet = new Set();
@@ -3824,7 +3832,7 @@ function renderStats() {
         datasets: sportList.map(s => ({
           label: sportIcon(s) + ' ' + sportLabel(s),
           data: anniSorted.map(y => perAnnoSport[s]?.[y] || 0),
-          backgroundColor: sportColorMap[s] || '#888',
+          backgroundColor: getSportColor(s),
           borderRadius: 4,
           stack: 'anni',
         }))
@@ -3867,7 +3875,7 @@ function renderStats() {
       data: {
         labels: sportLabels.map(s => sportIcon(s) + ' ' + sportLabel(s)),
         datasets: [{ data: sportLabels.map(s=>perSport[s]),
-          backgroundColor: sportLabels.map(s => _sportColorSolid[s] || '#607d8b'),
+          backgroundColor: sportLabels.map(s => getSportColor(s) !== '#888' ? getSportColor(s) : '#607d8b'),
           borderColor: 'var(--bg3)', borderWidth: 3,
           hoverOffset: 6 }]
       },
@@ -3895,7 +3903,7 @@ function renderStats() {
       data: {
         labels: tipoSorted.map(([t, v]) => sportIcon(v.sport) + ' ' + t),
         datasets: [{ label: 'Gare', data: tipoSorted.map(([,v])=>v.count),
-          backgroundColor: tipoSorted.map(([,v]) => sportColorMap[v.sport] || CHART_COLORS.accent),
+          backgroundColor: tipoSorted.map(([,v]) => getSportColor(v.sport) !== '#888' ? getSportColor(v.sport) : CHART_COLORS.accent),
           borderRadius: 4 }]
       },
       options: { ...CHART_DEFAULTS, indexAxis: 'y',
