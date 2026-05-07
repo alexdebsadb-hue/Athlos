@@ -1605,6 +1605,7 @@
           <select class="form-select" id="f-regione" onchange="onRegioneChange(this.value)">
             <option value="">Prima seleziona nazione...</option>
           </select>
+          <input class="form-input" id="f-regione-altro" placeholder="Specifica regione..." style="display:none;margin-top:6px;" />
         </div>
       </div>
 
@@ -1806,9 +1807,10 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Tipo gara <span style="color:var(--accent)">*</span></label>
-          <select class="form-select" id="p-tipo-gara">
+          <select class="form-select" id="p-tipo-gara" onchange="onPTipoGaraChange(this.value)">
             <option value="">Prima seleziona uno sport...</option>
           </select>
+          <input class="form-input" id="p-tipo-gara-altro" placeholder="Specifica tipo gara..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Data <span style="color:var(--accent)">*</span>
@@ -1831,12 +1833,14 @@
           <select class="form-select" id="p-nazione" onchange="onPNazioneChange(this.value)">
             <option value="">Prima seleziona continente...</option>
           </select>
+          <input class="form-input" id="p-nazione-altro" placeholder="Specifica nazione..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
           <select class="form-select" id="p-regione" onchange="onPRegioneChange(this.value)">
             <option value="">Prima seleziona nazione...</option>
           </select>
+          <input class="form-input" id="p-regione-altro" placeholder="Specifica regione..." style="display:none;margin-top:6px;" />
         </div>
       </div>
       <div class="form-group">
@@ -2932,29 +2936,7 @@ function selectSport(btn) {
 }
 
 function salvaGara() {
-  const tipoGaraRaw = document.getElementById('f-tipo-gara').value.trim();
-  const _sportRaw = document.getElementById('f-sport').value.trim();
-  if (!tipoGara) { alert('Seleziona il tipo di gara'); return; }
-  if (!_sportRaw && !sportSel) { alert('Seleziona lo sport'); return; }
-  const dataVal = document.getElementById('f-data').value;
-  if (dataVal && dataVal > new Date().toISOString().slice(0,10)) {
-    alert('⚠️ La data è futura. Per le gare in programma usa la sezione "In Programma".');
-    return;
-  }
-  // Controllo contenuti offensivi nelle note
-  const noteVal = (document.getElementById('f-note') || {}).value || '';
-  if (contenutoOffensivo(noteVal)) {
-    alert('⚠️ Il testo inserito nelle note contiene contenuti non consentiti. Rimuovili per procedere.');
-    return;
-  }
-  const editId = document.getElementById('f-edit-id').value;
-  const isEdit = !!editId;
-  const sportLower = (_sportRaw||'').toLowerCase();
-  const isTriFlag = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
-                    sportLower.includes('triathlon') || sportLower.includes('ironman');
-  const isTri = isTriFlag;
-  const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
-  // Leggi valori "Altro" dai campi liberi
+  // Leggi valori dai campi (inclusi quelli "Altro")
   const sportSel = (document.getElementById('f-sport')||{}).value || '';
   const sportVal = sportSel === '__altro_sport__'
     ? ((document.getElementById('f-sport-altro')||{}).value||'').trim()
@@ -2971,6 +2953,25 @@ function salvaGara() {
   const regVal = regSel === '__altra_reg__'
     ? ((document.getElementById('f-regione-altro')||{}).value||'').trim()
     : regSel;
+  // Validazioni
+  if (!sportVal) { alert('Seleziona lo sport'); return; }
+  if (!tipoVal)  { alert('Seleziona il tipo di gara'); return; }
+  const dataVal = document.getElementById('f-data').value;
+  if (dataVal && dataVal > new Date().toISOString().slice(0,10)) {
+    alert('⚠️ La data è futura. Per le gare in programma usa la sezione "In Programma".');
+    return;
+  }
+  const noteVal = (document.getElementById('f-note') || {}).value || '';
+  if (contenutoOffensivo(noteVal)) {
+    alert('⚠️ Il testo inserito nelle note contiene contenuti non consentiti. Rimuovili per procedere.');
+    return;
+  }
+  const editId = document.getElementById('f-edit-id').value;
+  const isEdit = !!editId;
+  const sportLower = sportVal.toLowerCase();
+  const isTri = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
+                sportLower.includes('triathlon') || sportLower.includes('ironman');
+  const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
 
   const gara = {
     id: (isEdit && editId !== '__archivia__') ? parseInt(editId) : Date.now(),
@@ -3242,8 +3243,15 @@ function salvaGaraProgramma() {
     alert('⚠️ La data deve essere successiva a oggi. Per le gare passate usa "Aggiungi gara".');
     return;
   }
-  const sportP    = (document.getElementById('p-sport')     || {}).value || selectedSportP || '';
-  const tipoGaraP = (document.getElementById('p-tipo-gara') || {}).value || '';
+  // Leggi valori con supporto "Altro"
+  const _pSportSel = (document.getElementById('p-sport')||{}).value || selectedSportP || '';
+  const sportP = _pSportSel === '__altro_sport__'
+    ? ((document.getElementById('p-sport-altro')||{}).value||'').trim()
+    : _pSportSel;
+  const _pTipoSel = (document.getElementById('p-tipo-gara')||{}).value || '';
+  const tipoGaraP = _pTipoSel === '__altro__'
+    ? ((document.getElementById('p-tipo-gara-altro')||{}).value||'').trim()
+    : _pTipoSel;
   const nomeGara  = tipoGaraP || nome || '';
   if (!nomeGara && !sportP) { alert('Seleziona almeno lo sport o il tipo di gara'); return; }
   // Legge dalla cascata — nome da select o campo libero
@@ -3258,20 +3266,41 @@ function salvaGaraProgramma() {
   const cittaVal = (pCittaSel && pCittaSel.value && pCittaSel.value !== '__altra__')
     ? pCittaSel.value
     : ((pLuogoLib || {}).value || '').trim();
+  // Leggi nazione e regione con supporto Altro
+  const _pNazSel = (document.getElementById('p-nazione')||{}).value || '';
+  const nazP = _pNazSel === '__altra_naz__'
+    ? ((document.getElementById('p-nazione-altro')||{}).value||'').trim() : _pNazSel;
+  const _pRegSel = (document.getElementById('p-regione')||{}).value || '';
+  const regP = _pRegSel === '__altra_reg__'
+    ? ((document.getElementById('p-regione-altro')||{}).value||'').trim() : _pRegSel;
+
   const gara = {
     id: Date.now(),
     utente_id: getUtenteId() || 'locale',
     sport: sportP,
     tipo_gara: nomeGara,
     nome: nomeGaraP || nomeGara,
-    nazione:    (document.getElementById('p-nazione')    || {}).value || '',
+    nazione:    nazP,
     continente: (document.getElementById('p-continente') || {}).value || '',
     data: document.getElementById('p-data').value,
     luogo: cittaVal,
-    regione: document.getElementById('p-regione').value,
+    regione: regP,
     distanza: parseFloat(document.getElementById('p-distanza').value) || 0,
     note: document.getElementById('p-note').value,
   };
+
+  // Segnala campi non censiti
+  if (_pSportSel==='__altro_sport__' || _pTipoSel==='__altro__' ||
+      _pNazSel==='__altra_naz__' || _pRegSel==='__altra_reg__') {
+    gsPost('segnalaGaraNonCensita', {
+      utente_id: getUtenteId(),
+      sport:     _pSportSel==='__altro_sport__' ? sportP    : '',
+      tipo_gara: _pTipoSel==='__altro__'        ? tipoGaraP : '',
+      nazione:   _pNazSel==='__altra_naz__'     ? nazP      : '',
+      regione:   _pRegSel==='__altra_reg__'     ? regP      : '',
+      luogo: '', nome: '', continente: '', distanza: ''
+    }).catch(() => {});
+  }
   const p = getProgramma();
   const editId = document.getElementById('form-programma-edit-id')?.value;
   const isEdit = !!editId;
@@ -5150,11 +5179,29 @@ function popolaTipoGaraP(sport) {
   distanze.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o);
   });
+  const oA = document.createElement('option'); oA.value='__altro__'; oA.textContent='✏️ Altro (non in elenco)...'; sel.appendChild(oA);
+  // Nascondi campo libero quando si popola
+  const pTA = document.getElementById('p-tipo-gara-altro');
+  if (pTA) { pTA.style.display='none'; pTA.value=''; }
 }
 
 function onPSportChange(sport) {
+  const pSportAltro = document.getElementById('p-sport-altro');
+  if (sport === '__altro_sport__') {
+    if (pSportAltro) { pSportAltro.style.display=''; pSportAltro.focus(); }
+    // Tipo gara: solo Altro
+    const pTipo = document.getElementById('p-tipo-gara');
+    if (pTipo) pTipo.innerHTML = '<option value="">—</option><option value="__altro__">✏️ Altro tipo gara (non in elenco)...</option>';
+    return;
+  }
+  if (pSportAltro) { pSportAltro.style.display='none'; pSportAltro.value=''; }
   selectedSportP = sport;
   popolaTipoGaraP(sport);
+}
+
+function onPTipoGaraChange(val) {
+  const pTA = document.getElementById('p-tipo-gara-altro');
+  if (pTA) { pTA.style.display = val==='__altro__' ? '' : 'none'; if(val==='__altro__') pTA.focus(); }
 }
 
 // Cascata programma — speculare alla cascata del form gara
@@ -7530,7 +7577,7 @@ async function inviaConsiglio(){
 </div>
 
 
-<div id="page-admin" class="page" style="padding-top:0;">
+<div id="page-admin" class="page" style="padding-top:8px;margin-top:0;">
   <div style="max-width:1100px;margin:0 auto;padding:16px 24px;">
 
     <!-- Header -->
