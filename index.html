@@ -1565,17 +1565,19 @@
     <div class="form-grid">
       <div class="form-group">
         <div class="form-label">Sport <span style="color:var(--accent)">*</span></div>
-        <select class="form-select" id="f-sport" onchange="onSportChange(this.value)">
+        <select class="form-select" id="f-sport" onchange="onSportSelChange(this.value)">
           <option value="">Seleziona sport...</option>
         </select>
+        <input class="form-input" id="f-sport-altro" placeholder="Specifica sport..." style="display:none;margin-top:6px;" />
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Tipo gara <span style="color:var(--accent)">*</span></label>
-          <select class="form-select" id="f-tipo-gara">
+          <select class="form-select" id="f-tipo-gara" onchange="onTipoGaraChange(this.value)">
             <option value="">Prima seleziona uno sport...</option>
           </select>
+          <input class="form-input" id="f-tipo-gara-altro" placeholder="Specifica tipo gara..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Data <span style="color:var(--accent)">*</span></label>
@@ -1596,6 +1598,7 @@
           <select class="form-select" id="f-nazione" onchange="onNazioneChange(this.value)">
             <option value="">Prima seleziona continente...</option>
           </select>
+          <input class="form-input" id="f-nazione-altro" placeholder="Specifica nazione..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
@@ -2495,7 +2498,8 @@ function onContinenteChange(cont) {
   const fNomeSel = document.getElementById('f-nome-sel');
   const fNome = document.getElementById('f-nome');
   if (fNaz) fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-    + nazioni.map(n => `<option value="${n}">${n}</option>`).join('');
+    + nazioni.map(n => `<option value="${n}">${n}</option>`).join('')
+    + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
   if (fReg) fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
   if (fCitta) fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
   if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
@@ -2504,22 +2508,45 @@ function onContinenteChange(cont) {
 }
 
 function onNazioneChange(nazione) {
+  // Mostra/nascondi campo libero nazione
+  const fNazAltro = document.getElementById('f-nazione-altro');
+  if (nazione === '__altra_naz__') {
+    if (fNazAltro) { fNazAltro.style.display = ''; fNazAltro.focus(); }
+    return;
+  }
+  if (fNazAltro) fNazAltro.style.display = 'none';
   const c = getConfig();
   const fReg = document.getElementById('f-regione');
   if (!fReg) return;
   const nazReg = c.naz_regioni || c.area_regioni || {};
   const regioni = nazione ? (nazReg[nazione] || []) : [];
   if (nazione && !regioni.length) {
-    fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
+    fReg.innerHTML = '<option value="">— nessuna regione censita —</option><option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
     onRegioneChange('');
     return;
   }
   fReg.innerHTML = '<option value="">Seleziona regione...</option>'
-    + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
+    + regioni.map(r => `<option value="${r}">${r}</option>`).join('')
+    + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
+  // Aggiungi campo libero regione se non c'è
+  const fRegEl = document.getElementById('f-regione');
+  if (fRegEl && !document.getElementById('f-regione-altro')) {
+    const inp = document.createElement('input');
+    inp.className = 'form-input'; inp.id = 'f-regione-altro';
+    inp.placeholder = 'Specifica regione...'; inp.style.display = 'none'; inp.style.marginTop = '6px';
+    fRegEl.parentNode.appendChild(inp);
+  }
   onRegioneChange('');
 }
 
 function onRegioneChange(regione) {
+  // Mostra/nascondi campo libero regione
+  const fRegAltro = document.getElementById('f-regione-altro');
+  if (regione === '__altra_reg__') {
+    if (fRegAltro) { fRegAltro.style.display = ''; fRegAltro.focus(); }
+    return;
+  }
+  if (fRegAltro) fRegAltro.style.display = 'none';
   const c = getConfig();
   const fCitta  = document.getElementById('f-citta-sel');
   const fLuogo  = document.getElementById('f-luogo');
@@ -2624,6 +2651,13 @@ function onSportChange(sport) {
   distanzeFiltrate.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; fTipo.appendChild(o);
   });
+  // Opzione "Altro" per tipo gara non in elenco
+  const oAltro = document.createElement('option'); oAltro.value = '__altro__'; oAltro.textContent = '✏️ Altro (non in elenco)...'; fTipo.appendChild(oAltro);
+  // Aggiungi "Altro" anche al select sport se non c'è
+  const fSportSel = document.getElementById('f-sport');
+  if (fSportSel && ![...fSportSel.options].find(o => o.value === '__altro_sport__')) {
+    const oAltroSport = document.createElement('option'); oAltroSport.value = '__altro_sport__'; oAltroSport.textContent = '✏️ Altro sport (non in elenco)...'; fSportSel.appendChild(oAltroSport);
+  }
 
   // Mostra/nascondi frazioni triathlon
   const isTriFlag = sportLower.includes('triathlon') || sportLower.includes('ironman') ||
@@ -2632,6 +2666,17 @@ function onSportChange(sport) {
   const tt = document.getElementById('tempo-tri');
   if (ts) ts.style.display = isTriFlag ? 'none' : 'block';
   if (tt) tt.style.display = isTriFlag ? 'block' : 'none';
+}
+
+function onTipoGaraChange(val) {
+  const fAltro = document.getElementById('f-tipo-gara-altro');
+  if (fAltro) { fAltro.style.display = val === '__altro__' ? '' : 'none'; if (val === '__altro__') fAltro.focus(); }
+}
+
+function onSportSelChange(val) {
+  const fAltro = document.getElementById('f-sport-altro');
+  if (fAltro) { fAltro.style.display = val === '__altro_sport__' ? '' : 'none'; if (val === '__altro_sport__') fAltro.focus(); }
+  if (val !== '__altro_sport__') onSportChange(val);
 }
 
 // ============ OPEN FORM (aggiornato) ============
@@ -2879,10 +2924,10 @@ function selectSport(btn) {
 }
 
 function salvaGara() {
-  const tipoGara = document.getElementById('f-tipo-gara').value.trim();
-  const sportVal = document.getElementById('f-sport').value.trim();
+  const tipoGaraRaw = document.getElementById('f-tipo-gara').value.trim();
+  const _sportRaw = document.getElementById('f-sport').value.trim();
   if (!tipoGara) { alert('Seleziona il tipo di gara'); return; }
-  if (!sportVal) { alert('Seleziona lo sport'); return; }
+  if (!_sportRaw && !sportSel) { alert('Seleziona lo sport'); return; }
   const dataVal = document.getElementById('f-data').value;
   if (dataVal && dataVal > new Date().toISOString().slice(0,10)) {
     alert('⚠️ La data è futura. Per le gare in programma usa la sezione "In Programma".');
@@ -2896,20 +2941,38 @@ function salvaGara() {
   }
   const editId = document.getElementById('f-edit-id').value;
   const isEdit = !!editId;
-  const sportLower = sportVal.toLowerCase();
+  const sportLower = (_sportRaw||'').toLowerCase();
   const isTriFlag = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
                     sportLower.includes('triathlon') || sportLower.includes('ironman');
   const isTri = isTriFlag;
   const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
+  // Leggi valori "Altro" dai campi liberi
+  const sportSel = (document.getElementById('f-sport')||{}).value || '';
+  const sportVal = sportSel === '__altro_sport__'
+    ? ((document.getElementById('f-sport-altro')||{}).value||'').trim()
+    : sportSel;
+  const tipoSel = (document.getElementById('f-tipo-gara')||{}).value || '';
+  const tipoVal = tipoSel === '__altro__'
+    ? ((document.getElementById('f-tipo-gara-altro')||{}).value||'').trim()
+    : tipoSel;
+  const nazSel = (document.getElementById('f-nazione')||{}).value || '';
+  const nazVal = nazSel === '__altra_naz__'
+    ? ((document.getElementById('f-nazione-altro')||{}).value||'').trim()
+    : nazSel;
+  const regSel = (document.getElementById('f-regione')||{}).value || '';
+  const regVal = regSel === '__altra_reg__'
+    ? ((document.getElementById('f-regione-altro')||{}).value||'').trim()
+    : regSel;
+
   const gara = {
     id: (isEdit && editId !== '__archivia__') ? parseInt(editId) : Date.now(),
     utente_id: getUtenteId(),
     sport: sportVal,
-    tipo_gara: tipoGara,
-    nome: nomeGaraCustom || tipoGara,
+    tipo_gara: tipoVal || tipoGaraRaw || '',
+    nome: nomeGaraCustom || tipoVal || tipoGaraRaw || '',
     data: document.getElementById('f-data').value,
     luogo: document.getElementById('f-luogo').value,
-    regione: document.getElementById('f-regione').value,
+    regione: regVal || (document.getElementById('f-regione')||{}).value || '',
     distanza: parseFloat(document.getElementById('f-distanza').value) || 0,
     esito: isTri ? document.getElementById('f-esito-tri').value : document.getElementById('f-esito').value,
     tempo: isTri ? null : document.getElementById('f-tempo').value,
@@ -2920,7 +2983,7 @@ function salvaGara() {
       t2: document.getElementById('f-t2').value,
       corsa: document.getElementById('f-corsa-tri').value,
     } : null,
-    nazione: (document.getElementById('f-nazione') || {}).value || '',
+    nazione:    nazVal || '',
     continente: (document.getElementById('f-continente') || {}).value || '',
     rating: { ...ratings },
     ratingHotel: { posizione: ratings.posizione, pulizia: ratings.pulizia, colazione: ratings.colazione },
@@ -2967,13 +3030,26 @@ function salvaGara() {
     }
 
     // Segnala gara non censita all'admin
-    const nomeSel = document.getElementById('f-nome-sel');
-    const garaCensita = nomeSel && nomeSel.style.display !== 'none' &&
-                        nomeSel.value && nomeSel.value !== '__altro__';
-    if (!isEdit && !garaCensita && gara.nome) {
+    // Segnala qualsiasi campo inserito manualmente (non da elenco)
+    const _sportNonCensito  = sportSel === '__altro_sport__';
+    const _tipoNonCensito   = tipoSel  === '__altro__';
+    const _nazNonCensita    = nazSel   === '__altra_naz__';
+    const _regNonCensita    = regSel   === '__altra_reg__';
+    const _nomeSel = document.getElementById('f-nome-sel');
+    const _nomeNonCensito = _nomeSel && (_nomeSel.value === '__altro__' || !_nomeSel.value);
+    const _cittaSel = document.getElementById('f-citta-sel');
+    const _cittaNonCensita = _cittaSel && _cittaSel.value === '__altra__';
+    if (!isEdit && (_sportNonCensito || _tipoNonCensito || _nazNonCensita || _regNonCensita || _nomeNonCensito || _cittaNonCensita)) {
       gsPost('segnalaGaraNonCensita', {
-        utente_id: gara.utente_id, sport: gara.sport,
-        nome: gara.nome, luogo: gara.luogo, regione: gara.regione
+        utente_id: gara.utente_id,
+        sport:      _sportNonCensito  ? gara.sport      : '',
+        tipo_gara:  _tipoNonCensito   ? gara.tipo_gara  : '',
+        nazione:    _nazNonCensita    ? gara.nazione     : '',
+        regione:    _regNonCensita    ? gara.regione     : '',
+        luogo:      _cittaNonCensita  ? gara.luogo       : '',
+        nome:       _nomeNonCensito   ? gara.nome        : '',
+        continente: gara.continente || '',
+        distanza:   gara.distanza || ''
       }).catch(() => {});
     }
   }
@@ -3031,6 +3107,19 @@ function _popolaFormProgramma() {
       const o = document.createElement('option');
       o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
     });
+    const oPS = document.createElement('option'); oPS.value='__altro_sport__'; oPS.textContent='✏️ Altro sport (non in elenco)...'; pSport.appendChild(oPS);
+    // Campo libero
+    let pSportAltro = document.getElementById('p-sport-altro');
+    if (!pSportAltro) {
+      pSportAltro = document.createElement('input'); pSportAltro.className='form-input';
+      pSportAltro.id='p-sport-altro'; pSportAltro.placeholder='Specifica sport...';
+      pSportAltro.style.display='none'; pSportAltro.style.marginTop='6px';
+      pSport.parentNode.appendChild(pSportAltro);
+    }
+    pSport.onchange = function() {
+      if (pSportAltro) pSportAltro.style.display = this.value==='__altro_sport__'?'':'none';
+      if (this.value !== '__altro_sport__') onPSportChange(this.value);
+    };
   }
   // Reset tipo gara
   const pTipo = document.getElementById('p-tipo-gara');
