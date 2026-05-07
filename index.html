@@ -2568,9 +2568,18 @@ function onRegioneChange(regione) {
   if (fNomeSel){ fNomeSel.innerHTML='<option value="">Seleziona città prima...</option>'; }
   if (fNome)   { fNome.style.display='none'; fNome.value=''; }
   if (regione === '__altra_reg__') {
-    // Regione non censita: mostra campo libero + blocca città/nome su solo Altro
     if (fRegAlt) { fRegAlt.style.display=''; fRegAlt.focus(); }
-    if (fCitta)  { fCitta.innerHTML='<option value="">—</option><option value="__altra__">✏️ Altra città (non in elenco)...</option>'; fCitta.style.display=''; }
+    if (fCitta) {
+      fCitta.innerHTML = '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
+      fCitta.value = '__altra__';
+      fCitta.style.display = '';
+    }
+    if (fLuogo) { fLuogo.style.display=''; fLuogo.value=''; }
+    if (fNomeSel) {
+      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+      fNomeSel.value = '__altro__';
+    }
+    if (fNome) { fNome.style.display=''; fNome.value=''; }
     return;
   }
   if (fRegAlt) { fRegAlt.style.display='none'; fRegAlt.value=''; }
@@ -2593,11 +2602,12 @@ function onCittaChange(citta) {
   const fNome    = document.getElementById('f-nome');
 
   if (citta === '__altra__') {
-    // Città non in elenco — mostra campo testo libero
     if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
-    // Nome gara: solo campo libero
-    if (fNomeSel) fNomeSel.innerHTML = '<option value="">—</option><option value="__altro__">✏️ Inserisci nome gara...</option>';
-    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+    if (fNomeSel) {
+      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+      fNomeSel.value = '__altro__';
+    }
+    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
     return;
   }
 
@@ -5189,9 +5199,13 @@ function onPSportChange(sport) {
   const pSportAltro = document.getElementById('p-sport-altro');
   if (sport === '__altro_sport__') {
     if (pSportAltro) { pSportAltro.style.display=''; pSportAltro.focus(); }
-    // Tipo gara: solo Altro
+    // Tipo gara: solo Altro — e mostra subito il campo libero
     const pTipo = document.getElementById('p-tipo-gara');
-    if (pTipo) pTipo.innerHTML = '<option value="">—</option><option value="__altro__">✏️ Altro tipo gara (non in elenco)...</option>';
+    if (pTipo) {
+      pTipo.innerHTML = '<option value="__altro__">✏️ Altro tipo gara (non in elenco)...</option>';
+      pTipo.value = '__altro__';
+      onPTipoGaraChange('__altro__');
+    }
     return;
   }
   if (pSportAltro) { pSportAltro.style.display='none'; pSportAltro.value=''; }
@@ -5274,7 +5288,18 @@ function onPRegioneChange(regione) {
   if (pNG)    { pNG.style.display='none'; pNG.value=''; }
   if (regione === '__altra_reg__') {
     if (pRegAlt) { pRegAlt.style.display=''; pRegAlt.focus(); }
-    if (pCS)     { pCS.innerHTML='<option value="">—</option><option value="__altra__">✏️ Altra città (non in elenco)...</option>'; pCS.style.display=''; }
+    if (pCS) {
+      pCS.innerHTML = '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
+      pCS.value = '__altra__';
+      pCS.style.display = '';
+    }
+    if (pLuogo) { pLuogo.style.display=''; pLuogo.value=''; }
+    // Nome gara: solo Altro, mostra campo libero
+    if (pNS) {
+      pNS.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+      pNS.value = '__altro__';
+    }
+    if (pNG) { pNG.style.display=''; pNG.value=''; }
     return;
   }
   if (pRegAlt) { pRegAlt.style.display='none'; pRegAlt.value=''; }
@@ -5297,8 +5322,12 @@ function onPCittaChange(citta) {
   const fNome   = document.getElementById('p-nome-gara');
   if (citta === '__altra__') {
     if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
-    if (fNomeSel) fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
-    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
+    // Nome gara: solo Altro, e mostra subito il campo libero
+    if (fNomeSel) {
+      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+      fNomeSel.value = '__altro__';
+    }
+    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
     return;
   }
   if (citta && fLuogo) { fLuogo.value = citta; fLuogo.style.display = 'none'; }
