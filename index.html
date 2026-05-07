@@ -7314,30 +7314,42 @@ async function caricaDatiAdmin() {
   // Inserimenti manuali (gare con campi liberi)
   window._gareNonCensiteData = segnalazioni;
   const elGNC = document.getElementById('admin-non-censite');
-  elGNC.innerHTML = segnalazioni.length
-    ? `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr style="color:var(--text3);text-align:left;border-bottom:2px solid var(--border);">
-          <th style="padding:8px;">Data</th>
-          <th style="padding:8px;">Utente</th>
-          <th style="padding:8px;color:var(--accent);">Sport ⬅</th>
-          <th style="padding:8px;color:var(--accent);">Continente ⬅</th>
-          <th style="padding:8px;color:var(--accent);">Nazione ⬅</th>
-          <th style="padding:8px;color:var(--accent);">Regione ⬅</th>
-          <th style="padding:8px;color:var(--accent);">Città ⬅</th>
-          <th style="padding:8px;color:var(--accent);">Nome gara ⬅</th>
-        </tr></thead>
-        <tbody>${segnalazioni.map(s => `<tr style="border-top:1px solid var(--border);">
-          <td style="padding:8px;color:var(--text3);white-space:nowrap;">${String(s.ts||'').slice(0,10)}</td>
-          <td style="padding:8px;">${s.utente_id||'—'}</td>
-          <td style="padding:8px;font-weight:600;">${s.sport||'—'}</td>
-          <td style="padding:8px;">${s.continente||'—'}</td>
-          <td style="padding:8px;font-weight:600;">${s.nazione||'—'}</td>
-          <td style="padding:8px;">${s.regione||'—'}</td>
-          <td style="padding:8px;font-weight:600;">${s.citta||'—'}</td>
-          <td style="padding:8px;font-weight:700;color:var(--accent);">${s.nome||'—'}</td>
-        </tr>`).join('')}</tbody>
-      </table></div>`
-    : '<div style="color:var(--text3);font-size:13px;">Nessuna gara non censita — ottimo!</div>';
+  if (!segnalazioni.length) {
+    elGNC.innerHTML = '<div style="color:var(--text3);font-size:13px;">Nessun inserimento manuale — ottimo!</div>';
+  } else {
+    // Mostra solo i campi effettivamente inseriti a mano (non vuoti)
+    // I campi da censire sono: sport, tipo_gara, continente, nazione, regione, citta, nome
+    const CAMPI = [
+      { key: 'sport',     label: 'Sport' },
+      { key: 'tipo_gara', label: 'Tipo gara' },
+      { key: 'continente',label: 'Continente' },
+      { key: 'nazione',   label: 'Nazione' },
+      { key: 'regione',   label: 'Regione' },
+      { key: 'citta',     label: 'Città' },
+      { key: 'nome',      label: 'Nome gara' },
+    ];
+    elGNC.innerHTML = segnalazioni.map(s => {
+      // Raccoglie solo i campi con valore non vuoto
+      const campiPresenti = CAMPI.filter(c => (s[c.key]||'').trim());
+      if (!campiPresenti.length) return ''; // segnalazione vuota, salta
+      const tags = campiPresenti.map(c =>
+        `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,87,34,0.12);
+          border:1px solid rgba(255,87,34,0.3);border-radius:6px;padding:3px 8px;font-size:12px;">
+          <span style="color:var(--text3);font-size:10px;">${c.label}</span>
+          <span style="font-weight:700;color:var(--accent);">${s[c.key]}</span>
+        </span>`
+      ).join(' ');
+      return `<div style="padding:10px 12px;background:var(--bg4);border-radius:8px;
+          margin-bottom:6px;border-left:3px solid var(--accent);">
+        <div style="display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:6px;font-size:11px;color:var(--text3);">
+          <span>${String(s.ts||'').slice(0,10)}</span>
+          <span>${s.utente_id||''}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${tags}</div>
+      </div>`;
+    }).filter(Boolean).join('') || '<div style="color:var(--text3);font-size:13px;">Nessun inserimento manuale.</div>';
+  }
 
   // Consigli dal foglio Google
   gsGet({ action: 'getConsigli' }).then(consigli => {
