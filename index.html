@@ -621,20 +621,6 @@
   box-shadow: 0 4px 14px rgba(255,87,34,0.4);
   transform: translateY(-1px);
 }
-/* --- FIX MAPPA ATHLOS --- */
-  .map-region {
-    transition: fill 0.3s ease, fill-opacity 0.3s ease;
-    cursor: pointer;
-    fill: #1a1a1a !important; /* Colore di base per regioni senza gare */
-    fill-opacity: 0.3 !important;
-  }
-
-  /* Quando la regione ha la classe 'conquistata' attivata dal JS */
-  .map-region.conquistata {
-    fill-opacity: 0.9 !important;
-    stroke: #ffffff !important;
-    stroke-width: 1px !important;
-  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -7614,37 +7600,33 @@ function loadMap() {
 
 
 function updateMapColors() {
-  const gare = typeof getGare === 'function' ? getGare() : [];
+  const gare = getGare();
   const regioniMap = {};
-
   gare.forEach(g => {
     if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
       if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
       regioniMap[g.regione].push(g);
     }
   });
-
   document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
     const regName = path.getAttribute('data-region');
     if (!regName) return;
-    
-    const gs = regioniMap[regName] || [];
-    
-    if (gs.length > 0) {
-      // REGIONE CON GARE: Accendiamo l'arancione
-      const color = regioneColorSVG(gs.length);
-      path.style.setProperty('fill', color, 'important'); 
-      path.style.setProperty('fill-opacity', '0.9', 'important');
-      path.style.setProperty('stroke', '#ffffff', 'important');
-      path.style.setProperty('stroke-width', '1px', 'important');
+    const gs    = regioniMap[regName] || [];
+    const color = regioneColorSVG(gs.length);
+    if (gs.length) {
       path.classList.add('conquistata');
+      path.style.fill        = color || '#ff5722';
+      path.style.fillOpacity = '0.75';
+      path.style.stroke      = '#0a0a1a';
+      path.style.strokeWidth = '0.8';
+      path.style.cursor      = 'pointer';
     } else {
-      // REGIONE VUOTA: Torniamo allo stato scuro
-      path.style.setProperty('fill', '#1a1a1a', 'important');
-      path.style.setProperty('fill-opacity', '0.3', 'important');
-      path.style.setProperty('stroke', '#333333', 'important');
-      path.style.setProperty('stroke-width', '0.5px', 'important');
       path.classList.remove('conquistata');
+      path.style.fill        = '#2a2a3a';
+      path.style.fillOpacity = '0.6';
+      path.style.stroke      = '#0a0a1a';
+      path.style.strokeWidth = '0.5';
+      path.style.cursor      = 'default';
     }
   });
 }
@@ -7709,54 +7691,6 @@ function updateMapColors() {
   <a href="#" onclick="apriConsigli();return false;" style="color:var(--accent);text-decoration:none;font-weight:500;">💬 I tuoi consigli</a>
 </footer>
 
-<script>
-// --- DEFINIZIONE MAP_SEEDS (Risolve l'errore ReferenceError) ---
-const MAP_SEEDS = {
-  "Abruzzo":{},"Basilicata":{},"Calabria":{},"Campania":{},"Emilia-Romagna":{},
-  "Friuli-Venezia Giulia":{},"Lazio":{},"Liguria":{},"Lombardia":{},"Marche":{},
-  "Molise":{},"Piemonte":{},"Puglia":{},"Sardegna":{},"Sicilia":{},"Toscana":{},
-  "Trentino-Alto Adige":{},"Umbria":{},"Valle d'Aosta":{},"Veneto":{}
-};
-
-// Funzione per i colori della mappa
-function regioneColorSVG(count) {
-  if (count === 0) return '#1a1a1a';
-  if (count === 1) return '#ffccbc';
-  if (count < 5)   return '#ff8a65';
-  return '#ff5722';
-}
-
-// Funzione aggiornata per colorare la mappa
-function updateMapColors() {
-  // getGare() deve essere definita nel tuo script principale
-  const gare = typeof getGare === 'function' ? getGare() : [];
-  const regioniMap = {};
-  
-  gare.forEach(g => {
-    if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
-      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
-      regioniMap[g.regione].push(g);
-    }
-  });
-
-  document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
-    const regName = path.getAttribute('data-region');
-    if (!regName) return;
-    const gs = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-    path.style.fill = color;
-    path.style.fillOpacity = gs.length > 0 ? '0.8' : '0.3';
-  });
-}
-
-// Inizializzazione al caricamento
-window.addEventListener('DOMContentLoaded', () => {
-  if (typeof init === 'function') {
-    init();
-  }
-  updateMapColors();
-});
-</script>
 
 </body>
 </html>
