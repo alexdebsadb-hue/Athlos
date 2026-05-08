@@ -621,6 +621,20 @@
   box-shadow: 0 4px 14px rgba(255,87,34,0.4);
   transform: translateY(-1px);
 }
+/* --- FIX MAPPA ATHLOS --- */
+  .map-region {
+    transition: fill 0.3s ease, fill-opacity 0.3s ease;
+    cursor: pointer;
+    fill: #1a1a1a !important; /* Colore di base per regioni senza gare */
+    fill-opacity: 0.3 !important;
+  }
+
+  /* Quando la regione ha la classe 'conquistata' attivata dal JS */
+  .map-region.conquistata {
+    fill-opacity: 0.9 !important;
+    stroke: #ffffff !important;
+    stroke-width: 1px !important;
+  }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -7600,14 +7614,16 @@ function loadMap() {
 
 
 function updateMapColors() {
-  const gare = getGare();
+  const gare = typeof getGare === 'function' ? getGare() : [];
   const regioniMap = {};
+
   gare.forEach(g => {
     if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
       if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
       regioniMap[g.regione].push(g);
     }
   });
+
   document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
     const regName = path.getAttribute('data-region');
     if (!regName) return;
@@ -7615,17 +7631,20 @@ function updateMapColors() {
     const gs = regioniMap[regName] || [];
     
     if (gs.length > 0) {
-      // FORZIAMO IL COLORE DIRETTAMENTE
+      // REGIONE CON GARE: Accendiamo l'arancione
       const color = regioneColorSVG(gs.length);
       path.style.setProperty('fill', color, 'important'); 
       path.style.setProperty('fill-opacity', '0.9', 'important');
-      path.style.stroke = '#fff'; // Un bordino bianco per farla risaltare
-      path.style.strokeWidth = '1px';
+      path.style.setProperty('stroke', '#ffffff', 'important');
+      path.style.setProperty('stroke-width', '1px', 'important');
+      path.classList.add('conquistata');
     } else {
-      // REGIONE VUOTA
-      path.style.fill = '#1a1a1a';
-      path.style.fillOpacity = '0.3';
-      path.style.stroke = '#333';
+      // REGIONE VUOTA: Torniamo allo stato scuro
+      path.style.setProperty('fill', '#1a1a1a', 'important');
+      path.style.setProperty('fill-opacity', '0.3', 'important');
+      path.style.setProperty('stroke', '#333333', 'important');
+      path.style.setProperty('stroke-width', '0.5px', 'important');
+      path.classList.remove('conquistata');
     }
   });
 }
