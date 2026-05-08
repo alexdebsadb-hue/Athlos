@@ -2197,6 +2197,14 @@ function setCachedConfig(data) {
 const GS_URL   = 'https://script.google.com/macros/s/AKfycbyulhPWlAnh_ueNDMct2GB0TtXhAeTeEKLImHixergrZYb3X468EhlIf59eSSbcQBnq/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
+// Definizione delle regioni per evitare l'errore ReferenceError
+const MAP_SEEDS = {
+  "Abruzzo": {}, "Basilicata": {}, "Calabria": {}, "Campania": {}, "Emilia-Romagna": {},
+  "Friuli-Venezia Giulia": {}, "Lazio": {}, "Liguria": {}, "Lombardia": {}, "Marche": {},
+  "Molise": {}, "Piemonte": {}, "Puglia": {}, "Sardegna": {}, "Sicilia": {}, "Toscana": {},
+  "Trentino-Alto Adige": {}, "Umbria": {}, "Valle d'Aosta": {}, "Veneto": {}
+};
+
 // ============ STORAGE — dual layer (locale + remoto) ============
 // Le gare sono sempre tenute in localStorage come cache locale.
 // Ogni operazione di scrittura viene mandata anche al foglio Google.
