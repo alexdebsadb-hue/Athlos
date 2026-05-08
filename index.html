@@ -531,6 +531,32 @@
   .toast.show { transform:translateY(0); opacity:1; }
   .toast-success { border-left:3px solid var(--green); }
 
+  /* MAPPA BUBBLE */
+  .map-bubble-div {
+    position: absolute;
+    width: 44px; height: 44px;
+    margin-left: -22px; margin-top: -22px;
+    border-radius: 50%;
+    background: #1a1a2e;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: default;
+    transition: transform 0.15s, border-color 0.2s, background 0.2s;
+    z-index: 2;
+    opacity: 0.35;
+  }
+  .map-bubble-div:hover { transform: scale(1.2); z-index: 3; }
+  .map-bubble-div.conquistata { opacity: 1; cursor: pointer; border-width: 2.5px; }
+  .map-bubble-div.conquistata:hover { transform: scale(1.25); }
+  .map-bubble-emoji {
+    font-size: 22px;
+    line-height: 1;
+    filter: grayscale(80%);
+    pointer-events: none;
+    user-select: none;
+  }
+  .map-bubble-div.conquistata .map-bubble-emoji { filter: none; }
+
   /* MAPPA SVG */
   .reg-d3 {
     transition: fill 0.3s, fill-opacity 0.3s;
@@ -1216,57 +1242,30 @@
 
         <!-- SVG ITALIA -->
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;">
-          <div id="italy-map-container" style="width:100%;position:relative;">
-            <svg id="italy-map-svg" viewBox="0 0 460 620" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <clipPath id="clip-0"><circle cx="77" cy="72" r="22"/></clipPath>
-  <clipPath id="clip-1"><circle cx="81" cy="133" r="22"/></clipPath>
-  <clipPath id="clip-2"><circle cx="171" cy="192" r="22"/></clipPath>
-  <clipPath id="clip-3"><circle cx="193" cy="115" r="22"/></clipPath>
-  <clipPath id="clip-4"><circle cx="222" cy="63" r="22"/></clipPath>
-  <clipPath id="clip-5"><circle cx="254" cy="84" r="22"/></clipPath>
-  <clipPath id="clip-6"><circle cx="293" cy="78" r="22"/></clipPath>
-  <clipPath id="clip-7"><circle cx="189" cy="170" r="22"/></clipPath>
-  <clipPath id="clip-8"><circle cx="210" cy="243" r="22"/></clipPath>
-  <clipPath id="clip-9"><circle cx="277" cy="224" r="22"/></clipPath>
-  <clipPath id="clip-10"><circle cx="261" cy="262" r="22"/></clipPath>
-  <clipPath id="clip-11"><circle cx="261" cy="304" r="22"/></clipPath>
-  <clipPath id="clip-12"><circle cx="290" cy="256" r="22"/></clipPath>
-  <clipPath id="clip-13"><circle cx="333" cy="315" r="22"/></clipPath>
-  <clipPath id="clip-14"><circle cx="360" cy="356" r="22"/></clipPath>
-  <clipPath id="clip-15"><circle cx="378" cy="347" r="22"/></clipPath>
-  <clipPath id="clip-16"><circle cx="377" cy="393" r="22"/></clipPath>
-  <clipPath id="clip-17"><circle cx="405" cy="463" r="22"/></clipPath>
-  <clipPath id="clip-18"><circle cx="323" cy="532" r="22"/></clipPath>
-  <clipPath id="clip-19"><circle cx="104" cy="408" r="22"/></clipPath>
-    <style>
-      .map-bubble { transition: fill-opacity 0.2s, r 0.15s; }
-      .map-emoji  { transition: opacity 0.2s; }
-      .map-border { transition: stroke 0.2s, stroke-width 0.2s; }
-    </style>
-  </defs>
-  <g class="map-reg" data-clip-id="clip-0" data-region="Valle d'Aosta" data-label="Monte Bianco" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="77" cy="72" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="77" y="73" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏔️</text><circle cx="77" cy="72" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-1" data-region="Piemonte" data-label="Mole Antonelliana" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="81" cy="133" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="81" y="134" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏛️</text><circle cx="81" cy="133" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-2" data-region="Liguria" data-label="Cinque Terre" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="171" cy="192" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="171" y="193" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">⛵</text><circle cx="171" cy="192" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-3" data-region="Lombardia" data-label="Duomo di Milano" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="193" cy="115" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="193" y="116" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">⛪</text><circle cx="193" cy="115" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-4" data-region="Trentino-Alto Adige" data-label="Tre Cime" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="222" cy="63" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="222" y="64" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">⛷️</text><circle cx="222" cy="63" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-5" data-region="Veneto" data-label="Ponte di Rialto" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="254" cy="84" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="254" y="85" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🎭</text><circle cx="254" cy="84" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-6" data-region="Friuli-Venezia Giulia" data-label="Trieste" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="293" cy="78" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="293" y="79" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏰</text><circle cx="293" cy="78" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-7" data-region="Emilia-Romagna" data-label="Ferrari" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="189" cy="170" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="189" y="171" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏎️</text><circle cx="189" cy="170" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-8" data-region="Toscana" data-label="Torre di Pisa" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="210" cy="243" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="210" y="244" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🗼</text><circle cx="210" cy="243" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-9" data-region="Marche" data-label="Riviera del Conero" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="277" cy="224" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="277" y="225" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🌊</text><circle cx="277" cy="224" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-10" data-region="Umbria" data-label="Assisi" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="261" cy="262" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="261" y="263" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">⛪</text><circle cx="261" cy="262" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-11" data-region="Lazio" data-label="Colosseo" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="261" cy="304" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="261" y="305" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏛️</text><circle cx="261" cy="304" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-12" data-region="Abruzzo" data-label="Arrosticini" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="290" cy="256" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="290" y="257" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🍢</text><circle cx="290" cy="256" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-13" data-region="Molise" data-label="Campobasso" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="333" cy="315" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="333" y="316" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🌾</text><circle cx="333" cy="315" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-14" data-region="Campania" data-label="Napoli & Vesuvio" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="360" cy="356" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="360" y="357" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🌋</text><circle cx="360" cy="356" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-15" data-region="Puglia" data-label="Trulli di Alberobello" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="378" cy="347" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="378" y="348" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🏠</text><circle cx="378" cy="347" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-16" data-region="Basilicata" data-label="Sassi di Matera" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="377" cy="393" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="377" y="394" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🪨</text><circle cx="377" cy="393" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-17" data-region="Calabria" data-label="Tropea" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="405" cy="463" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="405" y="464" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🌶️</text><circle cx="405" cy="463" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-18" data-region="Sicilia" data-label="Etna" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="323" cy="532" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="323" y="533" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🌋</text><circle cx="323" cy="532" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-<g class="map-reg" data-clip-id="clip-19" data-region="Sardegna" data-label="Arcipelago Maddalena" style="cursor:pointer;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><circle cx="104" cy="408" r="22" fill="#1a1a2e" fill-opacity="0.9" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="map-bubble"/><text x="104" y="409" text-anchor="middle" dominant-baseline="central" font-size="18" style="pointer-events:none;user-select:none;" class="map-emoji">🐑</text><circle cx="104" cy="408" r="22" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" class="map-border"/></g>
-</svg>
-                        <div id="map-tooltip" style="position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:220px;font-size:13px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>
+                    <div id="italy-map-container" style="width:100%;position:relative;padding-top:134.78%;">
+            <div id="italy-map-inner" style="position:absolute;inset:0;">
+              <div class="map-bubble-div" data-region="Valle d'Aosta" data-label="Monte Bianco" style="left:16.74%;top:11.61%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏔️</span></div>
+              <div class="map-bubble-div" data-region="Piemonte" data-label="Mole Antonelliana" style="left:17.61%;top:21.45%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏛️</span></div>
+              <div class="map-bubble-div" data-region="Liguria" data-label="Cinque Terre" style="left:37.17%;top:30.97%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛵</span></div>
+              <div class="map-bubble-div" data-region="Lombardia" data-label="Duomo di Milano" style="left:41.96%;top:18.55%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛪</span></div>
+              <div class="map-bubble-div" data-region="Trentino-Alto Adige" data-label="Tre Cime" style="left:48.26%;top:10.16%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛷️</span></div>
+              <div class="map-bubble-div" data-region="Veneto" data-label="Ponte di Rialto" style="left:55.22%;top:13.55%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🎭</span></div>
+              <div class="map-bubble-div" data-region="Friuli-Venezia Giulia" data-label="Trieste" style="left:63.7%;top:12.58%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏰</span></div>
+              <div class="map-bubble-div" data-region="Emilia-Romagna" data-label="Ferrari" style="left:41.09%;top:27.42%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏎️</span></div>
+              <div class="map-bubble-div" data-region="Toscana" data-label="Torre di Pisa" style="left:45.65%;top:39.19%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🗼</span></div>
+              <div class="map-bubble-div" data-region="Marche" data-label="Riviera del Conero" style="left:60.22%;top:36.13%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌊</span></div>
+              <div class="map-bubble-div" data-region="Umbria" data-label="Assisi" style="left:56.74%;top:42.26%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🍫</span></div>
+              <div class="map-bubble-div" data-region="Lazio" data-label="Colosseo" style="left:56.74%;top:49.03%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏛️</span></div>
+              <div class="map-bubble-div" data-region="Abruzzo" data-label="Arrosticini" style="left:63.04%;top:41.29%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🍢</span></div>
+              <div class="map-bubble-div" data-region="Molise" data-label="Campobasso" style="left:72.39%;top:50.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌾</span></div>
+              <div class="map-bubble-div" data-region="Campania" data-label="Napoli & Vesuvio" style="left:78.26%;top:57.42%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌋</span></div>
+              <div class="map-bubble-div" data-region="Puglia" data-label="Trulli di Alberobello" style="left:82.17%;top:55.97%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏠</span></div>
+              <div class="map-bubble-div" data-region="Basilicata" data-label="Sassi di Matera" style="left:81.96%;top:63.39%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🪨</span></div>
+              <div class="map-bubble-div" data-region="Calabria" data-label="Tropea" style="left:88.04%;top:74.68%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌶️</span></div>
+              <div class="map-bubble-div" data-region="Sicilia" data-label="Etna" style="left:70.22%;top:85.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌋</span></div>
+              <div class="map-bubble-div" data-region="Sardegna" data-label="Arcipelago Maddalena" style="left:22.61%;top:65.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🐑</span></div>
+            </div>
+            <div id="map-tooltip" style="position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:220px;font-size:13px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>
           </div>
 
           <!-- TOOLTIP -->
