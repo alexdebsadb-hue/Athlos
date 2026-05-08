@@ -537,25 +537,32 @@
     width: 44px; height: 44px;
     margin-left: -22px; margin-top: -22px;
     border-radius: 50%;
-    background: #1a1a2e;
-    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(30,30,50,0.7);
+    border: 1.5px solid rgba(255,255,255,0.2);
     display: flex; align-items: center; justify-content: center;
     cursor: default;
-    transition: transform 0.15s, border-color 0.2s, background 0.2s;
+    transition: transform 0.15s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
     z-index: 2;
-    opacity: 0.35;
   }
-  .map-bubble-div:hover { transform: scale(1.2); z-index: 3; }
-  .map-bubble-div.conquistata { opacity: 1; cursor: pointer; border-width: 2.5px; }
+  .map-bubble-div:hover { transform: scale(1.15); z-index: 3; }
+  .map-bubble-div.conquistata {
+    cursor: pointer;
+    border-width: 3px;
+    box-shadow: 0 0 12px rgba(255,87,34,0.5);
+  }
   .map-bubble-div.conquistata:hover { transform: scale(1.25); }
   .map-bubble-emoji {
     font-size: 22px;
     line-height: 1;
-    filter: grayscale(80%);
+    filter: grayscale(100%) opacity(40%);
     pointer-events: none;
     user-select: none;
+    transition: filter 0.2s;
   }
-  .map-bubble-div.conquistata .map-bubble-emoji { filter: none; }
+  .map-bubble-div.conquistata .map-bubble-emoji {
+    filter: none;
+    font-size: 24px;
+  }
 
   /* MAPPA SVG */
   .reg-d3 {
@@ -7626,163 +7633,29 @@ function updateMapColors() {
       regioniMap[g.regione].push(g);
     }
   });
-  document.querySelectorAll('#italy-map-svg .map-reg').forEach(el => {
+  document.querySelectorAll('#italy-map-inner .map-bubble-div').forEach(el => {
     const regName = el.getAttribute('data-region');
     if (!regName) return;
-    const gs = regioniMap[regName] || [];
+    const gs    = regioniMap[regName] || [];
     const color = regioneColorSVG(gs.length);
-    const bubble = el.querySelector('.map-bubble');
-    const border = el.querySelector('.map-border');
-    const emoji  = el.querySelector('.map-emoji');
-    const r = gs.length ? Math.min(22 + gs.length * 1.5, 30) : 22;
-    if (bubble) {
-      bubble.setAttribute('r', r);
-      bubble.setAttribute('fill', gs.length ? (color || '#ff5722') : '#1a1a2e');
-      bubble.setAttribute('fill-opacity', gs.length ? '0.25' : '0.9');
+    const em    = el.querySelector('.map-bubble-emoji');
+    if (gs.length) {
+      el.classList.add('conquistata');
+      el.style.background  = (color || '#ff5722') + '35';
+      el.style.borderColor = color || '#ff5722';
+      el.style.borderWidth = '3px';
+      const sz = Math.min(44 + gs.length * 2, 60);
+      el.style.width = el.style.height = sz + 'px';
+      el.style.marginLeft = el.style.marginTop = (-sz/2) + 'px';
+      if (em) { em.style.filter = 'none'; em.style.fontSize = Math.min(22 + gs.length, 30) + 'px'; }
+    } else {
+      el.classList.remove('conquistata');
+      el.style.background  = 'rgba(20,20,40,0.5)';
+      el.style.borderColor = 'rgba(255,255,255,0.15)';
+      el.style.borderWidth = '1px';
+      el.style.width = el.style.height = '44px';
+      el.style.marginLeft = el.style.marginTop = '-22px';
+      if (em) { em.style.filter = 'grayscale(100%) opacity(40%)'; em.style.fontSize = '22px'; }
     }
-    if (border) {
-      border.setAttribute('r', r);
-      border.setAttribute('stroke', gs.length ? (color || '#ff5722') : 'rgba(255,255,255,0.12)');
-      border.setAttribute('stroke-width', gs.length ? '2.5' : '1.5');
-    }
-    if (emoji) emoji.style.opacity = gs.length ? '1' : '0.25';
-    el.style.cursor = gs.length ? 'pointer' : 'default';
   });
 }
-function loadMap() {
-  const saved = localStorage.getItem('irun_map_color') || '#ff5722';
-  _mapColor = saved;
-  const picker = document.getElementById('map-color-custom');
-  if (picker) picker.value = saved;
-  updateMapLegend(saved);
-  document.querySelectorAll('.map-color-btn').forEach(b => {
-    b.classList.toggle('active', b.style.background === saved);
-  });
-  updateMapColors();
-}
-function apriConsigli(){const ov=document.getElementById('consigli-overlay');if(ov)ov.classList.add('open');}
-function chiudiConsigli(){const ov=document.getElementById('consigli-overlay');if(ov)ov.classList.remove('open');}
-async function inviaConsiglio(){
-  const testo=(document.getElementById('consiglio-testo').value||'').trim();
-  const nome=(document.getElementById('consiglio-nome').value||'').trim();
-  const esito=document.getElementById('consiglio-esito');
-  if(!testo){esito.style.color='#ef5350';esito.textContent='Scrivi un messaggio prima di inviare.';esito.style.display='block';return;}
-  esito.style.color='var(--text2)';esito.textContent='Invio in corso...';esito.style.display='block';
-  try{
-    // Invia al foglio Google tramite Apps Script
-    await gsPost('inviaConsiglio',{
-      nome: nome||'Anonimo',
-      testo,
-      ts: new Date().toISOString(),
-      utente_id: getUtenteId()||'anonimo'
-    });
-    esito.style.color='#4caf50';
-    esito.textContent='Grazie! Il tuo consiglio è stato inviato.';
-    document.getElementById('consiglio-testo').value='';
-    setTimeout(chiudiConsigli,2000);
-  }catch(e){
-    esito.style.color='#ef5350';
-    esito.textContent='Errore nell\'invio. Riprova o scrivici via email.';
-  }
-}
-</script>
-</div>
-
-
-<div id="page-admin" class="page" style="padding-top:8px;margin-top:0;">
-  <div style="max-width:1100px;margin:0 auto;padding:16px 24px;">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;">⚙️ Pannello Admin</div>
-      <div id="admin-date" style="font-size:13px;color:var(--text3);"></div>
-    </div>
-
-    <!-- Login box -->
-    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin-top:0;">
-      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">🔐 Accesso Admin</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Inserisci la password per accedere al pannello</div>
-      <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin"
-        style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
-      <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
-      <button class="btn-primary" onclick="loginAdmin()" style="width:100%;">Accedi</button>
-    </div>
-
-    <!-- Contenuto dashboard (visibile solo dopo login) -->
-    <div id="admin-content" style="display:none;">
-
-      <!-- Cards riassunto -->
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
-
-      <!-- Riga 1: Ultimi utenti + Campi non censiti -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-
-        <!-- Ultimi 10 utenti registrati -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">👥 Ultimi 10 utenti registrati</div>
-          <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-
-        <!-- Gare inserite oggi -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">🏅 Gare inserite oggi</div>
-          <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-
-      </div>
-
-      <!-- Riga 2: Inserimenti manuali -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">📋 Inserimenti manuali</div>
-            <div style="font-size:12px;color:var(--text3);margin-top:2px;">Gare salvate con nome, nazione o città <strong>non presenti nel foglio Configurazione</strong>. Integralo per renderli disponibili a tutti gli utenti.</div>
-          </div>
-          <button class="btn-secondary" onclick="copiaGareNonCensite()" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📋 Copia lista</button>
-        </div>
-        <div id="admin-non-censite"></div>
-      </div>
-
-      <!-- Riga 3: Recensioni + Consigli -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-
-        <!-- Ultime recensioni -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">⭐ Ultime recensioni</div>
-          <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-
-        <!-- Consigli degli utenti -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">💬 Consigli degli utenti</div>
-          <div id="admin-consigli" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-<!-- PIÈ DI PAGINA -->
-<footer style="
-  background:var(--bg2);
-  border-top:1px solid var(--border);
-  padding:20px 24px;
-  text-align:center;
-  font-size:13px;
-  color:var(--text3);
-  margin-top:60px;
-">
-  <span>Athlos © 2026 &nbsp;·&nbsp;</span>
-  <a href="mailto:alexdebs.adb@gmail.com"
-     style="color:var(--accent);text-decoration:none;font-weight:500;"
-     onmouseenter="this.style.textDecoration='underline'"
-     onmouseleave="this.style.textDecoration='none'">
-    ✉️ Contattaci
-  </a>
-  <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
-  <span> &nbsp;·&nbsp; </span>
-  <a href="#" onclick="apriConsigli();return false;" style="color:var(--accent);text-decoration:none;font-weight:500;">&#x1F4AC; I tuoi consigli</a>
-</footer>
-
-</body>
-</html>
