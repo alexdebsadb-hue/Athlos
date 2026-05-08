@@ -2866,23 +2866,39 @@ function _riempiFormEdit(g) {
   const fCont = document.getElementById('f-continente');
   if (fCont && g.continente) fCont.value = g.continente;
 
-  const fNaz = document.getElementById('f-nazione');
-  if (fNaz && g.nazione) {
+  const fNaz    = document.getElementById('f-nazione');
+  const fNazAlt = document.getElementById('f-nazione-altro');
+  if (fNaz) {
     const contNaz = c.cont_nazioni || {};
     const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
+    const nazInLista = nazioniCont.includes(g.nazione);
     fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('');
+      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('')
+      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
+    if (g.nazione && !nazInLista) {
+      fNaz.value = '__altra_naz__';
+      if (fNazAlt) { fNazAlt.value = g.nazione; fNazAlt.style.display = ''; }
+    }
   }
 
-  const fReg = document.getElementById('f-regione');
-  if (fReg && g.regione) {
+  const fReg    = document.getElementById('f-regione');
+  const fRegAlt = document.getElementById('f-regione-altro');
+  if (fReg) {
     const nazReg = c.naz_regioni || c.area_regioni || {};
     const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
+    const regInLista = regioniNaz.includes(g.regione);
     if (regioniNaz.length) {
       fReg.innerHTML = '<option value="">Seleziona regione...</option>'
-        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('');
+        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('')
+        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
     } else {
-      fReg.innerHTML = `<option value="${g.regione}" selected>${g.regione}</option>`;
+      fReg.innerHTML = '<option value="">—</option>'
+        + (g.regione ? `<option value="${g.regione}" selected>${g.regione}</option>` : '')
+        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
+    }
+    if (g.regione && !regInLista) {
+      fReg.value = '__altra_reg__';
+      if (fRegAlt) { fRegAlt.value = g.regione; fRegAlt.style.display = ''; }
     }
   }
 
@@ -3176,24 +3192,41 @@ function _riempiFormProgrammaEdit(g) {
   if (pCont && g.continente) pCont.value = g.continente;
 
   // Nazione: popola le opzioni per il continente scelto, poi setta il valore
-  const pNaz = document.getElementById('p-nazione');
-  if (pNaz && g.nazione) {
+  const pNaz    = document.getElementById('p-nazione');
+  const pNazAlt = document.getElementById('p-nazione-altro');
+  if (pNaz) {
     const contNaz = c.cont_nazioni || {};
     const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
+    const nazInLista = nazioniCont.includes(g.nazione);
     pNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('');
+      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('')
+      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
+    if (g.nazione && !nazInLista) {
+      // Nazione inserita a mano — seleziona Altro e mostra campo libero
+      pNaz.value = '__altra_naz__';
+      if (pNazAlt) { pNazAlt.value = g.nazione; pNazAlt.style.display = ''; }
+    }
   }
 
   // Regione: popola le opzioni per la nazione scelta, poi setta il valore
-  const pReg = document.getElementById('p-regione');
-  if (pReg && g.regione) {
+  const pReg    = document.getElementById('p-regione');
+  const pRegAlt = document.getElementById('p-regione-altro');
+  if (pReg) {
     const nazReg = c.naz_regioni || c.area_regioni || {};
     const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
+    const regInLista = regioniNaz.includes(g.regione);
     if (regioniNaz.length) {
       pReg.innerHTML = '<option value="">Seleziona regione...</option>'
-        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('');
+        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('')
+        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
     } else {
-      pReg.innerHTML = `<option value="${g.regione}" selected>${g.regione}</option>`;
+      pReg.innerHTML = '<option value="">—</option>'
+        + (g.regione ? `<option value="${g.regione}" selected>${g.regione}</option>` : '')
+        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
+    }
+    if (g.regione && !regInLista) {
+      pReg.value = '__altra_reg__';
+      if (pRegAlt) { pRegAlt.value = g.regione; pRegAlt.style.display = ''; }
     }
   }
 
