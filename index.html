@@ -7611,22 +7611,21 @@ function updateMapColors() {
   document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
     const regName = path.getAttribute('data-region');
     if (!regName) return;
-    const gs    = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-    if (gs.length) {
-      path.classList.add('conquistata');
-      path.style.fill        = color || '#ff5722';
-      path.style.fillOpacity = '0.75';
-      path.style.stroke      = '#0a0a1a';
-      path.style.strokeWidth = '0.8';
-      path.style.cursor      = 'pointer';
+    
+    const gs = regioniMap[regName] || [];
+    
+    if (gs.length > 0) {
+      // FORZIAMO IL COLORE DIRETTAMENTE
+      const color = regioneColorSVG(gs.length);
+      path.style.setProperty('fill', color, 'important'); 
+      path.style.setProperty('fill-opacity', '0.9', 'important');
+      path.style.stroke = '#fff'; // Un bordino bianco per farla risaltare
+      path.style.strokeWidth = '1px';
     } else {
-      path.classList.remove('conquistata');
-      path.style.fill        = '#2a2a3a';
-      path.style.fillOpacity = '0.6';
-      path.style.stroke      = '#0a0a1a';
-      path.style.strokeWidth = '0.5';
-      path.style.cursor      = 'default';
+      // REGIONE VUOTA
+      path.style.fill = '#1a1a1a';
+      path.style.fillOpacity = '0.3';
+      path.style.stroke = '#333';
     }
   });
 }
