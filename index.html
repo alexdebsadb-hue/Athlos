@@ -7692,8 +7692,53 @@ function updateMapColors() {
 </footer>
 
 <script>
+// --- DEFINIZIONE MAP_SEEDS (Risolve l'errore ReferenceError) ---
+const MAP_SEEDS = {
+  "Abruzzo":{},"Basilicata":{},"Calabria":{},"Campania":{},"Emilia-Romagna":{},
+  "Friuli-Venezia Giulia":{},"Lazio":{},"Liguria":{},"Lombardia":{},"Marche":{},
+  "Molise":{},"Piemonte":{},"Puglia":{},"Sardegna":{},"Sicilia":{},"Toscana":{},
+  "Trentino-Alto Adige":{},"Umbria":{},"Valle d'Aosta":{},"Veneto":{}
+};
 
+// Funzione per i colori della mappa
+function regioneColorSVG(count) {
+  if (count === 0) return '#1a1a1a';
+  if (count === 1) return '#ffccbc';
+  if (count < 5)   return '#ff8a65';
+  return '#ff5722';
+}
 
+// Funzione aggiornata per colorare la mappa
+function updateMapColors() {
+  // getGare() deve essere definita nel tuo script principale
+  const gare = typeof getGare === 'function' ? getGare() : [];
+  const regioniMap = {};
+  
+  gare.forEach(g => {
+    if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
+      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
+      regioniMap[g.regione].push(g);
+    }
+  });
+
+  document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
+    const regName = path.getAttribute('data-region');
+    if (!regName) return;
+    const gs = regioniMap[regName] || [];
+    const color = regioneColorSVG(gs.length);
+    path.style.fill = color;
+    path.style.fillOpacity = gs.length > 0 ? '0.8' : '0.3';
+  });
+}
+
+// Inizializzazione al caricamento
+window.addEventListener('DOMContentLoaded', () => {
+  if (typeof init === 'function') {
+    init();
+  }
+  updateMapColors();
+});
+</script>
 
 </body>
 </html>
