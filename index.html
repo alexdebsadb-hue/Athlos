@@ -202,11 +202,10 @@
   .pb-card {
     background: var(--bg3); border: 1px solid var(--border);
     border-radius: 10px; padding: 14px 16px;
-    display:flex; flex-direction:column; gap:3px;
+    display:flex; justify-content:space-between; align-items:center;
   }
-  .pb-dist { font-size:12px; font-weight:600; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .pb-time { font-family:'Barlow Condensed',sans-serif; font-size:24px; font-weight:900; color:var(--accent); line-height:1.1; }
-  .pb-year { font-size:11px; color:var(--text3); }
+  .pb-dist { font-size:13px; color:var(--text2); }
+  .pb-time { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--text); }
 
   /* SEZIONE TITOLO */
   .section-title {
@@ -531,45 +530,22 @@
   .toast.show { transform:translateY(0); opacity:1; }
   .toast-success { border-left:3px solid var(--green); }
 
-  /* MAPPA BUBBLE */
   .map-bubble-div {
-    position: absolute;
-    width: 44px; height: 44px;
-    margin-left: -22px; margin-top: -22px;
-    border-radius: 50%;
-    background: rgba(30,30,50,0.7);
-    border: 1.5px solid rgba(255,255,255,0.2);
+    position: absolute; width: 44px; height: 44px;
+    margin-left: -22px; margin-top: -22px; border-radius: 50%;
+    background: rgba(20,20,40,0.7); border: 1.5px solid rgba(255,255,255,0.2);
     display: flex; align-items: center; justify-content: center;
-    cursor: default;
-    transition: transform 0.15s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    cursor: default; transition: transform 0.15s, border-color 0.2s, background 0.2s;
     z-index: 2;
   }
   .map-bubble-div:hover { transform: scale(1.15); z-index: 3; }
-  .map-bubble-div.conquistata {
-    cursor: pointer;
-    border-width: 3px;
-    box-shadow: 0 0 12px rgba(255,87,34,0.5);
-  }
+  .map-bubble-div.conquistata { cursor: pointer; border-width: 3px; box-shadow: 0 0 10px rgba(255,87,34,0.4); }
   .map-bubble-div.conquistata:hover { transform: scale(1.25); }
-  .map-bubble-emoji {
-    font-size: 22px;
-    line-height: 1;
-    filter: grayscale(100%) opacity(40%);
-    pointer-events: none;
-    user-select: none;
-    transition: filter 0.2s;
-  }
-  .map-bubble-div.conquistata .map-bubble-emoji {
-    filter: none;
-    font-size: 24px;
-  }
-
+  .map-bubble-emoji { font-size: 22px; line-height: 1; filter: grayscale(100%) opacity(35%); pointer-events: none; user-select: none; transition: filter 0.2s; }
+  .map-bubble-div.conquistata .map-bubble-emoji { filter: none; font-size: 24px; }
   /* MAPPA SVG */
   .reg-d3 {
-    transition: fill 0.3s, fill-opacity 0.3s;
-    fill: transparent;
-    stroke: rgba(255,255,255,0.15);
-    stroke-width: 0.5;
+    transition: fill 0.2s, opacity 0.15s;
   }
   .reg {
     fill: var(--bg4);
@@ -637,10 +613,7 @@
     <button class="nav-link" onclick="showPage('programma',this)">In programma</button>
     <button class="nav-link" onclick="showPage('stats',this)">Statistiche</button>
     <button class="nav-link" onclick="showPage('social',this)">🌍 Social</button>
-    <button class="nav-link" id="nav-admin-btn" onclick="showPage('admin',this)"
-      style="display:none;background:linear-gradient(135deg,rgba(255,87,34,0.15),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);color:var(--accent);">
-      ⚙️ Admin
-    </button>
+    <button class="nav-link" id="nav-admin-btn" onclick="showPage('admin',this)" style="display:none;background:linear-gradient(135deg,rgba(255,87,34,0.15),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);color:var(--accent);">⚙️ Admin</button>
   </div>
   <!-- BARRA RICERCA GLOBALE -->
   <div style="position:relative;margin:0 12px;flex-shrink:0;">
@@ -996,96 +969,13 @@
         </div>
 
         <!-- CTA FINALE -->
+
+        <div style="margin-top:48px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;text-align:center;margin-bottom:6px;">Cosa stiamo costruendo</div><div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:24px;">Athlos è in continua evoluzione</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;"><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">🏠</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Homepage utente</div><div style="font-size:11px;color:var(--text3);">Nuovo layout con ultima gara e feed</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">🤝</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Partner & Società</div><div style="font-size:11px;color:var(--text3);">Pagina con logo e contatti</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">📥</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Download Excel</div><div style="font-size:11px;color:var(--text3);">Esporta le tue gare</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">🏊</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Import Triathlon</div><div style="font-size:11px;color:var(--text3);">Import massivo con T1/T2</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">🏆</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">PDF Diploma</div><div style="font-size:11px;color:var(--text3);">Diploma con statistiche annuali</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">🟠</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Strava OAuth</div><div style="font-size:11px;color:var(--text3);">Collega e importa attività</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">👥</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Collegamento utenti</div><div style="font-size:11px;color:var(--text3);">Confronta i tempi</div></div></div><div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;"><span style="font-size:20px;">📱</span><div><div style="font-weight:700;font-size:13px;margin-bottom:2px;">App mobile PWA</div><div style="font-size:11px;color:var(--text3);">Installabile su smartphone</div></div></div></div></div>
         <div style="text-align:center;padding:32px;background:linear-gradient(135deg,rgba(255,87,34,0.08),rgba(255,87,34,0.03));border:1px solid rgba(255,87,34,0.2);border-radius:16px;">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:26px;font-weight:900;margin-bottom:8px;">Unisciti alla community</div>
           <div style="font-size:14px;color:var(--text2);margin-bottom:20px;">Registrazione gratuita — inizia subito a costruire la tua storia sportiva</div>
           <button class="btn-primary" style="font-size:15px;padding:12px 32px;" onclick="openLoginModal();setTimeout(()=>switchAuthTab('reg'),100)">Registrati gratis</button>
         </div>
-
-        <!-- ── PROSSIMI PASSI ── -->
-        <div style="margin-top:48px;">
-          <div style="text-align:center;margin-bottom:8px;">
-            <span style="background:rgba(255,87,34,0.12);color:var(--accent);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Roadmap</span>
-          </div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;text-align:center;margin-bottom:6px;">Cosa stiamo costruendo</div>
-          <div style="font-size:14px;color:var(--text2);text-align:center;margin-bottom:28px;">Athlos è in continua evoluzione — ecco le prossime funzionalità in arrivo</div>
-
-          <!-- A breve -->
-          <div style="margin-bottom:24px;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;">▶</span>
-              A breve
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🏠</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Homepage utente</div><div style="font-size:12px;color:var(--text3);">Nuovo layout con ultima gara per sport, regione conquistata, feed notifiche e box "raccontaci di te"</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🤝</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Partner &amp; Società sportive</div><div style="font-size:12px;color:var(--text3);">Pagina dedicata con logo, nome e contatto di ogni società. Gestibile dall'admin tramite foglio Google</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">📥</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Download Excel gare</div><div style="font-size:12px;color:var(--text3);">Esporta tutte le tue gare in un file Excel scaricabile direttamente dal tuo profilo</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🏊</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Import Triathlon con frazioni</div><div style="font-size:12px;color:var(--text3);">Import massivo con T1/T2, nuoto, bici e corsa per importare storici triathlon in un colpo solo</div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- In sviluppo -->
-          <div style="margin-bottom:24px;">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#9c27b0;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span style="background:#9c27b0;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;">⚙</span>
-              In sviluppo
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🏆</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">PDF Diploma statistiche</div><div style="font-size:12px;color:var(--text3);">Genera un diploma personalizzato con le tue statistiche annuali da scaricare e condividere</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🎉</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Animazione conquista regione</div><div style="font-size:12px;color:var(--text3);">Animazione celebrativa quando conquisti una nuova regione italiana per la prima volta</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🔔</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Sistema notifiche atleti</div><div style="font-size:12px;color:var(--text3);">Ricevi notifiche quando un atleta che segui aggiunge una nuova gara o batte un PB</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">📸</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Foto profilo e gara</div><div style="font-size:12px;color:var(--text3);">Carica foto del profilo e delle gare con storage sicuro su Cloudinary</div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Futuro -->
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#2196f3;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <span style="background:#2196f3;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;">★</span>
-              Futuro
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">🟠</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Strava OAuth</div><div style="font-size:12px;color:var(--text3);">Collega il tuo account Strava e importa attività con selezione manuale delle gare</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">👥</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Collegamento tra utenti</div><div style="font-size:12px;color:var(--text3);">Seguire altri atleti, confrontare i tempi sulle stesse gare e creare una vera community</div></div>
-              </div>
-              <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-                <span style="font-size:22px;">📱</span>
-                <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">App mobile PWA</div><div style="font-size:12px;color:var(--text3);">Installabile su smartphone come app nativa, con notifiche push e accesso offline</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- fine prossimi passi -->
-
       </div>
     </div>
 
@@ -1249,30 +1139,61 @@
 
         <!-- SVG ITALIA -->
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;position:relative;">
-                              <div id="italy-map-container" style="width:100%;position:relative;padding-top:134.78%;">
-            <div id="italy-map-inner" style="position:absolute;inset:0;">
-              <div class="map-bubble-div" data-region="Valle d'Aosta" data-label="Monte Bianco" style="left:16.74%;top:11.61%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏔️</span></div>
-              <div class="map-bubble-div" data-region="Piemonte" data-label="Mole Antonelliana" style="left:17.61%;top:21.45%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏛️</span></div>
-              <div class="map-bubble-div" data-region="Liguria" data-label="Cinque Terre" style="left:37.17%;top:30.97%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛵</span></div>
-              <div class="map-bubble-div" data-region="Lombardia" data-label="Duomo di Milano" style="left:41.96%;top:18.55%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛪</span></div>
-              <div class="map-bubble-div" data-region="Trentino-Alto Adige" data-label="Tre Cime" style="left:48.26%;top:10.16%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">⛷️</span></div>
-              <div class="map-bubble-div" data-region="Veneto" data-label="Ponte di Rialto" style="left:55.22%;top:13.55%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🎭</span></div>
-              <div class="map-bubble-div" data-region="Friuli-Venezia Giulia" data-label="Trieste" style="left:63.7%;top:12.58%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏰</span></div>
-              <div class="map-bubble-div" data-region="Emilia-Romagna" data-label="Ferrari" style="left:41.09%;top:27.42%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏎️</span></div>
-              <div class="map-bubble-div" data-region="Toscana" data-label="Torre di Pisa" style="left:45.65%;top:39.19%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🗼</span></div>
-              <div class="map-bubble-div" data-region="Marche" data-label="Riviera del Conero" style="left:60.22%;top:36.13%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌊</span></div>
-              <div class="map-bubble-div" data-region="Umbria" data-label="Assisi" style="left:56.74%;top:42.26%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🍫</span></div>
-              <div class="map-bubble-div" data-region="Lazio" data-label="Colosseo" style="left:56.74%;top:49.03%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏛️</span></div>
-              <div class="map-bubble-div" data-region="Abruzzo" data-label="Arrosticini" style="left:63.04%;top:41.29%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🍢</span></div>
-              <div class="map-bubble-div" data-region="Molise" data-label="Campobasso" style="left:72.39%;top:50.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌾</span></div>
-              <div class="map-bubble-div" data-region="Campania" data-label="Napoli & Vesuvio" style="left:78.26%;top:57.42%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌋</span></div>
-              <div class="map-bubble-div" data-region="Puglia" data-label="Trulli di Alberobello" style="left:82.17%;top:55.97%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🏠</span></div>
-              <div class="map-bubble-div" data-region="Basilicata" data-label="Sassi di Matera" style="left:81.96%;top:63.39%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🪨</span></div>
-              <div class="map-bubble-div" data-region="Calabria" data-label="Tropea" style="left:88.04%;top:74.68%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌶️</span></div>
-              <div class="map-bubble-div" data-region="Sicilia" data-label="Etna" style="left:70.22%;top:85.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🌋</span></div>
-              <div class="map-bubble-div" data-region="Sardegna" data-label="Arcipelago Maddalena" style="left:22.61%;top:65.81%;" onclick="mapRegClick(this)" onmouseenter="mapRegHover(this,event)" onmouseleave="mapRegLeave(this)"><span class="map-bubble-emoji">🐑</span></div>
-            </div>
-            <div id="map-tooltip" style="position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity 0.15s;max-width:220px;font-size:13px;z-index:10;box-shadow:0 4px 20px rgba(0,0,0,0.3);"></div>
+          <div id="italy-map-container" style="width:100%;position:relative;">
+            <svg id="italy-svg" viewBox="0 0 500 672" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <filter id="reg-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Immagine Italia reale come sfondo -->
+  <image id="italy-bg" href="data:image/png;base64,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" 
+    x="0" y="0" width="500" height="672" 
+    style="transition: opacity 0.3s;" />
+  <!-- Canvas overlay per colorare le regioni programmaticamente -->
+  <!-- I path sono mantenuti invisibili per il click e il tooltip -->
+  <path class="reg-d3" id="reg-Valle d'Aosta" data-region="Valle d'Aosta" fill="transparent" stroke="none"
+    d="M 65 68 L 78 62 L 92 65 L 98 72 L 90 80 L 75 82 L 62 76 Z"/>
+  <path class="reg-d3" id="reg-Piemonte" data-region="Piemonte" fill="transparent" stroke="none"
+    d="M 30 170 L 38 190 L 62 188 L 78 178 L 92 172 L 98 152 L 110 138 L 118 118 L 108 100 L 92 82 L 75 82 L 62 76 L 65 68 L 55 72 L 38 88 L 30 110 L 28 140 Z"/>
+  <path class="reg-d3" id="reg-Liguria" data-region="Liguria" fill="transparent" stroke="none"
+    d="M 38 190 L 30 170 L 28 140 L 62 158 L 92 142 L 112 168 L 132 175 L 148 178 L 138 192 L 112 192 L 88 188 Z"/>
+  <path class="reg-d3" id="reg-Lombardia" data-region="Lombardia" fill="transparent" stroke="none"
+    d="M 108 100 L 118 118 L 110 138 L 98 152 L 92 172 L 112 168 L 148 178 L 158 162 L 170 148 L 192 132 L 210 118 L 218 98 L 208 78 L 192 88 L 168 92 L 148 88 L 130 72 L 115 78 Z"/>
+  <path class="reg-d3" id="reg-Trentino-Alto Adige" data-region="Trentino-Alto Adige" fill="transparent" stroke="none"
+    d="M 130 72 L 148 88 L 168 92 L 192 88 L 208 78 L 215 58 L 198 45 L 175 42 L 155 48 L 138 58 Z"/>
+  <path class="reg-d3" id="reg-Veneto" data-region="Veneto" fill="transparent" stroke="none"
+    d="M 208 78 L 218 98 L 210 118 L 228 112 L 248 105 L 268 98 L 278 85 L 268 68 L 248 62 L 228 55 L 215 58 Z"/>
+  <path class="reg-d3" id="reg-Friuli-Venezia Giulia" data-region="Friuli-Venezia Giulia" fill="transparent" stroke="none"
+    d="M 215 58 L 228 55 L 248 62 L 268 68 L 288 72 L 298 82 L 285 95 L 268 98 L 248 105 L 228 112 L 210 118 Z"/>
+  <path class="reg-d3" id="reg-Emilia-Romagna" data-region="Emilia-Romagna" fill="transparent" stroke="none"
+    d="M 92 172 L 98 152 L 112 168 L 148 178 L 158 162 L 170 148 L 192 132 L 210 118 L 228 112 L 248 105 L 258 125 L 262 148 L 255 165 L 238 175 L 218 182 L 198 188 L 178 185 L 158 185 L 140 180 Z"/>
+  <path class="reg-d3" id="reg-Toscana" data-region="Toscana" fill="transparent" stroke="none"
+    d="M 112 192 L 138 192 L 140 180 L 158 185 L 168 205 L 165 225 L 162 245 L 175 252 L 195 248 L 218 252 L 225 262 L 215 268 L 200 272 L 185 265 L 172 255 L 158 250 L 148 238 L 145 220 L 138 205 Z"/>
+  <path class="reg-d3" id="reg-Marche" data-region="Marche" fill="transparent" stroke="none"
+    d="M 255 165 L 262 148 L 278 155 L 295 162 L 308 178 L 302 195 L 288 205 L 272 208 L 258 205 Z"/>
+  <path class="reg-d3" id="reg-Umbria" data-region="Umbria" fill="transparent" stroke="none"
+    d="M 218 252 L 225 262 L 240 255 L 255 248 L 268 235 L 272 218 L 265 205 L 258 205 L 240 215 L 225 225 L 218 238 Z"/>
+  <path class="reg-d3" id="reg-Lazio" data-region="Lazio" fill="transparent" stroke="none"
+    d="M 158 250 L 172 255 L 185 265 L 200 272 L 215 268 L 225 262 L 240 255 L 255 248 L 265 262 L 272 278 L 278 295 L 272 312 L 258 320 L 242 325 L 225 320 L 210 310 L 198 295 L 195 278 L 200 262 L 195 248 L 175 252 L 162 245 Z"/>
+  <path class="reg-d3" id="reg-Abruzzo" data-region="Abruzzo" fill="transparent" stroke="none"
+    d="M 288 205 L 302 195 L 308 178 L 325 182 L 338 195 L 342 212 L 335 228 L 325 242 L 315 252 L 305 262 L 298 272 L 288 265 L 278 295 L 272 278 L 265 262 L 272 218 L 272 208 Z"/>
+  <path class="reg-d3" id="reg-Molise" data-region="Molise" fill="transparent" stroke="none"
+    d="M 305 262 L 315 252 L 325 242 L 335 228 L 345 238 L 352 252 L 345 265 L 332 272 L 318 275 L 308 275 L 298 272 Z"/>
+  <path class="reg-d3" id="reg-Campania" data-region="Campania" fill="transparent" stroke="none"
+    d="M 278 295 L 288 265 L 298 272 L 308 275 L 318 275 L 332 272 L 345 265 L 355 278 L 365 295 L 372 312 L 372 330 L 362 345 L 350 358 L 338 368 L 325 372 L 312 368 L 298 360 L 285 348 L 278 332 L 275 315 Z"/>
+  <path class="reg-d3" id="reg-Puglia" data-region="Puglia" fill="transparent" stroke="none"
+    d="M 338 195 L 352 188 L 368 182 L 385 185 L 398 198 L 408 212 L 415 228 L 420 245 L 418 262 L 412 278 L 405 292 L 395 308 L 388 325 L 382 342 L 372 358 L 362 372 L 355 385 L 348 395 L 355 405 L 348 418 L 338 425 L 328 418 L 322 405 L 322 388 L 328 372 L 338 368 L 350 358 L 362 345 L 372 330 L 372 312 L 365 295 L 355 278 L 345 265 L 352 252 L 345 238 L 335 228 L 342 212 Z"/>
+  <path class="reg-d3" id="reg-Basilicata" data-region="Basilicata" fill="transparent" stroke="none"
+    d="M 338 368 L 328 372 L 322 388 L 322 405 L 328 418 L 338 425 L 348 418 L 355 405 L 348 395 L 355 385 L 362 372 L 372 358 L 382 342 L 388 355 L 382 368 L 375 382 L 368 395 L 362 405 L 355 415 L 348 405 Z"/>
+  <path class="reg-d3" id="reg-Calabria" data-region="Calabria" fill="transparent" stroke="none"
+    d="M 362 405 L 368 395 L 375 382 L 382 368 L 388 355 L 398 342 L 408 332 L 415 348 L 415 365 L 408 382 L 402 398 L 395 415 L 388 432 L 382 448 L 375 462 L 368 475 L 365 488 L 358 478 L 352 462 L 352 445 L 358 428 L 362 415 Z"/>
+  <path class="reg-d3" id="reg-Sicilia" data-region="Sicilia" fill="transparent" stroke="none"
+    d="M 195 488 L 212 480 L 232 475 L 255 478 L 278 485 L 302 488 L 322 482 L 338 472 L 350 462 L 360 472 L 348 488 L 328 502 L 308 510 L 285 515 L 262 512 L 238 508 L 215 502 L 198 495 Z"/>
+  <path class="reg-d3" id="reg-Sardegna" data-region="Sardegna" fill="transparent" stroke="none"
+    d="M 62 325 L 75 318 L 90 318 L 105 322 L 118 332 L 128 345 L 132 362 L 128 382 L 122 402 L 118 422 L 115 442 L 108 458 L 98 468 L 85 472 L 72 468 L 62 455 L 55 438 L 52 418 L 52 398 L 55 378 L 58 358 L 58 340 Z"/>
+</svg>
           </div>
 
           <!-- TOOLTIP -->
@@ -1381,11 +1302,7 @@
 
       <!-- EVOLUZIONE TEMPO -->
       <div style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;">
-        <!-- Gare all'estero per continente -->
-        <div id="stats-estero-wrap" style="display:none;margin-bottom:28px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 Gare all'estero</div>
-          <div id="stats-estero-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;"></div>
-        </div>
+        <div id="stats-estero-wrap" style="display:none;margin-bottom:24px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 Gare all'estero</div><div id="stats-estero-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;"></div></div>
 
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Evoluzione tempo</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:16px;">Seleziona un tipo di gara per vedere l'andamento del tempo nel corso degli anni</div>
@@ -1567,19 +1484,17 @@
     <div class="form-grid">
       <div class="form-group">
         <div class="form-label">Sport <span style="color:var(--accent)">*</span></div>
-        <select class="form-select" id="f-sport" onchange="onSportSelChange(this.value)">
+        <select class="form-select" id="f-sport" onchange="onSportChange(this.value)">
           <option value="">Seleziona sport...</option>
         </select>
-        <input class="form-input" id="f-sport-altro" placeholder="Specifica sport..." style="display:none;margin-top:6px;" />
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Tipo gara <span style="color:var(--accent)">*</span></label>
-          <select class="form-select" id="f-tipo-gara" onchange="onTipoGaraChange(this.value)">
+          <select class="form-select" id="f-tipo-gara">
             <option value="">Prima seleziona uno sport...</option>
           </select>
-          <input class="form-input" id="f-tipo-gara-altro" placeholder="Specifica tipo gara..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Data <span style="color:var(--accent)">*</span></label>
@@ -1600,14 +1515,12 @@
           <select class="form-select" id="f-nazione" onchange="onNazioneChange(this.value)">
             <option value="">Prima seleziona continente...</option>
           </select>
-          <input class="form-input" id="f-nazione-altro" placeholder="Specifica nazione..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
           <select class="form-select" id="f-regione" onchange="onRegioneChange(this.value)">
             <option value="">Prima seleziona nazione...</option>
           </select>
-          <input class="form-input" id="f-regione-altro" placeholder="Specifica regione..." style="display:none;margin-top:6px;" />
         </div>
       </div>
 
@@ -1809,10 +1722,9 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Tipo gara <span style="color:var(--accent)">*</span></label>
-          <select class="form-select" id="p-tipo-gara" onchange="onPTipoGaraChange(this.value)">
+          <select class="form-select" id="p-tipo-gara">
             <option value="">Prima seleziona uno sport...</option>
           </select>
-          <input class="form-input" id="p-tipo-gara-altro" placeholder="Specifica tipo gara..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Data <span style="color:var(--accent)">*</span>
@@ -1835,14 +1747,12 @@
           <select class="form-select" id="p-nazione" onchange="onPNazioneChange(this.value)">
             <option value="">Prima seleziona continente...</option>
           </select>
-          <input class="form-input" id="p-nazione-altro" placeholder="Specifica nazione..." style="display:none;margin-top:6px;" />
         </div>
         <div class="form-group">
           <label class="form-label">Regione</label>
           <select class="form-select" id="p-regione" onchange="onPRegioneChange(this.value)">
             <option value="">Prima seleziona nazione...</option>
           </select>
-          <input class="form-input" id="p-regione-altro" placeholder="Specifica regione..." style="display:none;margin-top:6px;" />
         </div>
       </div>
       <div class="form-group">
@@ -1866,6 +1776,11 @@
         <input class="form-input" id="p-distanza" type="number" step="0.1" placeholder="42.2" />
       </div>
 
+      <!-- Nome gara -->
+      <div class="form-group">
+        <label class="form-label">Nome gara</label>
+        <input class="form-input" id="p-nome-gara" placeholder="es. Ironman Italy, Maratona di Roma..." />
+      </div>
 
       <!-- Note -->
       <div class="form-group">
@@ -2021,7 +1936,7 @@
 <div class="form-overlay" id="consigli-overlay" onclick="if(event.target===this)chiudiConsigli()">
   <div class="form-box" style="max-width:500px;">
     <div class="form-title">I tuoi <span>consigli</span></div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">Cosa vorresti trovare su Athlos? Ogni idea conta.</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px;">Cosa vorresti trovare su Athlos?</p>
     <div class="form-group" style="margin-bottom:14px;"><label class="form-label">Nome (opzionale)</label><input class="form-input" id="consiglio-nome" placeholder="Il tuo nome"></div>
     <div class="form-group" style="margin-bottom:14px;"><label class="form-label">Messaggio *</label><textarea class="form-textarea" id="consiglio-testo" rows="5" placeholder="Scrivi qui..."></textarea></div>
     <div id="consiglio-esito" style="font-size:13px;margin-bottom:12px;display:none;"></div>
@@ -2493,108 +2408,68 @@ const REGIONI_DEFAULT = []; // Dati dal foglio Google
 
 // ── Cascata Area → Regione → Città → NomeGara ──
 // ── Cascata form GARA: Continente→Nazione→Regione→Città→NomeGara ──
-function _soloAltro(el, testo) {
-  // Imposta un select con la sola opzione "Altro"
-  if (el) el.innerHTML = '<option value="">—</option><option value="__altro_libero__">✏️ ' + (testo||'Altro (non in elenco)...') + '</option>';
-}
-
 function onContinenteChange(cont) {
-  const fNaz    = document.getElementById('f-nazione');
-  const fNazAlt = document.getElementById('f-nazione-altro');
-  const fReg    = document.getElementById('f-regione');
-  const fRegAlt = document.getElementById('f-regione-altro');
-  const fCitta  = document.getElementById('f-citta-sel');
-  const fLuogo  = document.getElementById('f-luogo');
-  const fNomeSel= document.getElementById('f-nome-sel');
-  const fNome   = document.getElementById('f-nome');
-  // Reset campi successivi
-  if (fReg)    fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
-  if (fRegAlt) { fRegAlt.style.display='none'; fRegAlt.value=''; }
-  if (fCitta)  fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
-  if (fLuogo)  { fLuogo.style.display='none'; fLuogo.value=''; }
-  if (fNomeSel)fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
-  if (fNome)   { fNome.style.display='none'; fNome.value=''; }
-  if (!cont) { if (fNaz) fNaz.innerHTML='<option value="">Prima seleziona continente...</option>'; return; }
-  // Popola nazioni
   const c = getConfig();
-  const nazioni = (c.cont_nazioni||{})[cont] || [];
-  if (fNaz) {
-    fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioni.map(n=>`<option value="${n}">${n}</option>`).join('')
-      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
-  }
-  if (fNazAlt) { fNazAlt.style.display='none'; fNazAlt.value=''; }
+  const contNaz = c.cont_nazioni || {};
+  const nazioni = cont ? (contNaz[cont] || []) : [];
+  const fNaz = document.getElementById('f-nazione');
+  const fReg = document.getElementById('f-regione');
+  const fCitta = document.getElementById('f-citta-sel');
+  const fLuogo = document.getElementById('f-luogo');
+  const fNomeSel = document.getElementById('f-nome-sel');
+  const fNome = document.getElementById('f-nome');
+  if (fNaz) fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+    + nazioni.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (fReg) fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
+  if (fCitta) fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+  if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onNazioneChange(nazione) {
-  const fNazAlt = document.getElementById('f-nazione-altro');
-  const fReg    = document.getElementById('f-regione');
-  const fRegAlt = document.getElementById('f-regione-altro');
-  const fCitta  = document.getElementById('f-citta-sel');
-  const fLuogo  = document.getElementById('f-luogo');
-  const fNomeSel= document.getElementById('f-nome-sel');
-  const fNome   = document.getElementById('f-nome');
-  // Reset campi successivi
-  if (fCitta)  fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
-  if (fLuogo)  { fLuogo.style.display='none'; fLuogo.value=''; }
-  if (fNomeSel)fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
-  if (fNome)   { fNome.style.display='none'; fNome.value=''; }
-  if (nazione === '__altra_naz__') {
-    // Nazione non censita: mostra campo libero + blocca regione/città/nome su solo Altro
-    if (fNazAlt) { fNazAlt.style.display=''; fNazAlt.focus(); }
-    if (fReg)    { fReg.innerHTML='<option value="">—</option><option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>'; }
-    if (fRegAlt) { fRegAlt.style.display='none'; fRegAlt.value=''; }
+  const c = getConfig();
+  const fReg = document.getElementById('f-regione');
+  if (!fReg) return;
+  const nazReg = c.naz_regioni || c.area_regioni || {};
+  const regioni = nazione ? (nazReg[nazione] || []) : [];
+  if (nazione && !regioni.length) {
+    fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
+    onRegioneChange('');
     return;
   }
-  if (fNazAlt) { fNazAlt.style.display='none'; fNazAlt.value=''; }
-  if (!nazione) { if (fReg) fReg.innerHTML='<option value="">Prima seleziona nazione...</option>'; return; }
-  const c = getConfig();
-  const regioni = (c.naz_regioni||c.area_regioni||{})[nazione] || [];
-  if (fReg) {
-    fReg.innerHTML = '<option value="">Seleziona regione...</option>'
-      + regioni.map(r=>`<option value="${r}">${r}</option>`).join('')
-      + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-  }
-  if (fRegAlt) { fRegAlt.style.display='none'; fRegAlt.value=''; }
+  fReg.innerHTML = '<option value="">Seleziona regione...</option>'
+    + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
   onRegioneChange('');
 }
 
 function onRegioneChange(regione) {
-  const fRegAlt = document.getElementById('f-regione-altro');
+  const c = getConfig();
   const fCitta  = document.getElementById('f-citta-sel');
   const fLuogo  = document.getElementById('f-luogo');
-  const fNomeSel= document.getElementById('f-nome-sel');
+  const fNomeSel = document.getElementById('f-nome-sel');
   const fNome   = document.getElementById('f-nome');
-  // Reset campi successivi
-  if (fLuogo)  { fLuogo.style.display='none'; fLuogo.value=''; }
-  if (fNomeSel){ fNomeSel.innerHTML='<option value="">Seleziona città prima...</option>'; }
-  if (fNome)   { fNome.style.display='none'; fNome.value=''; }
-  if (regione === '__altra_reg__') {
-    if (fRegAlt) { fRegAlt.style.display=''; fRegAlt.focus(); }
-    if (fCitta) {
-      fCitta.innerHTML = '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
-      fCitta.value = '__altra__';
-      fCitta.style.display = '';
-    }
-    if (fLuogo) { fLuogo.style.display=''; fLuogo.value=''; }
-    if (fNomeSel) {
-      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
-      fNomeSel.value = '__altro__';
-    }
-    if (fNome) { fNome.style.display=''; fNome.value=''; }
-    return;
-  }
-  if (fRegAlt) { fRegAlt.style.display='none'; fRegAlt.value=''; }
   if (!fCitta) return;
-  const c = getConfig();
+
+  // Città disponibili per questa regione dal foglio CONFIGURAZIONE
   const gareCensite = c.gare_censite || [];
   const citta = [...new Set(
     gareCensite.filter(g => !regione || g.regione === regione).map(g => g.citta).filter(Boolean)
   )].sort();
+
   fCitta.innerHTML = '<option value="">Seleziona città...</option>'
-    + citta.map(cc=>`<option value="${cc}">${cc}</option>`).join('')
+    + citta.map(cc => `<option value="${cc}">${cc}</option>`).join('')
     + '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
+
+  // Mostra sempre il dropdown città; campo libero solo se sceglie "Altra città"
   fCitta.style.display = '';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+
+  // Reset nome gara
+  if (fNomeSel) {
+    fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  }
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onCittaChange(citta) {
@@ -2604,12 +2479,11 @@ function onCittaChange(citta) {
   const fNome    = document.getElementById('f-nome');
 
   if (citta === '__altra__') {
+    // Città non in elenco — mostra campo testo libero
     if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
-    if (fNomeSel) {
-      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
-      fNomeSel.value = '__altro__';
-    }
-    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+    // Nome gara: solo campo libero
+    if (fNomeSel) fNomeSel.innerHTML = '<option value="">—</option><option value="__altro__">✏️ Inserisci nome gara...</option>';
+    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
     return;
   }
 
@@ -2674,13 +2548,6 @@ function onSportChange(sport) {
   distanzeFiltrate.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; fTipo.appendChild(o);
   });
-  // Opzione "Altro" per tipo gara non in elenco
-  const oAltro = document.createElement('option'); oAltro.value = '__altro__'; oAltro.textContent = '✏️ Altro (non in elenco)...'; fTipo.appendChild(oAltro);
-  // Aggiungi "Altro" anche al select sport se non c'è
-  const fSportSel = document.getElementById('f-sport');
-  if (fSportSel && ![...fSportSel.options].find(o => o.value === '__altro_sport__')) {
-    const oAltroSport = document.createElement('option'); oAltroSport.value = '__altro_sport__'; oAltroSport.textContent = '✏️ Altro sport (non in elenco)...'; fSportSel.appendChild(oAltroSport);
-  }
 
   // Mostra/nascondi frazioni triathlon
   const isTriFlag = sportLower.includes('triathlon') || sportLower.includes('ironman') ||
@@ -2691,32 +2558,18 @@ function onSportChange(sport) {
   if (tt) tt.style.display = isTriFlag ? 'block' : 'none';
 }
 
-function onTipoGaraChange(val) {
-  const fAltro = document.getElementById('f-tipo-gara-altro');
-  if (fAltro) { fAltro.style.display = val === '__altro__' ? '' : 'none'; if (val === '__altro__') fAltro.focus(); }
-}
-
-function onSportSelChange(val) {
-  const fAltro = document.getElementById('f-sport-altro');
-  if (fAltro) { fAltro.style.display = val === '__altro_sport__' ? '' : 'none'; if (val === '__altro_sport__') fAltro.focus(); }
-  if (val !== '__altro_sport__') onSportChange(val);
-}
-
 // ============ OPEN FORM (aggiornato) ============
 // ============ NAVIGATION ============
 function showPage(page, btn) {
-  // Pagina admin: mostra senza login box, carica dati subito
   if (page === 'admin') {
     currentPage = page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const ap = document.getElementById('page-admin');
     if (ap) ap.classList.add('active');
-    const al = document.getElementById('admin-login');
-    const ac = document.getElementById('admin-content');
-    if (al) al.style.display = 'none';
-    if (ac) ac.style.display = 'block';
+    document.getElementById('admin-login').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
     if (btn) { document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-    window.scrollTo(0, 0);
+    window.scrollTo(0,0);
     caricaDatiAdmin();
     return;
   }
@@ -2797,21 +2650,35 @@ function openForm(garaEdit) {
   document.getElementById('form-title-label').innerHTML = isEdit
     ? 'Modifica <span>gara</span>'
     : 'Aggiungi <span>gara</span>';
-  // Per archivia usa '' come edit-id (è una nuova gara, non un aggiornamento)
-  document.getElementById('f-edit-id').value = (isEdit && garaEdit.id !== '__archivia__') ? garaEdit.id : '';
+  document.getElementById('f-edit-id').value = isEdit ? garaEdit.id : '';
   document.getElementById('form-save-btn').textContent = isEdit ? 'Salva modifiche' : 'Salva gara';
 
   resetRatings();
-  // Popola select dal foglio, poi (se edit) ri-applica i valori della gara
-  caricaConfigurazione().then(() => {
-    popolaSelectConfig();
-    if (isEdit) _riempiFormEdit(garaEdit);
-  });
+  // Ricarica sempre la config se manca sport_distanze
+  const c = getConfig();
+  // Popola sempre — caricaConfigurazione è idempotente (usa cache se fresca)
+  caricaConfigurazione().then(() => popolaSelectConfig());
 
   if (isEdit) {
-    // Popola subito i campi semplici (non dipendono dalla config)
+    // Pre-popola il form con i dati della gara
     const g = garaEdit;
-    document.getElementById('f-data').value     = g.data     || '';
+    const fSport = document.getElementById('f-sport');
+    if (fSport) fSport.value = g.sport || '';
+    onSportChange(g.sport || '');
+    setTimeout(() => {
+      const fTipo = document.getElementById('f-tipo-gara');
+      if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
+    }, 50);
+    document.getElementById('f-data').value  = g.data  || '';
+    const fNome = document.getElementById('f-nome');
+    if (fNome) fNome.value = (g.nome !== g.tipo_gara ? g.nome : '') || '';
+    document.getElementById('f-luogo').value = g.luogo || '';
+    setTimeout(() => {
+      const fReg = document.getElementById('f-regione');
+      if (fReg) fReg.value = g.regione || '';
+      const fNaz = document.getElementById('f-nazione');
+      if (fNaz) fNaz.value = g.nazione || g.regione === 'Estero' ? 'Estero' : 'Italia';
+    }, 50);
     document.getElementById('f-distanza').value = g.distanza || '';
     document.getElementById('f-esito').value    = g.esito    || 'finisher';
     document.getElementById('f-tempo').value    = g.tempo    || '';
@@ -2819,10 +2686,11 @@ function openForm(garaEdit) {
     document.getElementById('f-hotel').value    = g.hotel    || '';
     document.getElementById('f-hotel-tipo').value = g.hotelTipo || '';
     if (g.frazioni) {
-      ['nuoto','t1','bici','t2','corsa'].forEach(k => {
-        const el = document.getElementById('f-'+(k==='corsa'?'corsa-tri':k));
-        if (el) el.value = g.frazioni[k] || '';
-      });
+      document.getElementById('f-nuoto').value     = g.frazioni.nuoto || '';
+      document.getElementById('f-t1').value        = g.frazioni.t1    || '';
+      document.getElementById('f-bici').value      = g.frazioni.bici  || '';
+      document.getElementById('f-t2').value        = g.frazioni.t2    || '';
+      document.getElementById('f-corsa-tri').value = g.frazioni.corsa || '';
     }
     if (g.rating) {
       ['percorso','ristori','organizzazione','posizione','pulizia','colazione'].forEach(k => {
@@ -2857,95 +2725,6 @@ function openForm(garaEdit) {
   }
 }
 
-function _riempiFormEdit(g) {
-  const c = getConfig();
-  // ── Sport ──
-  const fSport = document.getElementById('f-sport');
-  if (fSport) { fSport.value = g.sport || ''; onSportChange(g.sport || ''); }
-  // ── Tipo gara ──
-  setTimeout(() => {
-    const fTipo = document.getElementById('f-tipo-gara');
-    if (fTipo) fTipo.value = g.tipo_gara || g.nome || '';
-  }, 80);
-
-  // ── Cascata geografica: popola direttamente senza on*Change che resetta ──
-  const fCont = document.getElementById('f-continente');
-  if (fCont && g.continente) fCont.value = g.continente;
-
-  const fNaz    = document.getElementById('f-nazione');
-  const fNazAlt = document.getElementById('f-nazione-altro');
-  if (fNaz) {
-    const contNaz = c.cont_nazioni || {};
-    const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
-    const nazInLista = nazioniCont.includes(g.nazione);
-    fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('')
-      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
-    if (g.nazione && !nazInLista) {
-      fNaz.value = '__altra_naz__';
-      if (fNazAlt) { fNazAlt.value = g.nazione; fNazAlt.style.display = ''; }
-    }
-  }
-
-  const fReg    = document.getElementById('f-regione');
-  const fRegAlt = document.getElementById('f-regione-altro');
-  if (fReg) {
-    const nazReg = c.naz_regioni || c.area_regioni || {};
-    const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
-    const regInLista = regioniNaz.includes(g.regione);
-    if (regioniNaz.length) {
-      fReg.innerHTML = '<option value="">Seleziona regione...</option>'
-        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('')
-        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-    } else {
-      fReg.innerHTML = '<option value="">—</option>'
-        + (g.regione ? `<option value="${g.regione}" selected>${g.regione}</option>` : '')
-        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-    }
-    if (g.regione && !regInLista) {
-      fReg.value = '__altra_reg__';
-      if (fRegAlt) { fRegAlt.value = g.regione; fRegAlt.style.display = ''; }
-    }
-  }
-
-  const fCS = document.getElementById('f-citta-sel');
-  const fLuogo = document.getElementById('f-luogo');
-  if (fCS && g.luogo) {
-    const gareCensite = c.gare_censite || [];
-    const citta = [...new Set(
-      gareCensite.filter(gc => !g.regione || gc.regione === g.regione).map(gc => gc.citta).filter(Boolean)
-    )].sort();
-    fCS.innerHTML = '<option value="">Seleziona città...</option>'
-      + citta.map(cc => `<option value="${cc}"${cc===g.luogo?' selected':''}>${cc}</option>`).join('')
-      + '<option value="__altra__">✏️ Altra città...</option>';
-    if (!citta.includes(g.luogo)) {
-      fCS.value = '__altra__';
-      if (fLuogo) { fLuogo.value = g.luogo; fLuogo.style.display = 'block'; }
-    }
-  } else if (fLuogo && g.luogo) {
-    fLuogo.value = g.luogo;
-  }
-
-  const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
-  const fNS = document.getElementById('f-nome-sel');
-  const fNome = document.getElementById('f-nome');
-  if (fNS && nomeCercato) {
-    const gareCensite = c.gare_censite || [];
-    const nomiGare = gareCensite
-      .filter(gc => gc.citta === g.luogo || gc.regione === g.regione)
-      .map(gc => gc.nome).filter(Boolean);
-    fNS.innerHTML = '<option value="">Seleziona gara...</option>'
-      + nomiGare.map(n => `<option value="${n}"${n===nomeCercato?' selected':''}>${n}</option>`).join('')
-      + '<option value="__altro__">✏️ Altra gara...</option>';
-    if (!nomiGare.includes(nomeCercato)) {
-      fNS.value = '__altro__';
-      if (fNome) { fNome.value = nomeCercato; fNome.style.display = 'block'; }
-    }
-  } else if (fNome) {
-    fNome.value = nomeCercato;
-  }
-}
-
 function apriModificaGara(id) {
   const gare = getGare();
   const g = gare.find(x => x.id === id);
@@ -2964,31 +2743,16 @@ function selectSport(btn) {
 }
 
 function salvaGara() {
-  // Leggi valori dai campi (inclusi quelli "Altro")
-  const sportSel = (document.getElementById('f-sport')||{}).value || '';
-  const sportVal = sportSel === '__altro_sport__'
-    ? ((document.getElementById('f-sport-altro')||{}).value||'').trim()
-    : sportSel;
-  const tipoSel = (document.getElementById('f-tipo-gara')||{}).value || '';
-  const tipoVal = tipoSel === '__altro__'
-    ? ((document.getElementById('f-tipo-gara-altro')||{}).value||'').trim()
-    : tipoSel;
-  const nazSel = (document.getElementById('f-nazione')||{}).value || '';
-  const nazVal = nazSel === '__altra_naz__'
-    ? ((document.getElementById('f-nazione-altro')||{}).value||'').trim()
-    : nazSel;
-  const regSel = (document.getElementById('f-regione')||{}).value || '';
-  const regVal = regSel === '__altra_reg__'
-    ? ((document.getElementById('f-regione-altro')||{}).value||'').trim()
-    : regSel;
-  // Validazioni
+  const tipoGara = document.getElementById('f-tipo-gara').value.trim();
+  const sportVal = document.getElementById('f-sport').value.trim();
+  if (!tipoGara) { alert('Seleziona il tipo di gara'); return; }
   if (!sportVal) { alert('Seleziona lo sport'); return; }
-  if (!tipoVal)  { alert('Seleziona il tipo di gara'); return; }
   const dataVal = document.getElementById('f-data').value;
   if (dataVal && dataVal > new Date().toISOString().slice(0,10)) {
     alert('⚠️ La data è futura. Per le gare in programma usa la sezione "In Programma".');
     return;
   }
+  // Controllo contenuti offensivi nelle note
   const noteVal = (document.getElementById('f-note') || {}).value || '';
   if (contenutoOffensivo(noteVal)) {
     alert('⚠️ Il testo inserito nelle note contiene contenuti non consentiti. Rimuovili per procedere.');
@@ -2997,19 +2761,19 @@ function salvaGara() {
   const editId = document.getElementById('f-edit-id').value;
   const isEdit = !!editId;
   const sportLower = sportVal.toLowerCase();
-  const isTri = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
-                sportLower.includes('triathlon') || sportLower.includes('ironman');
+  const isTriFlag = ['triathlon','tri703','ironman','duathlon'].includes(sportLower) ||
+                    sportLower.includes('triathlon') || sportLower.includes('ironman');
+  const isTri = isTriFlag;
   const nomeGaraCustom = (document.getElementById('f-nome').value || '').trim();
-
   const gara = {
-    id: (isEdit && editId !== '__archivia__') ? parseInt(editId) : Date.now(),
+    id: isEdit ? parseInt(editId) : Date.now(),
     utente_id: getUtenteId(),
     sport: sportVal,
-    tipo_gara: tipoVal || tipoGaraRaw || '',
-    nome: nomeGaraCustom || tipoVal || tipoGaraRaw || '',
+    tipo_gara: tipoGara,
+    nome: nomeGaraCustom || tipoGara,
     data: document.getElementById('f-data').value,
     luogo: document.getElementById('f-luogo').value,
-    regione: regVal || (document.getElementById('f-regione')||{}).value || '',
+    regione: document.getElementById('f-regione').value,
     distanza: parseFloat(document.getElementById('f-distanza').value) || 0,
     esito: isTri ? document.getElementById('f-esito-tri').value : document.getElementById('f-esito').value,
     tempo: isTri ? null : document.getElementById('f-tempo').value,
@@ -3020,7 +2784,7 @@ function salvaGara() {
       t2: document.getElementById('f-t2').value,
       corsa: document.getElementById('f-corsa-tri').value,
     } : null,
-    nazione:    nazVal || '',
+    nazione: (document.getElementById('f-nazione') || {}).value || '',
     continente: (document.getElementById('f-continente') || {}).value || '',
     rating: { ...ratings },
     ratingHotel: { posizione: ratings.posizione, pulizia: ratings.pulizia, colazione: ratings.colazione },
@@ -3053,7 +2817,7 @@ function salvaGara() {
   if (currentPage === 'gare') renderGare('tutte');
   if (currentPage === 'mappa') renderMappa();
   if (getUtenteId()) {
-    const action = (isEdit && gara.id && gara.id !== '__archivia__') ? 'updateGara' : 'saveGara';
+    const action = isEdit ? 'updateGara' : 'saveGara';
     gsPost(action, gara).then(r => { if (r) showSyncBadge('ok'); });
 
     // Controlla regione conquistata (solo inserimento manuale, non edit)
@@ -3067,26 +2831,13 @@ function salvaGara() {
     }
 
     // Segnala gara non censita all'admin
-    // Segnala qualsiasi campo inserito manualmente (non da elenco)
-    const _sportNonCensito  = sportSel === '__altro_sport__';
-    const _tipoNonCensito   = tipoSel  === '__altro__';
-    const _nazNonCensita    = nazSel   === '__altra_naz__';
-    const _regNonCensita    = regSel   === '__altra_reg__';
-    const _nomeSel = document.getElementById('f-nome-sel');
-    const _nomeNonCensito = _nomeSel && (_nomeSel.value === '__altro__' || !_nomeSel.value);
-    const _cittaSel = document.getElementById('f-citta-sel');
-    const _cittaNonCensita = _cittaSel && _cittaSel.value === '__altra__';
-    if (!isEdit && (_sportNonCensito || _tipoNonCensito || _nazNonCensita || _regNonCensita || _nomeNonCensito || _cittaNonCensita)) {
+    const nomeSel = document.getElementById('f-nome-sel');
+    const garaCensita = nomeSel && nomeSel.style.display !== 'none' &&
+                        nomeSel.value && nomeSel.value !== '__altro__';
+    if (!isEdit && !garaCensita && gara.nome) {
       gsPost('segnalaGaraNonCensita', {
-        utente_id: gara.utente_id,
-        sport:      _sportNonCensito  ? gara.sport      : '',
-        tipo_gara:  _tipoNonCensito   ? gara.tipo_gara  : '',
-        nazione:    _nazNonCensita    ? gara.nazione     : '',
-        regione:    _regNonCensita    ? gara.regione     : '',
-        luogo:      _cittaNonCensita  ? gara.luogo       : '',
-        nome:       _nomeNonCensito   ? gara.nome        : '',
-        continente: '',
-        distanza:   ''
+        utente_id: gara.utente_id, sport: gara.sport,
+        nome: gara.nome, luogo: gara.luogo, regione: gara.regione
       }).catch(() => {});
     }
   }
@@ -3114,164 +2865,81 @@ function openFormProgramma(garaEdit) {
   const pData = document.getElementById('p-data');
   if (pData) pData.min = domani.toISOString().slice(0,10);
 
-  // Popola campi semplici subito (non dipendono dalla config)
-  if (isEdit) {
-    const g = garaEdit;
-    if (pData) pData.value = g.data || '';
-    const pDistEl = document.getElementById('p-distanza'); if (pDistEl) pDistEl.value = g.distanza || '';
-    const pNoteEl = document.getElementById('p-note'); if (pNoteEl) pNoteEl.value = g.note || '';
-  } else {
-    if (pData) pData.value = '';
-    ['p-nome-gara','p-luogo','p-distanza','p-note'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.value = '';
-    });
-  }
-
-  // Carica config e poi popola tutti i select + cascata
-  caricaConfigurazione().then(() => {
-    _popolaFormProgramma();
-    if (isEdit) _riempiFormProgrammaEdit(garaEdit);
-  });
-}
-
-function _popolaFormProgramma() {
-  const cc = getConfig();
-  // Sport
-  const pSport = document.getElementById('p-sport');
-  if (pSport) {
-    pSport.innerHTML = '<option value="">Seleziona sport...</option>';
-    (cc.sport || []).forEach(s => {
-      const o = document.createElement('option');
-      o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
-    });
-    const oPS = document.createElement('option'); oPS.value='__altro_sport__'; oPS.textContent='✏️ Altro sport (non in elenco)...'; pSport.appendChild(oPS);
-    // Campo libero
-    let pSportAltro = document.getElementById('p-sport-altro');
-    if (!pSportAltro) {
-      pSportAltro = document.createElement('input'); pSportAltro.className='form-input';
-      pSportAltro.id='p-sport-altro'; pSportAltro.placeholder='Specifica sport...';
-      pSportAltro.style.display='none'; pSportAltro.style.marginTop='6px';
-      pSport.parentNode.appendChild(pSportAltro);
+  // Assicura config aggiornata con sport_distanze
+  const cfgP = getConfig();
+  const loadAndFill = () => {
+    const cc = getConfig();
+    const pSport = document.getElementById('p-sport');
+    if (pSport) {
+      pSport.innerHTML = '<option value="">Seleziona sport...</option>';
+      (cc.sport || []).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.toLowerCase(); o.textContent = s; pSport.appendChild(o);
+      });
     }
-    pSport.onchange = function() {
-      if (pSportAltro) pSportAltro.style.display = this.value==='__altro_sport__'?'':'none';
-      if (this.value !== '__altro_sport__') onPSportChange(this.value);
-    };
+    const pNazInner = document.getElementById('p-nazione');
+    if (pNazInner) {
+      pNazInner.innerHTML = '<option value="">Seleziona...</option>';
+      (cc.nazioni || []).forEach(n => {
+        const o = document.createElement('option'); o.value = n; o.textContent = n; pNazInner.appendChild(o);
+      });
+    }
+    const pRegInner = document.getElementById('p-regione');
+    if (pRegInner) {
+      pRegInner.innerHTML = '<option value="">Seleziona...</option>';
+      (cc.regioni || []).forEach(r => {
+        const o = document.createElement('option'); o.value = r; o.textContent = r; pRegInner.appendChild(o);
+      });
+    }
+  };
+  if (!cfgP.sport_distanze || Object.keys(cfgP.sport_distanze).length === 0) {
+    caricaConfigurazione().then(loadAndFill);
+  } else {
+    loadAndFill();
   }
+
+  // Popola nazione e regione
+  const pNaz = document.getElementById('p-nazione');
+  if (pNaz) {
+    const c = getConfig();
+    pNaz.innerHTML = '<option value="">Seleziona...</option>';
+    (c.nazioni || []).forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; pNaz.appendChild(o);
+    });
+  }
+  const pReg = document.getElementById('p-regione');
+  if (pReg) {
+    const c = getConfig();
+    pReg.innerHTML = '<option value="">Seleziona...</option>';
+    (c.regioni || []).forEach(r => {
+      const o = document.createElement('option'); o.value = r; o.textContent = r; pReg.appendChild(o);
+    });
+  }
+
   // Reset tipo gara
   const pTipo = document.getElementById('p-tipo-gara');
   if (pTipo) pTipo.innerHTML = '<option value="">Prima seleziona uno sport...</option>';
-  // Continente
-  const pCont = document.getElementById('p-continente');
-  if (pCont) {
-    const continenti = cc.continenti || Object.keys(cc.cont_nazioni || {});
-    pCont.innerHTML = '<option value="">Seleziona...</option>';
-    continenti.forEach(c => {
-      const o = document.createElement('option'); o.value = c; o.textContent = c; pCont.appendChild(o);
+
+  if (isEdit) {
+    const g = garaEdit;
+    if (pSport) { pSport.value = (g.sport||'').toLowerCase(); onPSportChange(pSport.value); }
+    setTimeout(() => {
+      if (pTipo) pTipo.value = g.tipo_gara || '';
+      const pNomeGara = document.getElementById('p-nome-gara');
+      if (pNomeGara) pNomeGara.value = (g.nome !== g.tipo_gara ? g.nome : '') || '';
+      if (pData) pData.value = g.data || '';
+      const pLuogo = document.getElementById('p-luogo'); if (pLuogo) pLuogo.value = g.luogo || '';
+      if (pNaz) pNaz.value = g.nazione || '';
+      if (pReg) pReg.value = g.regione || '';
+      const pDist = document.getElementById('p-distanza'); if (pDist) pDist.value = g.distanza || '';
+      const pNote = document.getElementById('p-note'); if (pNote) pNote.value = g.note || '';
+    }, 60);
+  } else {
+    // Reset campi
+    ['p-nome-gara','p-luogo','p-distanza','p-note'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
     });
-  }
-  // Reset nazione/regione/città/nome
-  const pNaz = document.getElementById('p-nazione');
-  if (pNaz) pNaz.innerHTML = '<option value="">Prima seleziona continente...</option>';
-  const pReg = document.getElementById('p-regione');
-  if (pReg) pReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
-  const pCS = document.getElementById('p-citta-sel');
-  if (pCS) pCS.innerHTML = '<option value="">Prima seleziona regione...</option>';
-  const pNS = document.getElementById('p-nome-sel');
-  if (pNS) pNS.innerHTML = '<option value="">Prima seleziona città...</option>';
-}
-
-function _riempiFormProgrammaEdit(g) {
-  const c = getConfig();
-  // ── Sport ──
-  const pSport = document.getElementById('p-sport');
-  if (pSport) { pSport.value = (g.sport||'').toLowerCase(); onPSportChange(pSport.value); }
-  // ── Tipo gara ──
-  setTimeout(() => {
-    const pTipo = document.getElementById('p-tipo-gara');
-    if (pTipo) pTipo.value = g.tipo_gara || g.nome || '';
-  }, 80);
-
-  // ── Cascata geografica: popola direttamente senza usare on*Change che resetta ──
-  // Continente: setta il valore (le opzioni sono già state popolate da _popolaFormProgramma)
-  const pCont = document.getElementById('p-continente');
-  if (pCont && g.continente) pCont.value = g.continente;
-
-  // Nazione: popola le opzioni per il continente scelto, poi setta il valore
-  const pNaz    = document.getElementById('p-nazione');
-  const pNazAlt = document.getElementById('p-nazione-altro');
-  if (pNaz) {
-    const contNaz = c.cont_nazioni || {};
-    const nazioniCont = g.continente ? (contNaz[g.continente] || []) : (c.nazioni || []);
-    const nazInLista = nazioniCont.includes(g.nazione);
-    pNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioniCont.map(n => `<option value="${n}"${n===g.nazione?' selected':''}>${n}</option>`).join('')
-      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
-    if (g.nazione && !nazInLista) {
-      // Nazione inserita a mano — seleziona Altro e mostra campo libero
-      pNaz.value = '__altra_naz__';
-      if (pNazAlt) { pNazAlt.value = g.nazione; pNazAlt.style.display = ''; }
-    }
-  }
-
-  // Regione: popola le opzioni per la nazione scelta, poi setta il valore
-  const pReg    = document.getElementById('p-regione');
-  const pRegAlt = document.getElementById('p-regione-altro');
-  if (pReg) {
-    const nazReg = c.naz_regioni || c.area_regioni || {};
-    const regioniNaz = g.nazione ? (nazReg[g.nazione] || []) : (c.regioni || []);
-    const regInLista = regioniNaz.includes(g.regione);
-    if (regioniNaz.length) {
-      pReg.innerHTML = '<option value="">Seleziona regione...</option>'
-        + regioniNaz.map(r => `<option value="${r}"${r===g.regione?' selected':''}>${r}</option>`).join('')
-        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-    } else {
-      pReg.innerHTML = '<option value="">—</option>'
-        + (g.regione ? `<option value="${g.regione}" selected>${g.regione}</option>` : '')
-        + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-    }
-    if (g.regione && !regInLista) {
-      pReg.value = '__altra_reg__';
-      if (pRegAlt) { pRegAlt.value = g.regione; pRegAlt.style.display = ''; }
-    }
-  }
-
-  // Città: popola le opzioni per la regione scelta, poi setta il valore
-  const pCS = document.getElementById('p-citta-sel');
-  const pLuogo = document.getElementById('p-luogo');
-  if (pCS && g.luogo) {
-    const gareCensite = c.gare_censite || [];
-    const citta = [...new Set(
-      gareCensite.filter(gc => !g.regione || gc.regione === g.regione).map(gc => gc.citta).filter(Boolean)
-    )].sort();
-    pCS.innerHTML = '<option value="">Seleziona città...</option>'
-      + citta.map(cc => `<option value="${cc}"${cc===g.luogo?' selected':''}>${cc}</option>`).join('')
-      + '<option value="__altra__">✏️ Altra città...</option>';
-    if (!citta.includes(g.luogo)) {
-      // Città non censita — mostra campo libero
-      pCS.value = '__altra__';
-      if (pLuogo) { pLuogo.value = g.luogo; pLuogo.style.display = 'block'; }
-    }
-  } else if (pLuogo && g.luogo) {
-    pLuogo.value = g.luogo;
-  }
-
-  // Nome gara: popola le opzioni per la città scelta, poi setta il valore
-  const nomeCercato = g.nome && g.nome !== g.tipo_gara ? g.nome : (g.tipo_gara || '');
-  const pNS = document.getElementById('p-nome-sel');
-  const pNG = document.getElementById('p-nome-gara');
-  if (pNS && nomeCercato) {
-    const gareCensite = c.gare_censite || [];
-    const nomiGare = gareCensite
-      .filter(gc => gc.citta === g.luogo || gc.regione === g.regione)
-      .map(gc => gc.nome).filter(Boolean);
-    pNS.innerHTML = '<option value="">Seleziona gara...</option>'
-      + nomiGare.map(n => `<option value="${n}"${n===nomeCercato?' selected':''}>${n}</option>`).join('')
-      + '<option value="__altro__">✏️ Altra gara...</option>';
-    if (!nomiGare.includes(nomeCercato)) {
-      pNS.value = '__altro__';
-      if (pNG) { pNG.value = nomeCercato; pNG.style.display = 'block'; }
-    }
+    if (pData) pData.value = '';
   }
 }
 function closeFormProgramma() { document.getElementById('form-programma-overlay').classList.remove('open'); }
@@ -3282,75 +2950,42 @@ function selectSportP(btn) {
   selectedSportP = btn.dataset.sport;
 }
 function salvaGaraProgramma() {
+  const nome = document.getElementById('p-nome') ? document.getElementById('p-nome').value.trim() : '';
   const dataVal = document.getElementById('p-data').value;
   if (dataVal && dataVal <= new Date().toISOString().slice(0,10)) {
     alert('⚠️ La data deve essere successiva a oggi. Per le gare passate usa "Aggiungi gara".');
     return;
   }
-
-  // ── Leggi tutti i valori dai campi (con supporto Altro) ──
-  const _pSportSel  = (document.getElementById('p-sport')||{}).value || selectedSportP || '';
-  const sportP      = _pSportSel === '__altro_sport__'
-    ? ((document.getElementById('p-sport-altro')||{}).value||'').trim() : _pSportSel;
-
-  const _pTipoSel   = (document.getElementById('p-tipo-gara')||{}).value || '';
-  const tipoGaraP   = _pTipoSel === '__altro__'
-    ? ((document.getElementById('p-tipo-gara-altro')||{}).value||'').trim() : _pTipoSel;
-
-  const _pNazSel    = (document.getElementById('p-nazione')||{}).value || '';
-  const nazP        = _pNazSel === '__altra_naz__'
-    ? ((document.getElementById('p-nazione-altro')||{}).value||'').trim() : _pNazSel;
-
-  const _pRegSel    = (document.getElementById('p-regione')||{}).value || '';
-  const regP        = _pRegSel === '__altra_reg__'
-    ? ((document.getElementById('p-regione-altro')||{}).value||'').trim() : _pRegSel;
-
-  const _pCittaSel  = (document.getElementById('p-citta-sel')||{}).value || '';
-  const cittaVal    = _pCittaSel === '__altra__'
-    ? ((document.getElementById('p-luogo')||{}).value||'').trim() : _pCittaSel;
-
-  const _pNomeSel   = (document.getElementById('p-nome-sel')||{}).value || '';
-  const nomeGaraP   = _pNomeSel === '__altro__'
-    ? ((document.getElementById('p-nome-gara')||{}).value||'').trim() : _pNomeSel;
-
-  const continenteP = (document.getElementById('p-continente')||{}).value || '';
-  const nomeGara    = tipoGaraP || '';
-
+  const sportP    = (document.getElementById('p-sport')     || {}).value || selectedSportP || '';
+  const tipoGaraP = (document.getElementById('p-tipo-gara') || {}).value || '';
+  const nomeGara  = tipoGaraP || nome || '';
   if (!nomeGara && !sportP) { alert('Seleziona almeno lo sport o il tipo di gara'); return; }
-
-  // ── Oggetto gara ──
+  // Legge dalla cascata — nome da select o campo libero
+  const pNomeSel = document.getElementById('p-nome-sel');
+  const pNomeLib = document.getElementById('p-nome-gara');
+  const nomeGaraP = (pNomeSel && pNomeSel.value && pNomeSel.value !== '__altro__')
+    ? pNomeSel.value
+    : ((pNomeLib || {}).value || '').trim();
+  // Città: da select o campo libero
+  const pCittaSel = document.getElementById('p-citta-sel');
+  const pLuogoLib = document.getElementById('p-luogo');
+  const cittaVal = (pCittaSel && pCittaSel.value && pCittaSel.value !== '__altra__')
+    ? pCittaSel.value
+    : ((pLuogoLib || {}).value || '').trim();
   const gara = {
-    id:         Date.now(),
-    utente_id:  getUtenteId() || 'locale',
-    sport:      sportP,
-    tipo_gara:  nomeGara,
-    nome:       nomeGaraP || nomeGara,
-    nazione:    nazP,
-    continente: continenteP,
-    data:       dataVal,
-    luogo:      cittaVal,
-    regione:    regP,
-    distanza:   parseFloat(document.getElementById('p-distanza').value) || 0,
-    note:       (document.getElementById('p-note')||{}).value || '',
+    id: Date.now(),
+    utente_id: getUtenteId() || 'locale',
+    sport: sportP,
+    tipo_gara: nomeGara,
+    nome: nomeGaraP || nomeGara,
+    nazione:    (document.getElementById('p-nazione')    || {}).value || '',
+    continente: (document.getElementById('p-continente') || {}).value || '',
+    data: document.getElementById('p-data').value,
+    luogo: cittaVal,
+    regione: document.getElementById('p-regione').value,
+    distanza: parseFloat(document.getElementById('p-distanza').value) || 0,
+    note: document.getElementById('p-note').value,
   };
-
-  // ── Segnala campi non censiti ──
-  const haAltro = _pSportSel==='__altro_sport__' || _pTipoSel==='__altro__' ||
-                  _pNazSel==='__altra_naz__'     || _pRegSel==='__altra_reg__' ||
-                  _pCittaSel==='__altra__'        || _pNomeSel==='__altro__';
-  if (haAltro) {
-    gsPost('segnalaGaraNonCensita', {
-      utente_id:  gara.utente_id,
-      sport:      _pSportSel==='__altro_sport__'  ? sportP    : '',
-      tipo_gara:  _pTipoSel==='__altro__'         ? tipoGaraP : '',
-      continente: '',
-      nazione:    _pNazSel==='__altra_naz__'      ? nazP      : '',
-      regione:    _pRegSel==='__altra_reg__'      ? regP      : '',
-      luogo:      _pCittaSel==='__altra__'        ? cittaVal  : '',
-      nome:       _pNomeSel==='__altro__'         ? nomeGaraP : '',
-      distanza:   ''
-    }).catch(() => {});
-  }
   const p = getProgramma();
   const editId = document.getElementById('form-programma-edit-id')?.value;
   const isEdit = !!editId;
@@ -3576,16 +3211,15 @@ function renderGare(tipo) {
 
   // Costruisci i tab dinamicamente
   const sport_presenti = [...new Set(gare.map(g => g.sport).filter(Boolean))];
-  const ha_italia = gare.some(g => g.regione && MAP_SEEDS.hasOwnProperty(g.regione));
-  const ha_estero = gare.some(g => g.nazione && g.nazione.toUpperCase() !== 'ITALIA');
+  const ha_estero = gare.some(g => g.regione === 'Estero');
 
   const tabsEl = document.getElementById('gare-tabs');
   if (tabsEl) {
     const tabList = [
       { id: 'tutte', label: 'Tutte (' + gare.length + ')' },
       ...sport_presenti.map(s => ({ id: 'sport_' + s, label: sportLabel(s) + ' (' + gare.filter(g=>g.sport===s).length + ')' })),
-      ...(ha_italia ? [{ id: 'italia', label: '🇮🇹 Italia' }] : [{ id: 'italia', label: '🇮🇹 Italia' }]),
-      ...(ha_estero ? [{ id: 'estero', label: '🌍 Estero' }] : []),
+      { id: 'italia', label: 'Italia' },
+      ...(ha_estero ? [{ id: 'estero', label: 'Estero' }] : []),
       { id: 'pb', label: 'Personal Best' },
     ];
     // Costruisci tab senza onclick inline per evitare conflitti di apici
@@ -3618,28 +3252,12 @@ function renderGare(tipo) {
       if (!perTipo[k]) perTipo[k] = [];
       perTipo[k].push(g);
     });
-    // Ordine distanza per triathlon (dalla più lunga alla più corta)
-    const TRI_ORDER = [
-      'long distance','ironman','iron','full distance',
-      'half distance','half iron','70.3',
-      'olympic','olimpico','middle distance',
-      'sprint','super sprint','altro'
-    ];
-    function triSortKey(tipoNome) {
-      const t = (tipoNome||'').toLowerCase();
-      const idx = TRI_ORDER.findIndex(k => t.includes(k));
-      return idx === -1 ? TRI_ORDER.length : idx;
-    }
-    const isTri = ['triathlon','ironman','duathlon','tri703']
-      .some(k => sportFiltro.toLowerCase().includes(k));
-    // Dentro ogni gruppo ordina per data decrescente (più recente prima)
-    Object.values(perTipo).forEach(list =>
-      list.sort((a,b) => (b.data||'').localeCompare(a.data||''))
-    );
+    const isTri2 = ['triathlon','ironman','duathlon','tri703'].some(k => sportFiltro.toLowerCase().includes(k));
+    const TRI_ORD = ['long distance','ironman','iron','full','half distance','half','70.3','olympic','sprint'];
+    const triKey = t => { const i = TRI_ORD.findIndex(k => (t||'').toLowerCase().includes(k)); return i<0?99:i; };
+    Object.values(perTipo).forEach(list => list.sort((a,b)=>(b.data||'').localeCompare(a.data||'')));
     cont.innerHTML = Object.entries(perTipo)
-      .sort((a,b) => isTri
-        ? triSortKey(a[0]) - triSortKey(b[0])   // triathlon: per distanza
-        : b[1].length - a[1].length)             // altri sport: per numero gare
+      .sort((a,b) => isTri2 ? triKey(a[0])-triKey(b[0]) : b[1].length - a[1].length)
       .map(([tipo_gara, list]) => `
         <div style="margin-bottom:24px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">
@@ -3650,28 +3268,56 @@ function renderGare(tipo) {
         </div>
       `).join('');
 
-  } else if (tipo === 'italia') {
-    const gareIt = gare.filter(g => g.regione && MAP_SEEDS.hasOwnProperty(g.regione));
-    if (!gareIt.length) { cont.innerHTML='<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">Nessuna gara in Italia</div></div>'; return; }
-    const perReg={};
-    gareIt.forEach(g=>{const r=g.regione;if(!perReg[r])perReg[r]={};const s=g.sport||'altro';if(!perReg[r][s])perReg[r][s]={};const t=g.tipo_gara||g.nome||'Altro';if(!perReg[r][s][t])perReg[r][s][t]=[];perReg[r][s][t].push(g);});
-    cont.innerHTML=Object.entries(perReg).sort((a,b)=>Object.values(b[1]).flatMap(x=>Object.values(x)).flat().length-Object.values(a[1]).flatMap(x=>Object.values(x)).flat().length).map(([reg,perSport])=>{
-      const tot=Object.values(perSport).flatMap(x=>Object.values(x)).flat().length;
-      const sB=Object.entries(perSport).map(([spt,pTG])=>{const tS=Object.values(pTG).flat().length;const tB=Object.entries(pTG).map(([tg,list])=>`<details style="margin-left:16px;margin-bottom:6px;"><summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;"><span>${tg}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span></summary><div style="margin-top:6px;">${list.map(garaCard).join('')}</div></details>`).join('');return`<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;"><span>${sportIcon(spt)} ${sportLabel(spt)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${tS} gare</span></summary><div style="margin-top:8px;">${tB}</div></details>`;}).join('');
-      return`<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>📍 ${reg}</span><span style="color:var(--accent);font-size:16px;">${tot} gare</span></summary><div style="margin-top:10px;">${sB}</div></details>`;
-    }).join('');
+  } else if (tipo === 'italia' || tipo === 'estero') {
+    const gareArea = tipo === 'estero' ? gare.filter(g => g.nazione && g.nazione.toUpperCase() !== 'ITALIA') : gare.filter(g => g.regione && MAP_SEEDS.hasOwnProperty(g.regione));
+    const perRegione = {};
+    gareArea.forEach(g => {
+      const r = g.regione || 'Senza regione';
+      if (!perRegione[r]) perRegione[r] = {};
+      const s = g.sport || 'altro';
+      if (!perRegione[r][s]) perRegione[r][s] = {};
+      const t = g.tipo_gara || g.nome || 'Altro';
+      if (!perRegione[r][s][t]) perRegione[r][s][t] = [];
+      perRegione[r][s][t].push(g);
+    });
 
-  } else if (tipo === 'estero') {
-    // Raggruppa per Continente → Nazione — nomi ESATTI dal foglio Google
-    const gareEst = gare.filter(g => g.nazione && g.nazione.toUpperCase() !== 'ITALIA');
-    if (!gareEst.length) { cont.innerHTML='<div class="empty-state"><div class="empty-icon">🌍</div><div class="empty-title">Nessuna gara all\'estero</div></div>'; return; }
-    const perCont={};
-    gareEst.forEach(g=>{const c2=(g.continente||'').trim()||'Altro';const nz=(g.nazione||'').trim()||'Non specificata';if(!perCont[c2])perCont[c2]={};if(!perCont[c2][nz])perCont[c2][nz]=[];perCont[c2][nz].push(g);});
-    cont.innerHTML=Object.entries(perCont).sort((a,b)=>Object.values(b[1]).flat().length-Object.values(a[1]).flat().length).map(([cont2,perNaz])=>{
-      const totC=Object.values(perNaz).flat().length;
-      const nB=Object.entries(perNaz).sort((a,b)=>b[1].length-a[1].length).map(([nz2,list])=>`<details style="margin-left:12px;margin-bottom:8px;"><summary style="cursor:pointer;padding:8px 14px;border-radius:8px;background:var(--bg3);font-size:15px;font-weight:700;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🏳️ ${nz2}</span><span style="color:var(--text2);font-size:12px;font-weight:400;">${list.length} gar${list.length===1?'a':'e'}</span></summary><div style="margin-top:8px;">${list.map(garaCard).join('')}</div></details>`).join('');
-      return`<details open style="margin-bottom:16px;"><summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;"><span>🌍 ${cont2}</span><span style="color:var(--accent);font-size:16px;">${totC} gar${totC===1?'a':'e'}</span></summary><div style="margin-top:10px;">${nB}</div></details>`;
-    }).join('');
+    if (!Object.keys(perRegione).length) {
+      cont.innerHTML = `<div class="empty-state"><div class="empty-icon">${tipo==='estero'?'🌍':'🗺️'}</div><div class="empty-title">Nessuna gara ${tipo==='estero'?'all\u2019estero':'in Italia'}</div></div>`;
+      return;
+    }
+
+    cont.innerHTML = Object.entries(perRegione)
+      .sort((a,b) => {
+        const na = Object.values(a[1]).flatMap(s=>Object.values(s)).flat().length;
+        const nb = Object.values(b[1]).flatMap(s=>Object.values(s)).flat().length;
+        return nb - na;
+      })
+      .map(([regione, perSport]) => {
+        const totRegione = Object.values(perSport).flatMap(s=>Object.values(s)).flat().length;
+        const sportBlocks = Object.entries(perSport).map(([sport, perTipoG]) => {
+          const totSport = Object.values(perTipoG).flat().length;
+          const tipoBlocks = Object.entries(perTipoG).map(([tipoG, list]) =>
+            `<details style="margin-left:16px;margin-bottom:6px;">
+              <summary style="cursor:pointer;padding:6px 10px;border-radius:6px;background:var(--bg4);font-size:13px;font-weight:600;list-style:none;display:flex;justify-content:space-between;">
+                <span>${tipoG}</span><span style="color:var(--text3);font-weight:400;">${list.length} gare</span>
+              </summary>
+              <div style="margin-top:6px;">${list.map(garaCard).join('')}</div>
+            </details>`
+          ).join('');
+          return `<details style="margin-left:12px;margin-bottom:8px;">
+            <summary style="cursor:pointer;padding:8px 12px;border-radius:8px;background:var(--bg3);font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+              <span>${sportIcon(sport)} ${sportLabel(sport)}</span><span style="color:var(--text3);font-size:12px;font-weight:400;">${totSport} gare</span>
+            </summary>
+            <div style="margin-top:8px;">${tipoBlocks}</div>
+          </details>`;
+        }).join('');
+        return `<details open style="margin-bottom:16px;">
+          <summary style="cursor:pointer;padding:12px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border2);font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;list-style:none;display:flex;align-items:center;justify-content:space-between;">
+            <span>📍 ${regione}</span><span style="color:var(--accent);font-size:16px;">${totRegione} gare</span>
+          </summary>
+          <div style="margin-top:10px;">${sportBlocks}</div>
+        </details>`;
+      }).join('');
 
   } else if (tipo === 'pb') {
     // Calcola PB automatici: un solo record per ogni sport+tipo_gara
@@ -3816,38 +3462,12 @@ function renderStats() {
     statCard('⚡', 'Finish Rate', (gare.length ? Math.round(finisher.length/gare.length*100) : 100) + '%', `${pb} Personal Best`, '#9c27b0'),
   ].join('');
 
-  // Card gare all'estero per continente (usa g.continente dal foglio)
-  const _esteroPerCont = {};
-  gare.forEach(g => {
-    const naz = (g.nazione||'').trim();
-    if (!naz || naz.toUpperCase() === 'ITALIA') return;
-    const cont = (g.continente||'').trim() || 'Estero';
-    _esteroPerCont[cont] = (_esteroPerCont[cont]||0) + 1;
-  });
-  const _wrapEstero = document.getElementById('stats-estero-wrap');
-  const _cardsEstero = document.getElementById('stats-estero-cards');
-  if (_cardsEstero && Object.keys(_esteroPerCont).length) {
-    if (_wrapEstero) _wrapEstero.style.display = 'block';
-    _cardsEstero.innerHTML = Object.entries(_esteroPerCont)
-      .sort((a,b) => b[1]-a[1])
-      .map(([cont,n]) => statCard('🌍', cont, n, n===1?'gara':'gare', '#2196f3'))
-      .join('');
-  }
-
   // ── Per Anno — solo Finisher, colori per sport ──
-  // Mappa colori sport — chiavi in minuscolo per match case-insensitive
-  const _buildSportColorMap = () => {
-    const base = {
-      corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
-      bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
-      duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
-      ciclismo:'#ffc107', nuoto:'#00bcd4', marcia:'#ff8a65',
-    };
-    return base;
+  const sportColorMap = {
+    corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
+    bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
+    duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
   };
-  const sportColorMap = _buildSportColorMap();
-  // Helper per lookup case-insensitive
-  const getSportColor = s => sportColorMap[(s||'').toLowerCase()] || '#888';
   // Raggruppa per anno+sport (solo finisher)
   const anniSet = new Set();
   const sportSet = new Set();
@@ -3871,7 +3491,7 @@ function renderStats() {
         datasets: sportList.map(s => ({
           label: sportIcon(s) + ' ' + sportLabel(s),
           data: anniSorted.map(y => perAnnoSport[s]?.[y] || 0),
-          backgroundColor: getSportColor(s),
+          backgroundColor: sportColorMap[s] || '#888',
           borderRadius: 4,
           stack: 'anni',
         }))
@@ -3914,7 +3534,7 @@ function renderStats() {
       data: {
         labels: sportLabels.map(s => sportIcon(s) + ' ' + sportLabel(s)),
         datasets: [{ data: sportLabels.map(s=>perSport[s]),
-          backgroundColor: sportLabels.map(s => getSportColor(s) !== '#888' ? getSportColor(s) : '#607d8b'),
+          backgroundColor: sportLabels.map(s => _sportColorSolid[s] || '#607d8b'),
           borderColor: 'var(--bg3)', borderWidth: 3,
           hoverOffset: 6 }]
       },
@@ -3942,7 +3562,7 @@ function renderStats() {
       data: {
         labels: tipoSorted.map(([t, v]) => sportIcon(v.sport) + ' ' + t),
         datasets: [{ label: 'Gare', data: tipoSorted.map(([,v])=>v.count),
-          backgroundColor: tipoSorted.map(([,v]) => getSportColor(v.sport) !== '#888' ? getSportColor(v.sport) : CHART_COLORS.accent),
+          backgroundColor: tipoSorted.map(([,v]) => sportColorMap[v.sport] || CHART_COLORS.accent),
           borderRadius: 4 }]
       },
       options: { ...CHART_DEFAULTS, indexAxis: 'y',
@@ -3953,8 +3573,33 @@ function renderStats() {
 
   // ── Evoluzione Tempo ──
   renderEvoluzioneSelector(gare);
-  // ── Popola selector comparatore (usa nome gara) ──
-  populateComparator(gare);
+  // ── Popola selector comparatore ──
+  const sel = document.getElementById('comp-selector');
+  if (sel) {
+    // Raggruppa per sport+tipo_gara+luogo
+    const gruppi = {};
+    gare.filter(g => g.esito === 'finisher' && garaTempoSecs(g) > 0).forEach(g => {
+      const sport    = (g.sport    || '').toLowerCase();
+      const tipo     = (g.tipo_gara || g.nome || '').trim();
+      const luogo    = (g.luogo    || '').trim();
+      if (!tipo || !luogo) return;
+      const k = sport + '|||' + tipo + '|||' + luogo;
+      if (!gruppi[k]) gruppi[k] = { sport, tipo, luogo, count: 0 };
+      gruppi[k].count++;
+    });
+    const opzioni = Object.entries(gruppi)
+      .filter(([,v]) => v.count >= 2)
+      .sort((a,b) => b[1].count - a[1].count);
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="">— Seleziona gara ripetuta —</option>'
+      + opzioni.map(([k,v]) =>
+          `<option value="${k}">${sportIcon(v.sport)} ${v.tipo} · ${v.luogo} (${v.count}x)</option>`
+        ).join('');
+    if (curVal) sel.value = curVal;
+    if (!opzioni.length) {
+      sel.innerHTML = '<option value="">— Nessuna gara ripetuta nella stessa città —</option>';
+    }
+  }
   renderComparator();
 }
 
@@ -4152,14 +3797,14 @@ function renderMappa() {
   const gare = getGare();
   const regioniMap = {};
   gare.forEach(g => {
-    if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
+    if (g.regione && g.regione !== 'Estero') {
       if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
       regioniMap[g.regione].push(g);
     }
   });
 
   const nRegioni = Object.keys(regioniMap).length;
-  const kmTot = gare.filter(g => MAP_SEEDS.hasOwnProperty(g.regione)).reduce((s,g) => s + (g.distanza||0), 0);
+  const kmTot = gare.reduce((s,g) => s + (g.distanza||0), 0);
   const statsEl = document.getElementById('mappa-stats');
   if (statsEl) statsEl.textContent = nRegioni + ' regioni · ' + Math.round(kmTot).toLocaleString('it') + ' km totali';
 
@@ -4242,7 +3887,15 @@ function renderMappa() {
     </div>`;
   }).join('');
 
-
+  // Estero
+  const estero = gare.filter(g => g.regione === 'Estero');
+  if (estero.length) {
+    sidebar.innerHTML += `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
+      <div style="width:10px;height:10px;border-radius:50%;background:#2196f3;flex-shrink:0;"></div>
+      <div style="flex:1;font-size:13px;font-weight:500;">Estero 🌍</div>
+      <div style="font-size:12px;color:var(--text2);">${estero.length} gare</div>
+    </div>`;
+  }
 
   // Carica mappa D3
   loadMap();
@@ -4366,7 +4019,7 @@ function renderProfiloPB() {
       <div class="pb-card" onclick="openDetail(${g.id})" style="cursor:pointer;" title="Clicca per vedere la gara">
         <div class="pb-dist">${sportIcon(g.sport)} ${g.tipo_gara||g.nome||''}</div>
         <div class="pb-time">${tempoGara(g)}</div>
-        <div class="pb-year">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px;font-weight:500;">${(g.data||'').slice(0,4)}${g.luogo?' · '+g.luogo:''}</div>
       </div>
     `).join('');
 }
@@ -4580,22 +4233,16 @@ function sposta2Gare(id) {
   // La gara viene rimossa solo quando si salva il form gara completata
   _archiviandoProgrammaId = id;
   // Apri il form gara pre-popolato con i dati della gara in programma
-  // Bozza con tutti i dati della gara programmata
-  // id = '__archivia__' forza _riempiFormEdit anche senza id reale
   const bozza = {
-    id:         '__archivia__',
-    sport:      garaP.sport || '',
-    tipo_gara:  garaP.tipo_gara || '',
-    nome:       garaP.nome || garaP.tipo_gara || '',
-    data:       garaP.data || '',   // data programmata come suggerimento
-    luogo:      garaP.luogo || '',
-    regione:    garaP.regione || '',
-    nazione:    garaP.nazione || '',
-    continente: garaP.continente || '',
-    distanza:   garaP.distanza || 0,
-    note:       garaP.note || '',
-    esito:      'finisher',
-    tempo:      '',
+    id: null,
+    sport:     garaP.sport || '',
+    tipo_gara: garaP.tipo_gara || garaP.nome || '',
+    nome:      garaP.tipo_gara || garaP.nome || '',
+    data:      '',  // da compilare — la data della gara completata
+    luogo:     garaP.luogo || '',
+    regione:   garaP.regione || '',
+    distanza:  garaP.distanza || 0,
+    note:      garaP.note || '',
   };
   openForm(bozza);
   showToast('Completa il risultato e salva! 🏅');
@@ -5237,130 +4884,67 @@ function popolaTipoGaraP(sport) {
   distanze.forEach(d => {
     const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o);
   });
-  const oA = document.createElement('option'); oA.value='__altro__'; oA.textContent='✏️ Altro (non in elenco)...'; sel.appendChild(oA);
-  // Nascondi campo libero quando si popola
-  const pTA = document.getElementById('p-tipo-gara-altro');
-  if (pTA) { pTA.style.display='none'; pTA.value=''; }
 }
 
 function onPSportChange(sport) {
-  const pSportAltro = document.getElementById('p-sport-altro');
-  if (sport === '__altro_sport__') {
-    if (pSportAltro) { pSportAltro.style.display=''; pSportAltro.focus(); }
-    // Tipo gara: solo Altro — e mostra subito il campo libero
-    const pTipo = document.getElementById('p-tipo-gara');
-    if (pTipo) {
-      pTipo.innerHTML = '<option value="__altro__">✏️ Altro tipo gara (non in elenco)...</option>';
-      pTipo.value = '__altro__';
-      onPTipoGaraChange('__altro__');
-    }
-    return;
-  }
-  if (pSportAltro) { pSportAltro.style.display='none'; pSportAltro.value=''; }
   selectedSportP = sport;
   popolaTipoGaraP(sport);
-}
-
-function onPTipoGaraChange(val) {
-  const pTA = document.getElementById('p-tipo-gara-altro');
-  if (pTA) { pTA.style.display = val==='__altro__' ? '' : 'none'; if(val==='__altro__') pTA.focus(); }
 }
 
 // Cascata programma — speculare alla cascata del form gara
 // ── Cascata form PROGRAMMA: Continente→Nazione→Regione→Città→NomeGara ──
 function onPContinenteChange(cont) {
-  const pNaz    = document.getElementById('p-nazione');
-  const pNazAlt = document.getElementById('p-nazione-altro');
-  const pReg    = document.getElementById('p-regione');
-  const pRegAlt = document.getElementById('p-regione-altro');
-  const pCS     = document.getElementById('p-citta-sel');
-  const pLuogo  = document.getElementById('p-luogo');
-  const pNS     = document.getElementById('p-nome-sel');
-  const pNG     = document.getElementById('p-nome-gara');
-  if (pReg)    pReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
-  if (pRegAlt) { pRegAlt.style.display='none'; pRegAlt.value=''; }
-  if (pCS)     pCS.innerHTML  = '<option value="">Prima seleziona regione...</option>';
-  if (pLuogo)  { pLuogo.style.display='none'; pLuogo.value=''; }
-  if (pNS)     pNS.innerHTML  = '<option value="">Prima seleziona città...</option>';
-  if (pNG)     { pNG.style.display='none'; pNG.value=''; }
-  if (!cont) { if (pNaz) pNaz.innerHTML='<option value="">Prima seleziona continente...</option>'; return; }
   const c = getConfig();
-  const nazioni = (c.cont_nazioni||{})[cont] || [];
-  if (pNaz) {
-    pNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
-      + nazioni.map(n=>`<option value="${n}">${n}</option>`).join('')
-      + '<option value="__altra_naz__">✏️ Altra nazione (non in elenco)...</option>';
-  }
-  if (pNazAlt) { pNazAlt.style.display='none'; pNazAlt.value=''; }
+  const contNaz = c.cont_nazioni || {};
+  const nazioni = cont ? (contNaz[cont] || []) : [];
+  const fNaz = document.getElementById('p-nazione');
+  const fReg = document.getElementById('p-regione');
+  const fCitta = document.getElementById('p-citta-sel');
+  const fLuogo = document.getElementById('p-luogo');
+  const fNomeSel = document.getElementById('p-nome-sel');
+  const fNome = document.getElementById('p-nome-gara');
+  if (fNaz) fNaz.innerHTML = '<option value="">Seleziona nazione...</option>'
+    + nazioni.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (fReg) fReg.innerHTML = '<option value="">Prima seleziona nazione...</option>';
+  if (fCitta) fCitta.innerHTML = '<option value="">Seleziona regione prima...</option>';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+  if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onPNazioneChange(nazione) {
-  const pNazAlt = document.getElementById('p-nazione-altro');
-  const pReg    = document.getElementById('p-regione');
-  const pRegAlt = document.getElementById('p-regione-altro');
-  const pCS     = document.getElementById('p-citta-sel');
-  const pLuogo  = document.getElementById('p-luogo');
-  const pNS     = document.getElementById('p-nome-sel');
-  const pNG     = document.getElementById('p-nome-gara');
-  if (pCS)    pCS.innerHTML  = '<option value="">Prima seleziona regione...</option>';
-  if (pLuogo) { pLuogo.style.display='none'; pLuogo.value=''; }
-  if (pNS)    pNS.innerHTML  = '<option value="">Prima seleziona città...</option>';
-  if (pNG)    { pNG.style.display='none'; pNG.value=''; }
-  if (nazione === '__altra_naz__') {
-    if (pNazAlt) { pNazAlt.style.display=''; pNazAlt.focus(); }
-    if (pReg)    { pReg.innerHTML='<option value="">—</option><option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>'; }
-    if (pRegAlt) { pRegAlt.style.display='none'; pRegAlt.value=''; }
+  const c = getConfig();
+  const fReg = document.getElementById('p-regione');
+  if (!fReg) return;
+  const nazReg = c.naz_regioni || c.area_regioni || {};
+  const regioni = nazione ? (nazReg[nazione] || []) : [];
+  if (nazione && !regioni.length) {
+    fReg.innerHTML = '<option value="">— nessuna regione censita —</option>';
+    onPRegioneChange('');
     return;
   }
-  if (pNazAlt) { pNazAlt.style.display='none'; pNazAlt.value=''; }
-  if (!nazione) { if (pReg) pReg.innerHTML='<option value="">Prima seleziona nazione...</option>'; return; }
-  const c = getConfig();
-  const regioni = (c.naz_regioni||c.area_regioni||{})[nazione] || [];
-  if (pReg) {
-    pReg.innerHTML = '<option value="">Seleziona regione...</option>'
-      + regioni.map(r=>`<option value="${r}">${r}</option>`).join('')
-      + '<option value="__altra_reg__">✏️ Altra regione (non in elenco)...</option>';
-  }
-  if (pRegAlt) { pRegAlt.style.display='none'; pRegAlt.value=''; }
+  fReg.innerHTML = '<option value="">Seleziona regione...</option>'
+    + regioni.map(r => `<option value="${r}">${r}</option>`).join('');
   onPRegioneChange('');
 }
 
 function onPRegioneChange(regione) {
-  const pRegAlt = document.getElementById('p-regione-altro');
-  const pCS     = document.getElementById('p-citta-sel');
-  const pLuogo  = document.getElementById('p-luogo');
-  const pNS     = document.getElementById('p-nome-sel');
-  const pNG     = document.getElementById('p-nome-gara');
-  if (pLuogo) { pLuogo.style.display='none'; pLuogo.value=''; }
-  if (pNS)    { pNS.innerHTML='<option value="">Prima seleziona città...</option>'; }
-  if (pNG)    { pNG.style.display='none'; pNG.value=''; }
-  if (regione === '__altra_reg__') {
-    if (pRegAlt) { pRegAlt.style.display=''; pRegAlt.focus(); }
-    if (pCS) {
-      pCS.innerHTML = '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
-      pCS.value = '__altra__';
-      pCS.style.display = '';
-    }
-    if (pLuogo) { pLuogo.style.display=''; pLuogo.value=''; }
-    // Nome gara: solo Altro, mostra campo libero
-    if (pNS) {
-      pNS.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
-      pNS.value = '__altro__';
-    }
-    if (pNG) { pNG.style.display=''; pNG.value=''; }
-    return;
-  }
-  if (pRegAlt) { pRegAlt.style.display='none'; pRegAlt.value=''; }
-  if (!pCS) return;
   const c = getConfig();
+  const fCitta  = document.getElementById('p-citta-sel');
+  const fLuogo  = document.getElementById('p-luogo');
+  const fNomeSel= document.getElementById('p-nome-sel');
+  const fNome   = document.getElementById('p-nome-gara');
+  if (!fCitta) return;
   const gareCensite = c.gare_censite || [];
   const citta = [...new Set(
     gareCensite.filter(g => !regione || g.regione === regione).map(g => g.citta).filter(Boolean)
   )].sort();
-  pCS.innerHTML = '<option value="">Seleziona città...</option>'
-    + citta.map(cc=>`<option value="${cc}">${cc}</option>`).join('')
-    + '<option value="__altra__">✏️ Altra città (non in elenco)...</option>';
-  pCS.style.display = '';
+  fCitta.innerHTML = '<option value="">Seleziona città...</option>'
+    + citta.map(cc => `<option value="${cc}">${cc}</option>`).join('')
+    + '<option value="__altra__">✏️ Altra città...</option>';
+  if (fLuogo) { fLuogo.style.display = 'none'; fLuogo.value = ''; }
+  if (fNomeSel) fNomeSel.innerHTML = '<option value="">Seleziona città prima...</option>';
+  if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
 }
 
 function onPCittaChange(citta) {
@@ -5370,12 +4954,8 @@ function onPCittaChange(citta) {
   const fNome   = document.getElementById('p-nome-gara');
   if (citta === '__altra__') {
     if (fLuogo) { fLuogo.style.display = ''; fLuogo.value = ''; fLuogo.focus(); }
-    // Nome gara: solo Altro, e mostra subito il campo libero
-    if (fNomeSel) {
-      fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
-      fNomeSel.value = '__altro__';
-    }
-    if (fNome) { fNome.style.display = ''; fNome.value = ''; }
+    if (fNomeSel) fNomeSel.innerHTML = '<option value="__altro__">✏️ Inserisci nome gara...</option>';
+    if (fNome) { fNome.style.display = 'none'; fNome.value = ''; }
     return;
   }
   if (citta && fLuogo) { fLuogo.value = citta; fLuogo.style.display = 'none'; }
@@ -6195,32 +5775,23 @@ function _OLD_renderStats_UNUSED() {
 }
 
 function populateComparator(gare) {
-  const byChiave = {};
-  gare.filter(g => g.esito === 'finisher').forEach(g => {
-    const sport    = (g.sport||'').trim().toLowerCase();
-    const tipo     = (g.tipo_gara||'').trim();
-    const nome     = (g.nome||'').trim();
-    // Chiave univoca: sport + tipo_gara + nome_gara
-    // Così "Maratona di Roma" e "Mezza Maratona di Roma" restano separate
-    const k = sport + '|||' + tipo + '|||' + nome;
-    if (!tipo && !nome) return;
-    if (!byChiave[k]) byChiave[k] = { sport, tipo, nome, list: [] };
-    byChiave[k].list.push(g);
+  const byNome = {};
+  gare.forEach(g => {
+    if (!byNome[g.nome]) byNome[g.nome] = [];
+    byNome[g.nome].push(g);
   });
 
-  const ripetute = Object.entries(byChiave)
-    .filter(([,v]) => v.list.length > 1)
-    .sort((a,b) => b[1].list.length - a[1].list.length);
+  const ripetute = Object.entries(byNome)
+    .filter(([,gs]) => gs.length > 1)
+    .sort((a,b) => b[1].length - a[1].length);
 
   const sel = document.getElementById('comp-selector');
   const currentVal = sel.value;
   sel.innerHTML = '<option value="">— Seleziona una gara ripetuta —</option>';
-  ripetute.forEach(([k, v]) => {
+  ripetute.forEach(([nome, gs]) => {
     const opt = document.createElement('option');
-    opt.value = k;
-    // Label: icona sport + tipo gara + nome gara (se diverso dal tipo)
-    const labelNome = v.nome && v.nome !== v.tipo ? ` · ${v.nome}` : '';
-    opt.textContent = `${sportIcon(v.sport)} ${v.tipo}${labelNome} (${v.list.length}x)`;
+    opt.value = nome;
+    opt.textContent = `${nome} (${gs.length}x)`;
     sel.appendChild(opt);
   });
   if (currentVal) sel.value = currentVal;
@@ -6233,19 +5804,16 @@ function renderComparator() {
     document.getElementById('comp-empty').style.display   = 'block';
     return;
   }
+  const [sport, tipoGara, luogo] = chiave.split('|||');
   const gare = calcolaPBAutomatici(getGare());
-  // Chiave composita: sport|||tipo_gara|||nome_gara
-  const [chSport, chTipo, chNome] = chiave.split('|||');
   const filtrate = gare
     .filter(g =>
       g.esito === 'finisher' &&
-      (g.sport||'').toLowerCase() === chSport &&
-      (g.tipo_gara||'').trim() === chTipo &&
-      (g.nome||'').trim() === chNome
+      (g.sport||'').toLowerCase() === (sport||'').toLowerCase() &&
+      (g.tipo_gara||g.nome||'').toLowerCase() === (tipoGara||'').toLowerCase() &&
+      (g.luogo||'').toLowerCase() === (luogo||'').toLowerCase()
     )
     .sort((a,b) => String(a.data||'').localeCompare(String(b.data||'')));
-  const tipoGara = chTipo || chNome || chiave;
-  const luogo = filtrate[0] ? (filtrate[0].luogo||'') : '';
 
   if (filtrate.length < 2) {
     document.getElementById('comp-content').style.display = 'none';
@@ -6273,12 +5841,11 @@ function renderComparator() {
       data: {
         labels: filtrate.map(g => {
           const anno  = (g.data||'').slice(0,4);
-          const luogo2 = (g.luogo||'').slice(0,18);
-          // sull'asse X: Anno · Luogo (così si distinguono le edizioni)
-          return luogo2 ? [anno, luogo2] : anno;
+          const luogo = (g.luogo||'');
+          return luogo ? [anno, luogo] : [anno];
         }),
         datasets: [{
-          label: chiave,
+          label: tipoGara + ' · ' + luogo,
           data: secsArr,
           backgroundColor: isBest.map(b => b ? '#ffd54f' : CHART_COLORS.accent),
           borderRadius: 6,
@@ -6721,27 +6288,9 @@ function mostraInfoReg(msg, tipo, el) {
   }
 }
 
-// ── Controllo admin ──────────────────────────────────────
-let _isAdmin = false;
-
-function setAdmin(val) {
-  _isAdmin = !!val;
-  const btn = document.getElementById('nav-admin-btn');
-  if (btn) btn.style.display = _isAdmin ? '' : 'none';
-}
-
-function isAdmin() { return _isAdmin; }
-
-async function verificaAdmin() {
-  const uid = getUtenteId();
-  if (!uid) { setAdmin(false); return; }
-  try {
-    const admins = await gsGet({ action: 'getAdmins', utente_id: '' });
-    if (Array.isArray(admins)) {
-      setAdmin(admins.some(a => String(a).trim() === String(uid).trim()));
-    }
-  } catch(e) { setAdmin(false); }
-}
+let _isAdmin=false;
+function setAdmin(v){_isAdmin=!!v;const b=document.getElementById('nav-admin-btn');if(b)b.style.display=_isAdmin?'':'none';}
+async function verificaAdmin(){const uid=getUtenteId();if(!uid){setAdmin(false);return;}try{const a=await gsGet({action:'getAdmins',utente_id:''});if(Array.isArray(a))setAdmin(a.some(x=>String(x).trim()===String(uid).trim()));}catch(e){setAdmin(false);}}
 
 function renderNavUser() {
   const uid = getUtenteId();
@@ -6782,8 +6331,21 @@ function renderNavUser() {
 
 // ============ INIT ============
 async function init() {
+  // Se URL ha ?admin, mostra subito pagina admin e non fare altro
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    // Modalità admin — usa showPage normalmente
+    const navLinks = document.querySelector('.nav-links');
+    const navRight = document.querySelector('.nav-right');
+    if (navLinks) navLinks.style.visibility = 'hidden';
+    if (navRight) navRight.style.visibility = 'hidden';
+    // Attiva page-admin come pagina normale
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const adminPage = document.getElementById('page-admin');
+    if (adminPage) adminPage.classList.add('active');
+    return;
+  }
   renderNavUser();
-  verificaAdmin();  // controlla se utente è admin
+  verificaAdmin();
 
   // Carica config dal foglio (await — aspettiamo prima di procedere)
   const cached = getCachedConfig();
@@ -6991,13 +6553,9 @@ async function renderSocial() {
   const gareEstero = {};
   gare.forEach(g => {
     const naz = (g.nazione||'').trim();
-    if (naz && naz.toUpperCase() !== 'ITALIA') {
-      gareEstero[naz] = (gareEstero[naz]||0) + 1;
-    } else if (MAP_SEEDS.hasOwnProperty(g.regione)) {
-      garePerRegione[g.regione] = (garePerRegione[g.regione]||0) + 1;
-    }
+    if (naz && naz.toUpperCase() !== 'ITALIA') { gareEstero[naz]=(gareEstero[naz]||0)+1; }
+    else if (MAP_SEEDS.hasOwnProperty(g.regione)) { garePerRegione[g.regione]=(garePerRegione[g.regione]||0)+1; }
   });
-
     const regioniGareSorted = Object.entries(garePerRegione).sort((a,b)=>b[1]-a[1]);
   const maxGR = regioniGareSorted[0]?.[1] || 1;
   const elRG = document.getElementById('social-regioni-gare');
@@ -7028,8 +6586,9 @@ async function renderSocial() {
   const utentiEstero = {};
   utenti.forEach(u => {
     const naz = (u.nazione||'').trim();
-    if (naz && naz.toUpperCase() !== 'ITALIA') {
-      utentiEstero[naz] = (utentiEstero[naz]||0) + 1;
+    if (naz && naz !== 'Italia' && naz !== 'ITALIA') {
+      const cont = continenteMap[naz] || ('🌐 ' + naz);
+      utentiEstero[cont] = (utentiEstero[cont]||0) + 1;
     }
   });
   const elUE = document.getElementById('social-utenti-estero');
@@ -7282,7 +6841,6 @@ function loginAdmin() {
     _adminAutenticato = true;
     document.getElementById('admin-login').style.display = 'none';
     document.getElementById('admin-content').style.display = 'block';
-    caricaDatiAdmin();
     document.getElementById('admin-date').textContent = new Date().toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
     caricaDatiAdmin();
   } else {
@@ -7293,41 +6851,33 @@ function loginAdmin() {
 }
 
 async function caricaDatiAdmin() {
-  // Carica tutti i dati freschi dal foglio Google (no cache)
-  const [utentiRes, gareRes, segnalazioniRes, accessiRes] = await Promise.allSettled([
-    gsGet({ action: 'getAllUtenti',    utente_id: '' }),
-    gsGet({ action: 'getAllGare',      utente_id: '' }),
-    gsGet({ action: 'getSegnalazioni', utente_id: '' }),
-    gsGet({ action: 'getAccessi',      utente_id: '' }),
+  // Carica utenti e gare freschi (senza cache)
+  const [utentiRes, gareRes, nonCensiteRes] = await Promise.allSettled([
+    gsGet({ action: 'getAllUtenti', utente_id: '' }),
+    gsGet({ action: 'getAllGare',   utente_id: '' }),
+    gsGet({ action: 'getGareNonCensite', admin_token: ADMIN_PWD, utente_id: '' }),
   ]);
 
-  const utenti       = (utentiRes.status==='fulfilled'       && Array.isArray(utentiRes.value))       ? utentiRes.value                      : [];
-  const gare         = (gareRes.status==='fulfilled'         && Array.isArray(gareRes.value))         ? gareRes.value.map(normalizzaGara)    : [];
-  const segnalazioni = (segnalazioniRes.status==='fulfilled' && Array.isArray(segnalazioniRes.value)) ? segnalazioniRes.value                : [];
-  const accessi      = (accessiRes.status==='fulfilled'      && Array.isArray(accessiRes.value))      ? accessiRes.value                     : [];
+  const utenti    = (utentiRes.status==='fulfilled'    && Array.isArray(utentiRes.value))    ? utentiRes.value    : [];
+  const gare      = (gareRes.status==='fulfilled'      && Array.isArray(gareRes.value))      ? gareRes.value.map(normalizzaGara) : [];
+  const nonCensite= (nonCensiteRes.status==='fulfilled'&& Array.isArray(nonCensiteRes.value))? nonCensiteRes.value : [];
 
   const oggi = new Date().toISOString().slice(0,10);
-  const ieri = new Date(Date.now() - 86400000).toISOString().slice(0,10);
 
-  // Ultimi 10 utenti registrati
+  // Nuovi utenti oggi — non abbiamo timestamp ma mostriamo gli ultimi
   const nuoviUtenti = utenti.slice(-10).reverse();
-  // Gare inserite oggi
+  // Nuove gare oggi
   const nuoveGare = gare.filter(g => (g.data||'').slice(0,10) === oggi).slice(0,20);
-  // Utenti unici che hanno fatto login ieri (dal foglio ACCESSI)
-  const utentiIeri = new Set(
-    accessi.filter(a => String(a.ts||'').slice(0,10) === ieri).map(a => a.utente_id)
-  ).size;
   // Recensioni con rating
   const recensioni = gare.filter(g => g.rating && (g.rating.percorso||g.rating.ristori||g.rating.organizzazione))
     .sort((a,b) => String(b.data||'').localeCompare(String(a.data||''))).slice(0,10);
 
   // Cards riassunto
   document.getElementById('admin-cards').innerHTML = [
-    { n: utenti.length,    label: 'Utenti totali',         icon: '👥' },
-    { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
-    { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
-    { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
-    { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
+    { n: utenti.length,    label: 'Utenti totali',      icon: '👥' },
+    { n: gare.length,      label: 'Gare totali',         icon: '🏅' },
+    { n: nuoveGare.length, label: 'Gare inserite oggi',  icon: '📅' },
+    { n: nonCensite.length,label: 'Gare non censite',    icon: '📋' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
       <div style="font-size:24px;margin-bottom:6px;">${icon}</div>
@@ -7339,11 +6889,9 @@ async function caricaDatiAdmin() {
   const elNU = document.getElementById('admin-nuovi-utenti');
   elNU.innerHTML = nuoviUtenti.length
     ? nuoviUtenti.map(u => `
-      <div style="padding:10px;background:var(--bg4);border-radius:8px;font-size:12px;display:grid;grid-template-columns:1fr auto;gap:4px;">
-        <div style="font-weight:700;">${u.nome||''} ${u.cognome||''}</div>
-        <div style="color:var(--text3);font-size:11px;text-align:right;">${u.utente_id||''}</div>
-        <div style="color:var(--text3);">${u.email||''}</div>
-        <div style="color:var(--text2);font-size:11px;text-align:right;">${u.sport_preferito||''} · ${u.regione||'—'}</div>
+      <div style="display:flex;gap:10px;padding:8px;background:var(--bg4);border-radius:8px;font-size:12px;">
+        <div style="flex:1;font-weight:600;">${u.nome||''} ${u.cognome||''} <span style="color:var(--text3);font-weight:400;">(${u.utente_id})</span></div>
+        <div style="color:var(--text3);">${u.regione||'—'}</div>
       </div>`).join('')
     : '<div style="color:var(--text3);font-size:13px;">Nessun nuovo utente oggi</div>';
 
@@ -7358,65 +6906,26 @@ async function caricaDatiAdmin() {
       </div>`).join('')
     : '<div style="color:var(--text3);font-size:13px;">Nessuna gara inserita oggi</div>';
 
-  // Inserimenti manuali (gare con campi liberi)
-  window._gareNonCensiteData = segnalazioni;
-  const elGNC = document.getElementById('admin-non-censite');
-  if (!segnalazioni.length) {
-    elGNC.innerHTML = '<div style="color:var(--text3);font-size:13px;">Nessun inserimento manuale — ottimo!</div>';
-  } else {
-    // Mostra solo i campi effettivamente inseriti a mano (non vuoti)
-    // I campi da censire sono: sport, tipo_gara, continente, nazione, regione, citta, nome
-    const CAMPI = [
-      { key: 'sport',     label: 'Sport' },
-      { key: 'tipo_gara', label: 'Tipo gara' },
-      { key: 'continente',label: 'Continente' },
-      { key: 'nazione',   label: 'Nazione' },
-      { key: 'regione',   label: 'Regione' },
-      { key: 'citta',     label: 'Città' },
-      { key: 'nome',      label: 'Nome gara' },
-    ];
-    elGNC.innerHTML = segnalazioni.map(s => {
-      // Raccoglie solo i campi con valore non vuoto
-      const campiPresenti = CAMPI.filter(c => (s[c.key]||'').trim());
-      if (!campiPresenti.length) return ''; // segnalazione vuota, salta
-      const tags = campiPresenti.map(c =>
-        `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,87,34,0.12);
-          border:1px solid rgba(255,87,34,0.3);border-radius:6px;padding:3px 8px;font-size:12px;">
-          <span style="color:var(--text3);font-size:10px;">${c.label}</span>
-          <span style="font-weight:700;color:var(--accent);">${s[c.key]}</span>
-        </span>`
-      ).join(' ');
-      return `<div style="padding:10px 12px;background:var(--bg4);border-radius:8px;
-          margin-bottom:6px;border-left:3px solid var(--accent);">
-        <div style="display:flex;justify-content:space-between;align-items:center;
-            margin-bottom:6px;font-size:11px;color:var(--text3);">
-          <span>${String(s.ts||'').slice(0,10)}</span>
-          <span>${s.utente_id||''}</span>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">${tags}</div>
-      </div>`;
-    }).filter(Boolean).join('') || '<div style="color:var(--text3);font-size:13px;">Nessun inserimento manuale.</div>';
-  }
-
-  // Consigli dal foglio Google
-  gsGet({ action: 'getConsigli' }).then(consigli => {
-    const elC = document.getElementById('admin-consigli');
-    if (!elC) return;
-    if (!Array.isArray(consigli) || !consigli.length) {
-      elC.innerHTML = '<div style="color:var(--text3);font-size:13px;">Nessun consiglio ancora.</div>'; return;
-    }
-    elC.innerHTML = consigli.slice(0,30).map(c => `
-      <div style="padding:10px;background:var(--bg4);border-radius:8px;font-size:13px;border-left:3px solid var(--accent);margin-bottom:6px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-          <span style="font-weight:600;">${c.nome||'Anonimo'}</span>
-          <span style="font-size:11px;color:var(--text3);">${(String(c.ts||'')).slice(0,10)}</span>
-        </div>
-        <div style="color:var(--text2);line-height:1.5;">${c.testo||''}</div>
-      </div>`).join('');
-  }).catch(() => {
-    const elC = document.getElementById('admin-consigli');
-    if (elC) elC.innerHTML = '<div style="color:var(--text3);font-size:13px;">Foglio CONSIGLI non ancora creato.</div>';
-  });
+  // Gare non censite
+  window._gareNonCensiteData = nonCensite;
+  const elGNC = document.getElementById('admin-gare-non-censite');
+  elGNC.innerHTML = nonCensite.length
+    ? `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="color:var(--text3);text-align:left;">
+          <th style="padding:6px 8px;">Data</th><th style="padding:6px 8px;">Utente</th>
+          <th style="padding:6px 8px;">Sport</th><th style="padding:6px 8px;">Nome gara</th>
+          <th style="padding:6px 8px;">Città</th><th style="padding:6px 8px;">Regione</th>
+        </tr></thead>
+        <tbody>${nonCensite.map(g => `<tr style="border-top:1px solid var(--border);">
+          <td style="padding:6px 8px;color:var(--text3);">${(g.ts||'').slice(0,10)}</td>
+          <td style="padding:6px 8px;">${g.utente||'—'}</td>
+          <td style="padding:6px 8px;">${g.sport||'—'}</td>
+          <td style="padding:6px 8px;font-weight:600;">${g.nome||'—'}</td>
+          <td style="padding:6px 8px;">${g.citta||'—'}</td>
+          <td style="padding:6px 8px;">${g.regione||'—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    : '<div style="color:var(--text3);font-size:13px;">Nessuna gara non censita — ottimo!</div>';
 
   // Recensioni
   const elR = document.getElementById('admin-recensioni');
@@ -7437,9 +6946,7 @@ function copiaGareNonCensite() {
   const lista = window._gareNonCensiteData || [];
   if (!lista.length) { showToast('Nessuna gara da copiare'); return; }
   const sep = String.fromCharCode(9); const nl = String.fromCharCode(10);
-  const testo = ['SPORT	CONTINENTE	NAZIONE	REGIONE	CITTA	NOME_GARA'].concat(
-    lista.map(s => [s.sport,s.continente,s.nazione,s.regione,s.citta,s.nome].join(sep))
-  ).join(nl);
+  const testo = lista.map(g => [g.sport,g.nome,g.citta,g.regione].join(sep)).join(nl);
   navigator.clipboard.writeText(testo).then(() => showToast('Lista copiata negli appunti! 📋'));
 }
 
@@ -7521,72 +7028,153 @@ function controllaAdmin() {
 
 init();
 controllaReferral();
+</script>
 
-function mapRegHover(el, e) {
-  const regName  = el.getAttribute('data-region');
-  const regLabel = el.getAttribute('data-label') || regName;
-  const gare     = getGare().filter(g => g.regione === regName);
-  const tooltip  = document.getElementById('map-tooltip');
-  if (!tooltip) return;
-  if (!gare.length) {
-    tooltip.innerHTML = '<div style="font-weight:600;">'+regName+'</div>'
-      +'<div style="font-size:12px;color:var(--text3);margin-top:3px;">Nessuna gara ancora</div>';
-  } else {
-    const kmR   = gare.reduce((s,g)=>s+(g.distanza||0),0);
-    const items = gare.slice(0,5).map(g=>
-      '<div style="font-size:11px;color:var(--text3);margin-top:3px;">'
-      +(g.data||'').slice(0,4)+' · '+(g.nome||g.tipo_gara||'')+'</div>'
-    ).join('');
-    const more  = gare.length>5
-      ? '<div style="font-size:11px;color:var(--accent);margin-top:3px;">+'+(gare.length-5)+' altre</div>' : '';
-    tooltip.innerHTML =
-      '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">'+regName+'</div>'
-      +'<div style="color:var(--accent);font-weight:600;margin-bottom:3px;">'
-      +gare.length+' gar'+(gare.length===1?'a':'e')+' · '+Math.round(kmR)+' km</div>'
-      +items+more;
+<!-- D3 + Mappa Italia -->
+<script>
+// Mappa con canvas flood-fill sull'immagine reale
+
+const MAP_SEEDS = {"Valle d'Aosta": [77, 72], "Piemonte": [81, 133], "Liguria": [171, 192], "Lombardia": [193, 115], "Trentino-Alto Adige": [222, 63], "Veneto": [254, 84], "Friuli-Venezia Giulia": [293, 78], "Emilia-Romagna": [189, 170], "Toscana": [210, 243], "Marche": [277, 224], "Umbria": [261, 262], "Lazio": [261, 304], "Abruzzo": [290, 256], "Molise": [333, 315], "Campania": [360, 356], "Puglia": [378, 347], "Basilicata": [377, 393], "Calabria": [405, 463], "Sicilia": [323, 532], "Sardegna": [104, 408]};
+
+function regioneColorSVG(n) {
+  if (n <= 0) return null;
+  return regioneColor(n);
+}
+
+// Converte hex/rgba in [r,g,b]
+function parseColor(colorStr) {
+  const tmp = document.createElement('canvas');
+  tmp.width = tmp.height = 1;
+  const ctx = tmp.getContext('2d');
+  ctx.fillStyle = colorStr;
+  ctx.fillRect(0,0,1,1);
+  const d = ctx.getImageData(0,0,1,1).data;
+  return [d[0], d[1], d[2]];
+}
+
+// Flood fill sul canvas
+function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
+  const idx = (sy * width + sx) * 4;
+  const tgtR = data[idx], tgtG = data[idx+1], tgtB = data[idx+2];
+  // Se il pixel target è già del colore di riempimento, esci
+  if (tgtR === fillR && tgtG === fillG && tgtB === fillB) return;
+  // Tolleranza per colori simili al rosa originale
+  const TOL = 30;
+  function isSimilar(i) {
+    return Math.abs(data[i]-tgtR) < TOL &&
+           Math.abs(data[i+1]-tgtG) < TOL &&
+           Math.abs(data[i+2]-tgtB) < TOL;
   }
-  const cont = document.getElementById('italy-map-svg') || document.getElementById('italy-map-container');
-  const box  = cont.getBoundingClientRect();
-  let tx = e.clientX-box.left+14, ty = e.clientY-box.top+14;
-  if (tx+225>box.width)  tx -= 240;
-  if (ty+160>box.height) ty -= 170;
-  tooltip.style.left    = Math.max(0,tx)+'px';
-  tooltip.style.top     = Math.max(0,ty)+'px';
-  tooltip.style.opacity = '1';
+  const stack = [[sx, sy]];
+  const visited = new Uint8Array(width * height);
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= width || y < 0 || y >= height) continue;
+    const i = (y * width + x) * 4;
+    if (visited[y * width + x]) continue;
+    if (!isSimilar(i)) continue;
+    visited[y * width + x] = 1;
+    // Blend colore con opacità
+    data[i]   = Math.round(data[i]   * (1-alpha) + fillR * alpha);
+    data[i+1] = Math.round(data[i+1] * (1-alpha) + fillG * alpha);
+    data[i+2] = Math.round(data[i+2] * (1-alpha) + fillB * alpha);
+    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  }
 }
 
-function mapRegLeave(el) {
+function updateMapColors() {
+  const gare = getGare();
+  const regioniMap = {};
+  gare.forEach(g => {
+    if (g.regione && g.regione !== 'Estero') {
+      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
+      regioniMap[g.regione].push(g);
+    }
+  });
+
   const tooltip = document.getElementById('map-tooltip');
-  if (tooltip) tooltip.style.opacity = '0';
-}
 
-function mapRegClick(el) {
-  const regName = el.getAttribute('data-region');
-  const gs = getGare().filter(g => g.regione === regName);
-  if (!gs.length) return;
-  const cards = gs.map(g =>
-    '<div style="padding:8px;background:var(--bg4);border-radius:8px;margin-bottom:6px;'
-    +'font-size:13px;cursor:pointer;" onclick="openDetail('+g.id+')">'
-    +'<div style="font-weight:600;">'+sportIcon(g.sport)+' '+(g.nome||g.tipo_gara||'')+'</div>'
-    +'<div style="color:var(--text3);font-size:12px;">'+(g.data||'').slice(0,10)+' · '+(g.luogo||'')+'</div>'
-    +'</div>'
-  ).join('');
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML =
-    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;'
-    +'padding:24px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;">'
-    +'<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:900;margin-bottom:16px;">📍 '+regName+'</div>'
-    +cards
-    +'<button id="map-modal-close-btn" class="btn-secondary" style="margin-top:12px;width:100%">Chiudi</button>'
-    +'</div>';
-  modal.onclick = ev => { if (ev.target===modal) modal.remove(); };
-  modal.querySelector('#map-modal-close-btn').onclick = () => modal.remove();
-  document.body.appendChild(modal);
-}
+  // Approccio canvas: disegna l'immagine originale + flood-fill per le regioni
+  const img = document.getElementById('italy-bg');
+  const svg = document.getElementById('italy-svg');
+  if (!img || !svg) return;
 
+  // Crea canvas temporaneo
+  const canvas = document.createElement('canvas');
+  const vb = svg.viewBox.baseVal;
+  canvas.width  = vb.width  || 500;
+  canvas.height = vb.height || 671;
+  const ctx = canvas.getContext('2d');
+
+  // Disegna immagine originale
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  // Flood-fill per ogni regione con gare
+  Object.entries(MAP_SEEDS).forEach(([regName, [sx, sy]]) => {
+    const gs = regioniMap[regName] || [];
+    if (!gs.length) return;
+    const colorStr = regioneColorSVG(gs.length);
+    if (!colorStr) return;
+    const [r,g,b] = parseColor(colorStr);
+    floodFill(data, canvas.width, canvas.height, sx, sy, r, g, b, 0.6);
+  });
+
+  ctx.putImageData(imageData, 0, 0);
+
+  // Sostituisci l'immagine SVG con il canvas colorato
+  const dataURL = canvas.toDataURL('image/png');
+  img.setAttribute('href', dataURL);
+
+  // Mantieni i path per tooltip e click (trasparenti)
+  document.querySelectorAll('#italy-svg .reg-d3').forEach(path => {
+    const regName = path.dataset.region;
+    const gs = regioniMap[regName] || [];
+    path.style.fill = 'transparent';
+    path.style.stroke = 'none';
+    path.style.cursor = gs.length ? 'pointer' : 'default';
+
+    path.onmouseenter = function(e) {
+      if (gs.length > 0) {
+        path.style.filter = 'url(#reg-glow)';
+        path.style.opacity = '0.85';
+      }
+      if (!tooltip) return;
+      if (!gs.length) {
+        tooltip.innerHTML = `<div style="font-weight:600;margin-bottom:2px;">${regName}</div><div style="color:var(--text3);font-size:12px;">Nessuna gara ancora</div>`;
+      } else {
+        const kmR = gs.reduce((s,g) => s+(g.distanza||0), 0);
+        const list = gs.slice(0,5).map(g => {
+          const t = g.frazioni ? calcTempoTri(g.frazioni) : (g.tempo||'');
+          return `<div style="font-size:11px;color:var(--text3);margin-top:3px;">${g.data.slice(0,4)} · ${g.nome}${t?' · <span style=color:#ff8a65>'+t+'</span>':''}</div>`;
+        }).join('');
+        const more = gs.length > 5 ? `<div style="font-size:11px;color:var(--accent);margin-top:3px;">+${gs.length-5} altre gare</div>` : '';
+        tooltip.innerHTML = `
+          <div style="font-weight:600;font-size:14px;margin-bottom:5px;">${regName}</div>
+          <div style="color:var(--accent);font-weight:600;margin-bottom:4px;">${gs.length} gar${gs.length===1?'a':'e'} · ${Math.round(kmR)} km</div>
+          ${list}${more}`;
+      }
+      const box = document.getElementById('italy-map-container').getBoundingClientRect();
+      let tx = e.clientX - box.left + 14;
+      let ty = e.clientY - box.top + 14;
+      if (tx + 230 > box.width) tx -= 245;
+      if (ty + 170 > box.height) ty -= 175;
+      tooltip.style.left = Math.max(0,tx) + 'px';
+      tooltip.style.top = Math.max(0,ty) + 'px';
+      tooltip.style.opacity = '1';
+    };
+
+    path.onmouseleave = function() {
+      path.style.filter = '';
+      path.style.opacity = '1';
+      if (tooltip) tooltip.style.opacity = '0';
+    };
+  });
+}
 
 function loadMap() {
+  // Inizializza colore e legenda
   const saved = localStorage.getItem('irun_map_color') || '#ff5722';
   _mapColor = saved;
   const picker = document.getElementById('map-color-custom');
@@ -7597,98 +7185,131 @@ function loadMap() {
   });
   updateMapColors();
 }
+
+function apriConsigli(){const ov=document.getElementById('consigli-overlay');if(ov)ov.classList.add('open');}
+function chiudiConsigli(){const ov=document.getElementById('consigli-overlay');if(ov)ov.classList.remove('open');}
+async function inviaConsiglio(){
+  const t=(document.getElementById('consiglio-testo').value||'').trim();
+  const n=(document.getElementById('consiglio-nome').value||'').trim();
+  const e=document.getElementById('consiglio-esito');
+  if(!t){e.style.color='#ef5350';e.textContent='Scrivi un messaggio.';e.style.display='block';return;}
+  e.style.color='var(--text2)';e.textContent='Invio...';e.style.display='block';
+  try{await gsPost('inviaConsiglio',{nome:n||'Anonimo',testo:t,ts:new Date().toISOString(),utente_id:getUtenteId()||'anonimo'});e.style.color='#4caf50';e.textContent='Grazie!';document.getElementById('consiglio-testo').value='';setTimeout(chiudiConsigli,2000);}catch(ex){e.style.color='#ef5350';e.textContent='Errore.';}
+}
+
+function updateMapColors() {
+  const gare = getGare(), regioniMap = {};
+  gare.forEach(g => { if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) { if (!regioniMap[g.regione]) regioniMap[g.regione]=[]; regioniMap[g.regione].push(g); } });
+  document.querySelectorAll('#italy-map-inner .map-bubble-div').forEach(el => {
+    const regName=el.getAttribute('data-region'); if(!regName) return;
+    const gs=regioniMap[regName]||[], color=regioneColorSVG(gs.length), em=el.querySelector('.map-bubble-emoji');
+    if (gs.length) {
+      el.classList.add('conquistata'); el.style.background=(color||'#ff5722')+'35';
+      el.style.borderColor=color||'#ff5722'; el.style.borderWidth='3px';
+      const sz=Math.min(44+gs.length*2,60); el.style.width=el.style.height=sz+'px'; el.style.marginLeft=el.style.marginTop=(-sz/2)+'px';
+      if(em){em.style.filter='none'; em.style.fontSize=Math.min(22+gs.length,30)+'px';}
+    } else {
+      el.classList.remove('conquistata'); el.style.background='rgba(20,20,40,0.5)';
+      el.style.borderColor='rgba(255,255,255,0.15)'; el.style.borderWidth='1px';
+      el.style.width=el.style.height='44px'; el.style.marginLeft=el.style.marginTop='-22px';
+      if(em){em.style.filter='grayscale(100%) opacity(35%)'; em.style.fontSize='22px';}
+    }
+  });
+}
+
+function mapRegHover(el, e) {
+  const regName=el.getAttribute('data-region'), regLabel=el.getAttribute('data-label')||regName;
+  const gare=getGare().filter(g=>g.regione===regName), tooltip=document.getElementById('map-tooltip');
+  if(!tooltip) return;
+  if(!gare.length) {
+    tooltip.innerHTML='<div style="font-weight:600;">'+regName+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Nessuna gara ancora</div>';
+  } else {
+    const km=gare.reduce((s,g)=>s+(g.distanza||0),0);
+    const items=gare.slice(0,5).map(g=>'<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+(g.data||'').slice(0,4)+' · '+(g.nome||g.tipo_gara||'')+'</div>').join('');
+    tooltip.innerHTML='<div style="font-weight:700;font-size:14px;margin-bottom:4px;">'+regName+'</div>'+'<div style="color:var(--accent);font-weight:600;margin-bottom:3px;">'+gare.length+' gar'+(gare.length===1?'a':'e')+' · '+Math.round(km)+' km</div>'+items+(gare.length>5?'<div style="font-size:11px;color:var(--accent);">+'+(gare.length-5)+' altre</div>':'');
+  }
+  const cont=document.getElementById('italy-map-container'), box=cont.getBoundingClientRect();
+  let tx=e.clientX-box.left+14, ty=e.clientY-box.top+14;
+  if(tx+225>box.width) tx-=240; if(ty+160>box.height) ty-=170;
+  tooltip.style.left=Math.max(0,tx)+'px'; tooltip.style.top=Math.max(0,ty)+'px'; tooltip.style.opacity='1';
+}
+
+function mapRegLeave(el) { const t=document.getElementById('map-tooltip'); if(t) t.style.opacity='0'; }
+
+function mapRegClick(el) {
+  const regName=el.getAttribute('data-region');
+  const gs=getGare().filter(g=>g.regione===regName); if(!gs.length) return;
+  const cards=gs.map(g=>'<div style="padding:8px;background:var(--bg4);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;" onclick="openDetail('+g.id+')">'+'<div style="font-weight:600;">'+sportIcon(g.sport)+' '+(g.nome||g.tipo_gara||'')+'</div>'+'<div style="color:var(--text3);font-size:12px;">'+(g.data||'').slice(0,10)+' · '+(g.luogo||'')+'</div></div>').join('');
+  const modal=document.createElement('div'); modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;">'+'<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:900;margin-bottom:16px;">📍 '+regName+'</div>'+cards+'<button id="mmcb" class="btn-secondary" style="margin-top:12px;width:100%">Chiudi</button></div>';
+  modal.onclick=ev=>{if(ev.target===modal)modal.remove();}; modal.querySelector('#mmcb').onclick=()=>modal.remove();
+  document.body.appendChild(modal);
+}
+
+function loadMap() {
+  const saved=localStorage.getItem('irun_map_color')||'#ff5722'; _mapColor=saved;
+  const picker=document.getElementById('map-color-custom'); if(picker) picker.value=saved;
+  updateMapLegend(saved);
+  document.querySelectorAll('.map-color-btn').forEach(b=>b.classList.toggle('active',b.style.background===saved));
+  updateMapColors();
+}
 </script>
 </div>
 
-<div id="page-admin" class="page" style="padding-top:8px;margin-top:0;">
+
+<div id="page-admin" class="page" style="padding-top:8px;">
   <div style="max-width:1100px;margin:0 auto;padding:16px 24px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;">⚙️ Pannello Admin</div>
       <div id="admin-date" style="font-size:13px;color:var(--text3);"></div>
     </div>
-    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin-top:0;">
-      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">🔐 Accesso Admin</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Inserisci la password per accedere al pannello</div>
+    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;">
+      <div style="font-size:18px;font-weight:700;margin-bottom:16px;">🔐 Accesso Admin</div>
       <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
       <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
       <button class="btn-primary" onclick="loginAdmin()" style="width:100%;">Accedi</button>
     </div>
     <div id="admin-content" style="display:none;">
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;" id="admin-cards"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">👥 Ultimi 10 utenti registrati</div>
-          <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">🏅 Gare inserite oggi</div>
-          <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:12px;">👥 Ultimi utenti</div><div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:12px;">🏅 Gare oggi</div><div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div></div>
       </div>
       <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;">📋 Inserimenti manuali</div>
-            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Gare con nome, nazione o città non presenti nel foglio <strong>Configurazione</strong>. Integra il foglio per renderli disponibili a tutti.</div>
-          </div>
-          <button class="btn-secondary" onclick="copiaGareNonCensite()" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📋 Copia lista</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;">📋 Inserimenti manuali</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Campi non nel foglio Configurazione</div></div>
+          <button class="btn-secondary" onclick="copiaGareNonCensite()" style="font-size:12px;padding:6px 12px;">📋 Copia</button>
         </div>
         <div id="admin-non-censite"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">⭐ Ultime recensioni</div>
-          <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">💬 Consigli degli utenti</div>
-          <div id="admin-consigli" style="display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:12px;">⭐ Recensioni</div><div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div></div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:12px;">💬 Consigli</div><div id="admin-consigli" style="display:flex;flex-direction:column;gap:6px;"></div></div>
       </div>
     </div>
   </div>
 </div>
 <!-- PIÈ DI PAGINA -->
-<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:13px;color:var(--text3);margin-top:60px;">
+<footer style="
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  padding:20px 24px;
+  text-align:center;
+  font-size:13px;
+  color:var(--text3);
+  margin-top:60px;
+">
   <span>Athlos © 2026 &nbsp;·&nbsp;</span>
-  <a href="mailto:alexdebs.adb@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:500;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">✉️ Contattaci</a>
+  <a href="mailto:alexdebs.adb@gmail.com"
+     style="color:var(--accent);text-decoration:none;font-weight:500;"
+     onmouseenter="this.style.textDecoration='underline'"
+     onmouseleave="this.style.textDecoration='none'">
+    ✉️ Contattaci
+  </a>
   <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
   <span> &nbsp;·&nbsp; </span>
   <a href="#" onclick="apriConsigli();return false;" style="color:var(--accent);text-decoration:none;font-weight:500;">💬 I tuoi consigli</a>
 </footer>
 
-
-function updateMapColors() {
-  const gare = getGare();
-  const regioniMap = {};
-  gare.forEach(g => {
-    if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
-      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
-      regioniMap[g.regione].push(g);
-    }
-  });
-  document.querySelectorAll('#italy-map-svg .map-region').forEach(path => {
-    const regName = path.getAttribute('data-region');
-    if (!regName) return;
-    const gs    = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-    if (gs.length) {
-      path.classList.add('conquistata');
-      path.style.fill        = color || '#ff5722';
-      path.style.fillOpacity = '0.75';
-      path.style.stroke      = '#0a0a1a';
-      path.style.strokeWidth = '0.8';
-      path.style.cursor      = 'pointer';
-    } else {
-      path.classList.remove('conquistata');
-      path.style.fill        = '#2a2a3a';
-      path.style.fillOpacity = '0.6';
-      path.style.stroke      = '#0a0a1a';
-      path.style.strokeWidth = '0.5';
-      path.style.cursor      = 'default';
-    }
-  });
-}
-</script>
 </body>
 </html>
