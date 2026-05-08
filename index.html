@@ -7521,141 +7521,77 @@ function controllaAdmin() {
 
 init();
 controllaReferral();
+
+function loadMap() {
+  const saved = localStorage.getItem('irun_map_color') || '#ff5722';
+  _mapColor = saved;
+  const picker = document.getElementById('map-color-custom');
+  if (picker) picker.value = saved;
+  updateMapLegend(saved);
+  document.querySelectorAll('.map-color-btn').forEach(b => {
+    b.classList.toggle('active', b.style.background === saved);
+  });
+  updateMapColors();
+}
 </script>
+</div>
 
-<!-- D3 + Mappa Italia -->
-<script>
-// Mappa con canvas flood-fill sull'immagine reale
+<div id="page-admin" class="page" style="padding-top:8px;margin-top:0;">
+  <div style="max-width:1100px;margin:0 auto;padding:16px 24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;">⚙️ Pannello Admin</div>
+      <div id="admin-date" style="font-size:13px;color:var(--text3);"></div>
+    </div>
+    <div id="admin-login" style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:400px;margin-top:0;">
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">🔐 Accesso Admin</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Inserisci la password per accedere al pannello</div>
+      <input type="password" id="admin-pwd-input" class="form-input" placeholder="Password admin" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')loginAdmin()">
+      <div id="admin-login-err" style="color:#ef5350;font-size:13px;margin-bottom:12px;display:none;"></div>
+      <button class="btn-primary" onclick="loginAdmin()" style="width:100%;">Accedi</button>
+    </div>
+    <div id="admin-content" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;" id="admin-cards"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">👥 Ultimi 10 utenti registrati</div>
+          <div id="admin-nuovi-utenti" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">🏅 Gare inserite oggi</div>
+          <div id="admin-nuove-gare" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;">📋 Inserimenti manuali</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Gare con nome, nazione o città non presenti nel foglio <strong>Configurazione</strong>. Integra il foglio per renderli disponibili a tutti.</div>
+          </div>
+          <button class="btn-secondary" onclick="copiaGareNonCensite()" style="font-size:12px;padding:6px 12px;white-space:nowrap;">📋 Copia lista</button>
+        </div>
+        <div id="admin-non-censite"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">⭐ Ultime recensioni</div>
+          <div id="admin-recensioni" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:14px;">💬 Consigli degli utenti</div>
+          <div id="admin-consigli" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- PIÈ DI PAGINA -->
+<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:13px;color:var(--text3);margin-top:60px;">
+  <span>Athlos © 2026 &nbsp;·&nbsp;</span>
+  <a href="mailto:alexdebs.adb@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:500;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">✉️ Contattaci</a>
+  <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
+  <span> &nbsp;·&nbsp; </span>
+  <a href="#" onclick="apriConsigli();return false;" style="color:var(--accent);text-decoration:none;font-weight:500;">💬 I tuoi consigli</a>
+</footer>
 
-const MAP_SEEDS = {"Valle d'Aosta": [77, 72], "Piemonte": [81, 133], "Liguria": [171, 192], "Lombardia": [193, 115], "Trentino-Alto Adige": [222, 63], "Veneto": [254, 84], "Friuli-Venezia Giulia": [293, 78], "Emilia-Romagna": [189, 170], "Toscana": [210, 243], "Marche": [277, 224], "Umbria": [261, 262], "Lazio": [261, 304], "Abruzzo": [290, 256], "Molise": [333, 315], "Campania": [360, 356], "Puglia": [378, 347], "Basilicata": [377, 393], "Calabria": [405, 463], "Sicilia": [323, 532], "Sardegna": [104, 408]};
-
-function regioneColorSVG(n) {
-  if (n <= 0) return null;
-  return regioneColor(n);
-}
-
-// Converte hex/rgba in [r,g,b]
-function parseColor(colorStr) {
-  const tmp = document.createElement('canvas');
-  tmp.width = tmp.height = 1;
-  const ctx = tmp.getContext('2d');
-  ctx.fillStyle = colorStr;
-  ctx.fillRect(0,0,1,1);
-  const d = ctx.getImageData(0,0,1,1).data;
-  return [d[0], d[1], d[2]];
-}
-
-// Flood fill sul canvas
-function floodFill(data, width, height, sx, sy, fillR, fillG, fillB, alpha) {
-  const idx = (sy * width + sx) * 4;
-  const tgtR = data[idx], tgtG = data[idx+1], tgtB = data[idx+2];
-  // Se il pixel target è già del colore di riempimento, esci
-  if (tgtR === fillR && tgtG === fillG && tgtB === fillB) return;
-  // Tolleranza per colori simili al rosa originale
-  const TOL = 30;
-  function isSimilar(i) {
-    return Math.abs(data[i]-tgtR) < TOL &&
-           Math.abs(data[i+1]-tgtG) < TOL &&
-           Math.abs(data[i+2]-tgtB) < TOL;
-  }
-  const stack = [[sx, sy]];
-  const visited = new Uint8Array(width * height);
-  while (stack.length) {
-    const [x, y] = stack.pop();
-    if (x < 0 || x >= width || y < 0 || y >= height) continue;
-    const i = (y * width + x) * 4;
-    if (visited[y * width + x]) continue;
-    if (!isSimilar(i)) continue;
-    visited[y * width + x] = 1;
-    // Blend colore con opacità
-    data[i]   = Math.round(data[i]   * (1-alpha) + fillR * alpha);
-    data[i+1] = Math.round(data[i+1] * (1-alpha) + fillG * alpha);
-    data[i+2] = Math.round(data[i+2] * (1-alpha) + fillB * alpha);
-    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
-  }
-}
-
-function mapRegHover(el, e) {
-  const regName = el.getAttribute('data-region');
-  const regLabel = el.getAttribute('data-label') || regName;
-  const gare = getGare().filter(g => g.regione === regName);
-  const tooltip = document.getElementById('map-tooltip');
-  const bubble  = el.querySelector('.map-bubble');
-  if (bubble) bubble.setAttribute('r', '26');
-  if (!tooltip) return;
-  if (!gare.length) {
-    tooltip.innerHTML = '<div style="font-weight:600;">'+regName+'</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">Nessuna gara ancora</div>';
-  } else {
-    const kmR = gare.reduce((s,g)=>s+(g.distanza||0),0);
-    const items = gare.slice(0,5).map(g=>'<div style="font-size:11px;color:var(--text3);margin-top:3px;">'+(g.data||'').slice(0,4)+' · '+(g.nome||g.tipo_gara||'')+'</div>').join('');
-    tooltip.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">'+regName+'</div><div style="font-size:11px;color:var(--accent);margin-bottom:4px;">'+regLabel+'</div>'
-      +'<div style="color:var(--accent);font-weight:600;margin-bottom:3px;">'+gare.length+' gar'+(gare.length===1?'a':'e')+' · '+Math.round(kmR)+' km</div>'+items
-      +(gare.length>5?'<div style="font-size:11px;color:var(--accent);margin-top:3px;">+'+(gare.length-5)+' altre</div>':'');
-  }
-  const cont = document.getElementById('italy-map-container');
-  const box  = cont.getBoundingClientRect();
-  let tx = e.clientX-box.left+14, ty = e.clientY-box.top+14;
-  if (tx+230>box.width)  tx -= 245;
-  if (ty+160>box.height) ty -= 170;
-  tooltip.style.left=Math.max(0,tx)+'px'; tooltip.style.top=Math.max(0,ty)+'px'; tooltip.style.opacity='1';
-}
-
-function mapRegLeave(el) {
-  const bubble = el.querySelector('.map-bubble');
-  if (bubble) bubble.setAttribute('r', '22');
-  const tooltip = document.getElementById('map-tooltip');
-  if (tooltip) tooltip.style.opacity='0';
-}
-
-function mapRegClick(el) {
-  const regName = el.getAttribute('data-region');
-  const gs = getGare().filter(g => g.regione === regName);
-  if (!gs.length) return;
-  const cards = gs.map(g=>'<div style="padding:8px;background:var(--bg4);border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;" onclick="openDetail('+g.id+')">'
-    +'<div style="font-weight:600;">'+sportIcon(g.sport)+' '+(g.nome||g.tipo_gara||'')+'</div>'
-    +'<div style="color:var(--text3);font-size:12px;">'+(g.data||'').slice(0,10)+' · '+(g.luogo||'')+'</div></div>').join('');
-  const modal = document.createElement('div');
-  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;">'
-    +'<div style="font-family:Barlow Condensed,sans-serif;font-size:24px;font-weight:900;margin-bottom:16px;">📍 '+regName+'</div>'
-    +cards+'<button id="map-modal-close-btn" class="btn-secondary" style="margin-top:12px;width:100%">Chiudi</button></div>';
-  modal.onclick=ev=>{if(ev.target===modal)modal.remove();};
-  modal.querySelector('#map-modal-close-btn').onclick=()=>modal.remove();
-  document.body.appendChild(modal);
-}
-
-function updateMapColors() {
-  const gare = getGare();
-  const regioniMap = {};
-  gare.forEach(g => {
-    if (g.regione && MAP_SEEDS.hasOwnProperty(g.regione)) {
-      if (!regioniMap[g.regione]) regioniMap[g.regione] = [];
-      regioniMap[g.regione].push(g);
-    }
-  });
-  document.querySelectorAll('#italy-map-inner .map-bubble-div').forEach(el => {
-    const regName = el.getAttribute('data-region');
-    if (!regName) return;
-    const gs    = regioniMap[regName] || [];
-    const color = regioneColorSVG(gs.length);
-    const em    = el.querySelector('.map-bubble-emoji');
-    if (gs.length) {
-      el.classList.add('conquistata');
-      el.style.background  = (color || '#ff5722') + '35';
-      el.style.borderColor = color || '#ff5722';
-      el.style.borderWidth = '3px';
-      const sz = Math.min(44 + gs.length * 2, 60);
-      el.style.width = el.style.height = sz + 'px';
-      el.style.marginLeft = el.style.marginTop = (-sz/2) + 'px';
-      if (em) { em.style.filter = 'none'; em.style.fontSize = Math.min(22 + gs.length, 30) + 'px'; }
-    } else {
-      el.classList.remove('conquistata');
-      el.style.background  = 'rgba(20,20,40,0.5)';
-      el.style.borderColor = 'rgba(255,255,255,0.15)';
-      el.style.borderWidth = '1px';
-      el.style.width = el.style.height = '44px';
-      el.style.marginLeft = el.style.marginTop = '-22px';
-      if (em) { em.style.filter = 'grayscale(100%) opacity(40%)'; em.style.fontSize = '22px'; }
-    }
-  });
-}
+</body>
+</html>
