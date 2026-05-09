@@ -4115,12 +4115,23 @@ function renderStats() {
   ].join('');
 
   // Card gare all'estero per continente (usa g.continente dal foglio)
+  // Gare estero per continente (una sola card per continente)
   const _esteroPerCont = {};
   gare.forEach(g => {
     const naz = (g.nazione||'').trim();
     if (!naz || naz.toUpperCase() === 'ITALIA') return;
-    const cont = (g.continente||'').trim() || 'Estero';
-    _esteroPerCont[cont] = (_esteroPerCont[cont]||0) + 1;
+    // Deduci continente se mancante
+    let cont = (g.continente||'').trim();
+    if (!cont) {
+      const EU = ['FRANCIA','SPAGNA','GERMANIA','PORTOGALLO','AUSTRIA','SVIZZERA',
+                  'BELGIO','OLANDA','PAESI BASSI','GRECIA','CROAZIA','SLOVENIA',
+                  'UK','REGNO UNITO','INGHILTERRA','IRLANDA','SVEZIA','NORVEGIA',
+                  'DANIMARCA','FINLANDIA','POLONIA','CECO','SLOVACCHIA','UNGHERIA',
+                  'ROMANIA','BULGARIA','SERBIA','ALBANIA','MALTA','CIPRO','MONACO'];
+      cont = EU.includes((g.nazione||'').toUpperCase()) ? 'Europa' : 'Altro';
+    }
+    if (!_esteroPerCont[cont]) _esteroPerCont[cont] = 0;
+    _esteroPerCont[cont]++;
   });
   const _wrapEstero = document.getElementById('stats-estero-wrap');
   const _cardsEstero = document.getElementById('stats-estero-cards');
@@ -4145,7 +4156,7 @@ function renderStats() {
   };
   const sportColorMap = _buildSportColorMap();
   // Helper per lookup case-insensitive
-  const getSportColor = s => sportColorMap[(s||'').toLowerCase()] || '#888';
+
   // Raggruppa per anno+sport (solo finisher)
   const anniSet = new Set();
   const sportSet = new Set();
@@ -6462,6 +6473,20 @@ function normalizzaTempo(raw) {
 }
 
 // Converte stringa tempo in secondi (usa normalizzaTempo internamente)
+// Colori sport — funzione globale
+const _SPORT_COLORS = {
+  corsa:'#ff5722', trail:'#4caf50', ultra:'#ff8a65',
+  bici:'#ffc107', nuoto:'#00bcd4', triathlon:'#2196f3',
+  duathlon:'#9c27b0', ironman:'#1565c0', tri703:'#42a5f5',
+};
+function getSportColor(s) { return _SPORT_COLORS[(s||'').toLowerCase()] || '#888'; }
+
+function secsToHMS(s) {
+  if (!s || s <= 0) return '--:--:--';
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+
 function tempoStringToSec(raw) {
   const n = normalizzaTempo(raw);
   if (!n) return 0;
@@ -7434,9 +7459,12 @@ async function renderSocial() {
 
   // Se entrambi vuoti, mostra errore
   if (!utenti.length && !gare.length) {
+    // Invalida cache e riprova una volta
+    localStorage.removeItem('irun_social_cache');
     document.getElementById('social-loading').innerHTML = `
       <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
-      <div>Impossibile caricare i dati. Verifica il deployment dell'Apps Script.</div>`;
+      <div style="margin-bottom:12px;">Impossibile caricare i dati social.</div>
+      <button class="btn-secondary" onclick="renderSocial()" style="font-size:13px;">🔄 Riprova</button>`;
     return;
   }
 
