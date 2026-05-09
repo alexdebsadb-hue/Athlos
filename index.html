@@ -6276,9 +6276,13 @@ function tempoStringToSec(raw) {
 
 function garaTempoSecs(g) {
   if (g.frazioni) {
-    return ['nuoto','t1','bici','t2','corsa'].reduce((s,k) => s + timeToSecs(g.frazioni[k]||''), 0);
+    try {
+      const fr = typeof g.frazioni === 'string' ? JSON.parse(g.frazioni) : g.frazioni;
+      const tot = ['nuoto','t1','bici','t2','corsa'].reduce((s,k) => s + tempoStringToSec(fr[k]||''), 0);
+      if (tot > 0) return tot;
+    } catch(e) {}
   }
-  return timeToSecs(g.tempo || '');
+  return tempoStringToSec(g.tempo || '');
 }
 
 function garaTempoDisplay(g) {
