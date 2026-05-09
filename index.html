@@ -7445,15 +7445,7 @@ async function renderSocial() {
   }
 
   let utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
-  let gare   = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
-  // Se getAllGare non disponibile, usa le gare locali dell'utente come fallback parziale
-  if (!gare.length) {
-    const gareLocali = getGare();
-    if (gareLocali.length) {
-      gare = gareLocali;
-      console.log('[Social] Uso gare locali come fallback:', gare.length);
-    }
-  }
+  const gare = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
 
   // Se utenti è vuoto ma cache era presente, invalida cache e ricarica
   if (!utenti.length && _socialCache) {
