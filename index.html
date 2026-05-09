@@ -7708,8 +7708,8 @@ async function renderSocial() {
       </div>`).join('');
   }
 
-  const topMezza    = buildPercorsiVeloci(gare, t => t.includes('mezza'));
-  const topMaratona = buildPercorsiVeloci(gare, t => t.includes('maratona') && !t.includes('mezza') && !t.includes('ultra'));
+  const topMezza    = buildPercorsiVeloci(gare, t => t === 'mezza maratona');
+  const topMaratona = buildPercorsiVeloci(gare, t => t === 'maratona');
 
   document.getElementById('social-top-mezza').innerHTML    = renderPercorsiVeloci(topMezza);
   document.getElementById('social-top-maratona').innerHTML = renderPercorsiVeloci(topMaratona);
@@ -7827,8 +7827,9 @@ async function renderSocial() {
       </div>`).join('');
   }
 
-  const mezzaAcc   = tempiMediPerSesso(gare, n => n.includes('mezza') || n.includes('half') || n.includes('21'));
-  const maratonaAcc= tempiMediPerSesso(gare, n => (n.includes('maratona') || n.includes('marathon')) && !n.includes('mezza') && !n.includes('half') && !n.includes('21'));
+  // Stesso filtro usato da buildPercorsiVeloci che funziona già
+  const mezzaAcc    = tempiMediPerSesso(gare, t => t === 'mezza maratona');
+  const maratonaAcc = tempiMediPerSesso(gare, t => t === 'maratona');
   renderTempiSesso(document.getElementById('social-tempi-mezza'),    mezzaAcc);
   renderTempiSesso(document.getElementById('social-tempi-maratona'), maratonaAcc);
 
