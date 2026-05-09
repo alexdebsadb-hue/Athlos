@@ -5888,10 +5888,14 @@ function confirmImport() {
       nazione:     g.nazione     || '',
       continente:  g.continente  || '',
     }));
-    gsPost('importaGare', payload).then(r => {
-      if (r) showToast(`✅ ${r.imported || toImport.length} gare sincronizzate sul foglio!`);
+    console.log('[importGare] payload:', JSON.stringify(payload).slice(0,500));
+    gsPost('importGare', payload).then(r => {
+      console.log('[importGare] risposta:', JSON.stringify(r));
+      if (r && r.imported) showToast(`✅ ${r.imported} gare sincronizzate sul foglio!`);
+      else if (r && r.ok) showToast(`✅ ${toImport.length} gare sincronizzate!`);
+      else { console.error('[importGare] risposta inattesa:', r); showToast('⚠️ Sync parziale - controlla console'); }
       showSyncBadge('ok');
-    });
+    }).catch(e => { console.error('[importGare] errore:', e); showSyncBadge('err'); });
   }
 }
 
@@ -6214,10 +6218,14 @@ function confirmImportTri() {
       nazione:     g.nazione     || '',
       continente:  g.continente  || '',
     }));
-    gsPost('importaGare', payload).then(r => {
-      if (r) showToast(`✅ ${r.imported || toImport.length} gare sincronizzate sul foglio!`);
+    console.log('[importGare tri] payload:', JSON.stringify(payload).slice(0,500));
+    gsPost('importGare', payload).then(r => {
+      console.log('[importGare tri] risposta:', JSON.stringify(r));
+      if (r && r.imported) showToast(`✅ ${r.imported} gare triathlon sul foglio!`);
+      else if (r && r.ok) showToast(`✅ ${toImport.length} gare sincronizzate!`);
+      else { console.error('[importGare tri] risposta:', r); showToast('⚠️ Sync parziale - controlla console'); }
       showSyncBadge('ok');
-    }).catch(() => showSyncBadge('err'));
+    }).catch(e => { console.error('[importGare tri] errore:', e); showSyncBadge('err'); });
   }
 }
 
