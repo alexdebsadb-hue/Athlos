@@ -7751,16 +7751,21 @@ async function renderSocial() {
 
   // ── GARE PER SESSO ══
   // Mappa utente_id → sesso
+  // Mappa utente_id → sesso (stesso pattern della classifica)
   const sessoById = {};
-  utenti.forEach(u => { if (u.id) sessoById[String(u.id)] = u.sesso || '—'; });
+  utenti.forEach(u => {
+    const uid = String(u.utente_id || u.ID_UTENTE || '');
+    if (uid) sessoById[uid] = u.sesso || '—';
+  });
 
   const garePerSesso = { M: 0, F: 0, A: 0, '—': 0 };
   const kmPerSesso   = { M: 0, F: 0, A: 0, '—': 0 };
   gare.forEach(g => {
-    const s = sessoById[String(g.utente_id)] || '—';
-    const k = (garePerSesso[s] !== undefined) ? s : '—';
+    const uid = String(g.utente_id || '');
+    const s   = sessoById[uid] || '—';
+    const k   = (['M','F','A'].includes(s)) ? s : '—';
     garePerSesso[k]++;
-    kmPerSesso[k] += (g.distanza || 0);
+    kmPerSesso[k] += (parseFloat(g.distanza) || 0);
   });
 
   const sessoLabelsG = { M:'♂ Uomini', F:'♀ Donne', A:'⚧ Altro', '—':'Non specificato' };
