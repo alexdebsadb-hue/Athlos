@@ -6055,6 +6055,7 @@ function parsePastedDataTri(text) {
         nazione: regione && MAP_SEEDS.hasOwnProperty(regione) ? 'ITALIA' : '',
         distanza: km,
         tempo: toSec(tempoTot),
+        tempo_raw: tempoTot,
         esito: esito,
         frazioni: frazioni,
         note: note,
@@ -6125,34 +6126,59 @@ function renderImportTriPreview(errCount) {
   previewEl.innerHTML = previewHtml;
 }
 
-async function confirmImportTri() {
+function confirmImportTri() {
   const toImport = importTriPreviewData.filter(g => !g.isDuplicate);
   if (!toImport.length) { showToast('Nessuna gara nuova da importare'); return; }
 
-  const btn = document.querySelector('#import-go-btn-tri button');
-  if (btn) { btn.disabled = true; btn.textContent = 'Importazione in corso...'; }
+  const uid  = getUtenteId();
+  const gare = getGare();
 
-  let ok = 0, err = 0;
-  for (const g of toImport) {
-    try {
-      await gsPost('saveGara', {
-        id: g.id, utente_id: g.utente_id, sport: g.sport,
-        tipo_gara: g.tipo_gara, nome: g.nome, data: g.data,
-        luogo: g.luogo, regione: g.regione, nazione: g.nazione,
-        distanza: g.distanza, tempo: g.tempo, esito: g.esito,
-        frazioni: g.frazioni, note: g.note,
-        rating_gara: 0, hotel: '', hotel_tipo: '', rating_hotel: 0, continente: ''
-      });
-      ok++;
-    } catch(e) { err++; }
-  }
+  toImport.forEach((g, i) => {
+    const tempoNorm = normalizzaTempo(g.tempo_raw || '') || null;
+    const gara = {
+      id:         Date.now() + i,
+      utente_id:  uid,
+      sport:      g.sport       || 'Triathlon',
+      tipo_gara:  g.tipo_gara   || '',
+      nome:       g.nome        || g.tipo_gara || '',
+      data:       g.data        || '',
+      luogo:      g.luogo       || '',
+      regione:    g.regione     || '',
+      nazione:    g.nazione     || (MAP_SEEDS.hasOwnProperty(g.regione) ? 'ITALIA' : ''),
+      continente: g.continente  || (MAP_SEEDS.hasOwnProperty(g.regione) ? 'Europa' : ''),
+      distanza:   g.distanza    || 0,
+      esito:      g.esito       || 'finisher',
+      tempo:      tempoNorm,
+      frazioni:   g.frazioni    || '',
+      risultato:  '',
+      pb:         false,
+      rating:     {percorso:0, ristori:0, organizzazione:0, posizione:0, pulizia:0, colazione:0},
+      ratingHotel:{posizione:0, pulizia:0, colazione:0},
+      note:       g.note        || '',
+      hotel:      '',
+      hotelTipo:  ''
+    };
+    gare.push(gara);
+  });
 
-  if (btn) { btn.disabled = false; btn.textContent = '✅ Importa triathlon in Athlos'; }
-  showToast(`✅ Importate ${ok} gare${err?' ('+err+' errori)':''}`);
+  // Salva localmente — stesso metodo dell'import corsa
+  saveGare(gare);
   closeImport();
-  await caricaGare();
+  showToast(`Importate ${toImport.length} gare triathlon!`);
   renderHome();
-  showPage('gare');
+  if (currentPage === 'gare')  renderGare('tutte');
+  if (currentPage === 'mappa') renderMappa();
+  if (currentPage === 'stats') renderStats();
+
+  // Sync massivo al foglio Google — stesso metodo dell'import corsa
+  if (uid) {
+    showSyncBadge('sync');
+    const payload = gare.slice(-toImport.length).map(g => ({ ...g, utente_id: uid }));
+    gsPost('importGare', payload).then(r => {
+      if (r) showToast(`✅ ${r.imported || toImport.length} gare sincronizzate sul foglio!`);
+      showSyncBadge('ok');
+    }).catch(() => showSyncBadge('err'));
+  }
 }
 
 function downloadExcelTemplateTri() {
