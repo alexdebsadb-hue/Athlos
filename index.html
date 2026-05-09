@@ -5867,8 +5867,28 @@ function confirmImport() {
   // Sync massivo al foglio
   if (uid) {
     showSyncBadge('sync');
-    const payload = gare.slice(-toImport.length).map(g => ({ ...g, utente_id: uid }));
-    gsPost('importGare', payload).then(r => {
+    const payload = gare.slice(-toImport.length).map(g => ({
+      id:          g.id,
+      utente_id:   uid,
+      sport:       g.sport       || '',
+      tipo_gara:   g.tipo_gara   || '',
+      data:        g.data        || '',
+      luogo:       g.luogo       || '',
+      regione:     g.regione     || '',
+      distanza:    g.distanza    || 0,
+      tempo:       g.tempo       || '',
+      esito:       g.esito       || 'finisher',
+      frazioni:    g.frazioni    || '',
+      rating_gara: 0,
+      hotel:       g.hotel       || '',
+      hotel_tipo:  g.hotelTipo   || '',
+      rating_hotel:0,
+      note:        g.note        || '',
+      nome_gara:   g.nome        || g.tipo_gara || '',
+      nazione:     g.nazione     || '',
+      continente:  g.continente  || '',
+    }));
+    gsPost('importaGare', payload).then(r => {
       if (r) showToast(`✅ ${r.imported || toImport.length} gare sincronizzate sul foglio!`);
       showSyncBadge('ok');
     });
@@ -6173,8 +6193,28 @@ function confirmImportTri() {
   // Sync massivo al foglio Google — stesso metodo dell'import corsa
   if (uid) {
     showSyncBadge('sync');
-    const payload = gare.slice(-toImport.length).map(g => ({ ...g, utente_id: uid }));
-    gsPost('importGare', payload).then(r => {
+    const payload = gare.slice(-toImport.length).map(g => ({
+      id:          g.id,
+      utente_id:   uid,
+      sport:       g.sport       || '',
+      tipo_gara:   g.tipo_gara   || '',
+      data:        g.data        || '',
+      luogo:       g.luogo       || '',
+      regione:     g.regione     || '',
+      distanza:    g.distanza    || 0,
+      tempo:       g.tempo       || '',
+      esito:       g.esito       || 'finisher',
+      frazioni:    g.frazioni    || '',
+      rating_gara: 0,
+      hotel:       '',
+      hotel_tipo:  '',
+      rating_hotel:0,
+      note:        g.note        || '',
+      nome_gara:   g.nome        || g.tipo_gara || '',
+      nazione:     g.nazione     || '',
+      continente:  g.continente  || '',
+    }));
+    gsPost('importaGare', payload).then(r => {
       if (r) showToast(`✅ ${r.imported || toImport.length} gare sincronizzate sul foglio!`);
       showSyncBadge('ok');
     }).catch(() => showSyncBadge('err'));
