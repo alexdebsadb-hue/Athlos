@@ -1127,15 +1127,7 @@
 
       <div style="max-width:960px;margin:0 auto;padding:24px;">
 
-        <!-- BOX RACCONTACI DI TE (visibile solo se profilo incompleto) -->
-        <div id="home-box-profilo" style="display:none;background:linear-gradient(135deg,rgba(255,87,34,0.1),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
-          <div style="font-size:32px;">👋</div>
-          <div style="flex:1;">
-            <div style="font-weight:700;font-size:15px;margin-bottom:3px;">Raccontaci di te!</div>
-            <div style="font-size:13px;color:var(--text2);">Completa il tuo profilo con città, peso e sport preferito — aiuta a personalizzare la tua esperienza.</div>
-          </div>
-          <button class="btn-secondary" onclick="showPage('profilo')" style="white-space:nowrap;font-size:13px;">Completa profilo →</button>
-        </div>
+
 
         <!-- PROSSIMA GARA IN PROGRAMMA -->
         <div id="home-prossima-wrap" style="display:none;margin-bottom:24px;">
@@ -3624,9 +3616,7 @@ function renderHome() {
   const emp = el('home-empty'); if(emp) emp.style.display='none';
 
   // Box profilo incompleto
-  const profileOk = utente.citta && utente.peso && utente.sport_preferito;
-  const boxP = el('home-box-profilo');
-  if (boxP) boxP.style.display = profileOk ? 'none' : 'flex';
+
 
   // ── PROSSIMA GARA ──
   const oggi = new Date().toISOString().slice(0,10);
@@ -4121,12 +4111,19 @@ function renderStats() {
     const naz = (g.nazione||'').trim();
     if (!naz || naz.toUpperCase() === 'ITALIA') return;
     // Deduci continente se mancante
+    // Normalizza continente (case-insensitive, rimuovi accenti)
     let cont = (g.continente||'').trim();
-    if (!cont) {
+    const contNorm = cont.toLowerCase().replace(/[àèéìòù]/g, c => ({à:'a',è:'e',é:'e',ì:'i',ò:'o',ù:'u'}[c]||c));
+    if (contNorm === 'europa') cont = 'Europa';
+    else if (contNorm === 'america' || contNorm.includes('america')) cont = 'America';
+    else if (contNorm === 'asia') cont = 'Asia';
+    else if (contNorm === 'africa') cont = 'Africa';
+    else if (contNorm === 'oceania') cont = 'Oceania';
+    else if (!cont) {
       const EU = ['FRANCIA','SPAGNA','GERMANIA','PORTOGALLO','AUSTRIA','SVIZZERA',
                   'BELGIO','OLANDA','PAESI BASSI','GRECIA','CROAZIA','SLOVENIA',
                   'UK','REGNO UNITO','INGHILTERRA','IRLANDA','SVEZIA','NORVEGIA',
-                  'DANIMARCA','FINLANDIA','POLONIA','CECO','SLOVACCHIA','UNGHERIA',
+                  'DANIMARCA','FINLANDIA','POLONIA','REP.CECA','SLOVACCHIA','UNGHERIA',
                   'ROMANIA','BULGARIA','SERBIA','ALBANIA','MALTA','CIPRO','MONACO'];
       cont = EU.includes((g.nazione||'').toUpperCase()) ? 'Europa' : 'Altro';
     }
@@ -7448,7 +7445,15 @@ async function renderSocial() {
   }
 
   let utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
-  const gare = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+  let gare   = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
+  // Se getAllGare non disponibile, usa le gare locali dell'utente come fallback parziale
+  if (!gare.length) {
+    const gareLocali = getGare();
+    if (gareLocali.length) {
+      gare = gareLocali;
+      console.log('[Social] Uso gare locali come fallback:', gare.length);
+    }
+  }
 
   // Se utenti è vuoto ma cache era presente, invalida cache e ricarica
   if (!utenti.length && _socialCache) {
