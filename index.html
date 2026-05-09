@@ -2389,25 +2389,51 @@ async function gsPost(action, data) {
 // ── sincronizzazione: scarica le gare dal foglio e aggiorna localStorage
 function normalizzaData(d) {
   if (!d) return '';
-  // Oggetto Date
   if (d instanceof Date) {
     if (isNaN(d)) return '';
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
-  const s = String(d).trim();
-  if (!s || s === 'undefined' || s === 'null') return '';
-  // YYYY-MM-DD già ok
+  const s = String(d).trim().replace(/\s+/g,' ');
+  if (!s || s === 'undefined' || s === 'null' || s === '-' || s === '—') return '';
+
+  // YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
-  // DD/MM/YYYY
-  const d1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (d1) return d1[3]+'-'+d1[2].padStart(2,'0')+'-'+d1[1].padStart(2,'0');
-  // DD-MM-YYYY
-  const d2 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
-  if (d2) return d2[3]+'-'+d2[2].padStart(2,'0')+'-'+d2[1].padStart(2,'0');
-  // Prova Date nativo
+  // DD/MM/YYYY o DD/MM/YY
+  const d1 = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+  if (d1) {
+    let y = parseInt(d1[3]); if (y < 100) y += y < 50 ? 2000 : 1900;
+    return y+'-'+d1[2].padStart(2,'0')+'-'+d1[1].padStart(2,'0');
+  }
+  // MM/DD/YYYY (formato americano: mese > 12 impossibile come giorno)
+  const d2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (d2 && parseInt(d2[1]) > 12) {
+    return d2[3]+'-'+d2[1].padStart(2,'0')+'-'+d2[2].padStart(2,'0');
+  }
+  // DD Month YYYY (es. "15 June 2024", "15 Giugno 2024")
+  const MESI = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12,
+                gen:1,mag:5,giu:6,lug:7,ago:8,set:9,ott:10,dic:12};
+  const d3 = s.match(/^(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})$/);
+  if (d3) {
+    const m = MESI[d3[2].toLowerCase().slice(0,3)];
+    if (m) return d3[3]+'-'+String(m).padStart(2,'0')+'-'+d3[1].padStart(2,'0');
+  }
+  // Month DD, YYYY (es. "June 15, 2024")
+  const d4 = s.match(/^([a-zA-Z]+)\s+(\d{1,2})[,\s]+(\d{4})$/);
+  if (d4) {
+    const m = MESI[d4[1].toLowerCase().slice(0,3)];
+    if (m) return d4[3]+'-'+String(m).padStart(2,'0')+'-'+d4[2].padStart(2,'0');
+  }
+  // Numero seriale Excel (es. 45476 = 15/06/2024)
+  if (/^\d{5}$/.test(s)) {
+    try {
+      const dt = new Date((parseInt(s) - 25569) * 86400000);
+      if (!isNaN(dt)) return normalizzaData(dt);
+    } catch(e) {}
+  }
+  // Fallback: Date nativo
   try {
     const dt = new Date(s);
-    if (!isNaN(dt)) return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+    if (!isNaN(dt) && dt.getFullYear() > 1990) return normalizzaData(dt);
   } catch(e) {}
   return '';
 }
@@ -6006,20 +6032,9 @@ function parsePastedDataTri(text) {
 
       if (!nome && !tipo) { errCount++; continue; }
 
-      // Converti data da GG/MM/AAAA a AAAA-MM-GG
-      let dataISO = '';
-      const dm = dataRaw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-      if (dm) dataISO = `${dm[3]}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`;
-      else if (dataRaw.match(/^\d{4}-\d{2}-\d{2}$/)) dataISO = dataRaw;
-
-      // Converti tempo in secondi
-      const toSec = t => {
-        if (!t) return 0;
-        const p = t.trim().split(':').map(Number);
-        if (p.length === 3) return p[0]*3600 + p[1]*60 + p[2];
-        if (p.length === 2) return p[0]*60 + p[1];
-        return 0;
-      };
+      const dataISO = normalizzaData(dataRaw);
+      // Usa tempoStringToSec per qualsiasi formato
+      const toSec = t => tempoStringToSec(t);
 
       // Frazioni come stringa JSON
       const frazioni = JSON.stringify({
@@ -6173,89 +6188,65 @@ function _destroyChart_orig(id) {
 }
 
 function normalizzaTempo(raw) {
-  if (!raw || raw === '' || raw === '0' || raw === '-' || raw === '--:--') return null;
+  if (!raw || raw === '' || raw === '0' || raw === '-' || raw === '--' ||
+      raw === '--:--' || raw === '—' || raw === 'DNS' || raw === 'DNF') return null;
   const s = String(raw).trim();
 
-  // 1. Già H:MM:SS
+  // H:MM:SS (standard)
   if (/^\d+:\d{2}:\d{2}$/.test(s)) return s;
-  // 2. H:MM → H:MM:00
+  // H:MM → H:MM:00
   if (/^\d+:\d{2}$/.test(s)) return s + ':00';
-  // 3. H.MM.SS con punti (Excel italiano es. 3.25.10)
+  // MM:SS con valore < 60 minuti (frazioni T1/T2)
+  // distingue da H:MM controllando se primo numero < 2 (ore) o > 59 (minuti)
+  // H.MM.SS con punti (Excel italiano)
   if (/^\d{1,2}\.\d{2}\.\d{2}$/.test(s)) return s.replace(/\./g,':');
-  // 4. HH:MM:SS AM/PM (formato 12h)
+  // H,MM,SS con virgole
+  if (/^\d{1,2},\d{2},\d{2}$/.test(s)) return s.replace(/,/g,':');
+  // HH-MM-SS con trattini
+  if (/^\d{1,2}-\d{2}-\d{2}$/.test(s)) return s.replace(/-/g,':');
+  // 3h25m10s o 3h25'10"
+  const hms1 = s.match(/^(\d+)h\s*(\d{1,2})m?\s*(\d{1,2})s?$/i);
+  if (hms1) return hms1[1]+':'+hms1[2].padStart(2,'0')+':'+hms1[3].padStart(2,'0');
+  // 3h25m (senza secondi)
+  const hm1 = s.match(/^(\d+)h\s*(\d{1,2})m?$/i);
+  if (hm1) return hm1[1]+':'+hm1[2].padStart(2,'0')+':00';
+  // 3'25" o 25'10" (solo minuti e secondi — per frazioni brevi)
+  const ms1 = s.match(/^(\d{1,3})'(\d{2})"?$/);
+  if (ms1) return '0:'+ms1[1].padStart(2,'0')+':'+ms1[2].padStart(2,'0');
+  // AM/PM (formato 12h)
   const ampm = s.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/i);
   if (ampm) {
     let h = parseInt(ampm[1]);
-    const m = parseInt(ampm[2]);
-    const sec = parseInt(ampm[3]||'0');
+    const m = parseInt(ampm[2]), sec = parseInt(ampm[3]||'0');
     if (/PM/i.test(ampm[4]) && h < 12) h += 12;
     if (/AM/i.test(ampm[4]) && h === 12) h = 0;
-    return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+    return h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
   }
-  // 5. Numero decimale Excel (es. 0.142361 = 3h25m — seriale Excel)
-  const n = parseFloat(s.replace(',','.'));
-  if (!isNaN(n) && n > 0 && n < 2 && s.indexOf(':') === -1 && s.indexOf('.') !== s.lastIndexOf('.') === false) {
-    const totalSecs = Math.round((n < 1 ? n : n - 1) * 86400);
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    const sec = totalSecs % 60;
-    if (h < 24) return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  // Numero decimale Excel (es. 0.142361 = ~3h25m)
+  if (/^0\.\d+$/.test(s)) {
+    const totalSecs = Math.round(parseFloat(s) * 86400);
+    const h = Math.floor(totalSecs/3600), m = Math.floor((totalSecs%3600)/60), sec = totalSecs%60;
+    if (h < 24) return h+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
   }
-  // 6. Secondi puri (es. "12300")
-  if (/^\d+$/.test(s) && parseInt(s) < 86400) {
-    const tot = parseInt(s);
-    return Math.floor(tot/3600) + ':' + String(Math.floor((tot%3600)/60)).padStart(2,'0') + ':' + String(tot%60).padStart(2,'0');
+  // Secondi puri (es. "12300")
+  if (/^\d+$/.test(s) && parseInt(s) < 86400 && parseInt(s) > 59) {
+    const n = parseInt(s);
+    return Math.floor(n/3600)+':'+String(Math.floor((n%3600)/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
   }
-  // 7. Fallback: prova timeToSecs
-  const secs = timeToSecs(s);
-  if (secs > 0) return secsToHMS(secs);
-  return null; // non riconosciuto — meglio null che sbagliato
+  // H:MM:SS.mmm (con millisecondi — Garmin)
+  const msec = s.match(/^(\d+):(\d{2}):(\d{2})[\.\,]\d+$/);
+  if (msec) return msec[1]+':'+msec[2]+':'+msec[3];
+  return null;
 }
 
-function timeToSecs(t) {
-  if (!t && t !== 0) return 0;
-  // Numero decimale da Excel (es. 0.142361 = 3h25m) — formato seriale Excel
-  if (typeof t === 'number' || (!isNaN(parseFloat(t)) && String(t).indexOf(':') === -1 && String(t).indexOf(',') === -1)) {
-    const n = parseFloat(t);
-    if (n > 0 && n < 1) return Math.round(n * 86400); // frazione di giorno
-    if (n >= 1 && n < 2) return Math.round((n - 1) * 86400); // oltre le 24h
-  }
-  const s = String(t).trim();
-  if (!s) return 0;
-  // Formato H:MM:SS o H:MM o MM:SS
-  const partsColon = s.split(':');
-  if (partsColon.length === 3) {
-    const h = parseInt(partsColon[0]) || 0;
-    const m = parseInt(partsColon[1]) || 0;
-    const sec = parseInt(partsColon[2]) || 0;
-    return h * 3600 + m * 60 + sec;
-  }
-  if (partsColon.length === 2) {
-    const a = parseInt(partsColon[0]) || 0;
-    const b = parseInt(partsColon[1]) || 0;
-    // Contesto gare sportive: H:MM se primo numero <= 23 e secondo <= 59
-    // (es. 3:25 = 3h25min, 45:30 = 45min30sec)
-    // Euristica: se primo > 23, trattalo come MM:SS
-    if (a <= 23 && b <= 59) return a * 3600 + b * 60;  // H:MM
-    return a * 60 + b;  // MM:SS
-  }
-  // Formato con punti H.MM.SS (Excel italiano)
-  const partsDot = s.split('.');
-  if (partsDot.length === 3 && partsDot[0].length <= 2) {
-    const h = parseInt(partsDot[0]) || 0;
-    const m = parseInt(partsDot[1]) || 0;
-    const sec = parseInt(partsDot[2]) || 0;
-    return h * 3600 + m * 60 + sec;
-  }
-  return 0;
+// Converte stringa tempo in secondi (usa normalizzaTempo internamente)
+function tempoStringToSec(raw) {
+  const n = normalizzaTempo(raw);
+  if (!n) return 0;
+  const p = n.split(':').map(Number);
+  return p[0]*3600 + p[1]*60 + (p[2]||0);
 }
 
-function secsToHMS(s) {
-  const h = Math.floor(s/3600);
-  const m = Math.floor((s%3600)/60);
-  const sec = s%60;
-  return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
 
 function garaTempoSecs(g) {
   if (g.frazioni) {
