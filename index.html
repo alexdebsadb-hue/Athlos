@@ -5546,14 +5546,34 @@ function openImportModal() {
   const _dz2 = document.getElementById('import-dropzone'); if(_dz2) _dz2.style.display = 'block';
   document.getElementById('import-preview').style.display = 'none';
   document.getElementById('import-confirm-btn').style.display = 'none';
-  document.getElementById('import-subtitle').textContent = 'Carica un file CSV per vedere l\'anteprima prima di importare';
+  const sub = document.getElementById('import-subtitle');
+  if (sub) sub.textContent = '';
   importPreviewData = [];
+  importTriPreviewData = [];
+  // Reset tab: mostra corsa, nascondi triathlon
+  switchImportType('std');
+  // Pulisci textarea
+  const pa = document.getElementById('import-paste-area');
+  if (pa) pa.value = '';
+  const pat = document.getElementById('import-paste-area-tri');
+  if (pat) pat.value = '';
+  const pc = document.getElementById('paste-count');
+  if (pc) pc.textContent = '';
+  const pct = document.getElementById('paste-count-tri');
+  if (pct) pct.textContent = '';
+  const goTri = document.getElementById('import-go-btn-tri');
+  if (goTri) goTri.style.display = 'none';
+  const prevTri = document.getElementById('import-preview-tri');
+  if (prevTri) prevTri.innerHTML = '';
 }
 
 function closeImport() {
   document.getElementById('import-overlay').classList.remove('open');
   const goBtn = document.getElementById('import-go-btn');
   if (goBtn) goBtn.style.display = 'none';
+  const goBtnT = document.getElementById('import-go-btn-tri');
+  if (goBtnT) goBtnT.style.display = 'none';
+  importTriPreviewData = [];
 }
 function closeImportOutside(e) { if (e.target === document.getElementById('import-overlay')) closeImport(); }
 
