@@ -1104,31 +1104,76 @@
 
     <!-- ── DASHBOARD (loggato) ── -->
     <div id="home-dashboard" style="display:none;">
-      <div class="stats-bar">
-        <div class="stat-item">
-          <div class="stat-num" id="home-n-gare">0</div>
-          <div class="stat-label">Gare completate</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="home-km">0</div>
-          <div class="stat-label">Km totali</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="home-regioni">0</div>
-          <div class="stat-label">Regioni coperte</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num" id="home-sport">0</div>
-          <div class="stat-label">Sport diversi</div>
+
+      <!-- HERO: saluto + stats veloci -->
+      <div id="home-hero" style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border-bottom:1px solid var(--border);padding:28px 24px 20px;">
+        <div style="max-width:960px;margin:0 auto;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+            <div>
+              <div id="home-saluto" style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;line-height:1.1;"></div>
+              <div id="home-sub" style="font-size:14px;color:var(--text2);margin-top:4px;"></div>
+            </div>
+            <button class="btn-primary" onclick="openForm()" style="font-size:14px;padding:10px 20px;">+ Aggiungi gara</button>
+          </div>
+          <!-- Stats veloci -->
+          <div class="stats-bar" style="margin:0;">
+            <div class="stat-item"><div class="stat-num" id="home-n-gare">0</div><div class="stat-label">Gare completate</div></div>
+            <div class="stat-item"><div class="stat-num" id="home-km">0</div><div class="stat-label">Km totali</div></div>
+            <div class="stat-item"><div class="stat-num" id="home-regioni">0</div><div class="stat-label">Regioni</div></div>
+            <div class="stat-item"><div class="stat-num" id="home-sport">0</div><div class="stat-label">Sport</div></div>
+          </div>
         </div>
       </div>
 
-      <div style="max-width:900px;margin:0 auto;padding:32px 24px;">
-        <div class="section-title">
-          Ultime gare aggiunte
-          <button class="btn-secondary" onclick="showPage('gare')" style="font-size:13px;padding:6px 14px;">Vedi tutte →</button>
+      <div style="max-width:960px;margin:0 auto;padding:24px;">
+
+        <!-- BOX RACCONTACI DI TE (visibile solo se profilo incompleto) -->
+        <div id="home-box-profilo" style="display:none;background:linear-gradient(135deg,rgba(255,87,34,0.1),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);border-radius:14px;padding:18px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+          <div style="font-size:32px;">👋</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:15px;margin-bottom:3px;">Raccontaci di te!</div>
+            <div style="font-size:13px;color:var(--text2);">Completa il tuo profilo con città, peso e sport preferito — aiuta a personalizzare la tua esperienza.</div>
+          </div>
+          <button class="btn-secondary" onclick="showPage('profilo')" style="white-space:nowrap;font-size:13px;">Completa profilo →</button>
         </div>
-        <div id="home-gare-list" class="gare-list">
+
+        <!-- PROSSIMA GARA IN PROGRAMMA -->
+        <div id="home-prossima-wrap" style="display:none;margin-bottom:24px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">📅 Prossima gara in programma</div>
+          <div id="home-prossima-card"></div>
+        </div>
+
+        <!-- ULTIMA GARA PER SPORT -->
+        <div id="home-per-sport-wrap" style="display:none;margin-bottom:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;">🏅 Ultima gara per sport</div>
+          </div>
+          <div id="home-per-sport" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+        </div>
+
+        <!-- REGIONI CONQUISTATE -->
+        <div id="home-regioni-wrap" style="display:none;margin-bottom:28px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🗺️ Regioni conquistate</div>
+          <div id="home-regioni-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+
+        <!-- GARE ESTERO -->
+        <div id="home-estero-wrap" style="display:none;margin-bottom:28px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 Gare all'estero</div>
+          <div id="home-estero-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+
+        <!-- FEED ULTIME GARE -->
+        <div id="home-feed-wrap" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;">🕐 Attività recente</div>
+            <button class="btn-secondary" onclick="showPage('gare')" style="font-size:12px;padding:5px 12px;">Vedi tutte →</button>
+          </div>
+          <div id="home-gare-list" class="gare-list"></div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="home-empty" style="display:none;">
           <div class="empty-state">
             <div class="empty-icon">🏅</div>
             <div class="empty-title">Nessuna gara ancora</div>
@@ -1136,6 +1181,7 @@
             <button class="btn-primary" onclick="openForm()">Aggiungi gara</button>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -3530,48 +3576,150 @@ function salvaGaraProgramma() {
 
 // ============ RENDER HOME ============
 function renderHome() {
-  const uid = getUtenteId();
-  const landing   = document.getElementById('home-landing');
-  const dashboard = document.getElementById('home-dashboard');
+  const uid      = getUtenteId();
+  const landing  = document.getElementById('home-landing');
+  const dashboard= document.getElementById('home-dashboard');
 
   if (!uid) {
-    // Mostra landing pubblica
     if (landing)   landing.style.display   = 'block';
     if (dashboard) dashboard.style.display = 'none';
     renderLanding();
     return;
   }
 
-  // Utente loggato — mostra dashboard personale
   if (landing)   landing.style.display   = 'none';
   if (dashboard) dashboard.style.display = 'block';
 
-  const gare = getGare();
+  const gare     = getGare();
   const finisher = gare.filter(g => g.esito === 'finisher');
-  const kmTot = gare.reduce((s,g) => s + (g.distanza||0), 0);
-  const regioni = [...new Set(gare.map(g => g.regione).filter(r => r && MAP_SEEDS.hasOwnProperty(r)))];
-  const sport   = [...new Set(gare.map(g => sportgruppo(g.sport)))];
+  const kmTot    = gare.reduce((s,g) => s+(g.distanza||0), 0);
+  const regioni  = [...new Set(gare.map(g=>g.regione).filter(r=>r&&MAP_SEEDS.hasOwnProperty(r)))];
+  const sport    = [...new Set(gare.map(g=>sportgruppo(g.sport)))];
 
-  document.getElementById('home-n-gare').textContent  = finisher.length;
-  document.getElementById('home-km').textContent       = Math.round(kmTot).toLocaleString('it');
-  document.getElementById('home-regioni').textContent  = regioni.length;
-  document.getElementById('home-sport').textContent    = sport.length;
+  // Stats veloci
+  document.getElementById('home-n-gare').textContent = finisher.length;
+  document.getElementById('home-km').textContent      = Math.round(kmTot).toLocaleString('it');
+  document.getElementById('home-regioni').textContent = regioni.length;
+  document.getElementById('home-sport').textContent   = sport.length;
 
-  const cont = document.getElementById('home-gare-list');
+  // Saluto personalizzato
+  const utente = JSON.parse(localStorage.getItem('irun_utente')||'{}');
+  const nome   = utente.nome || '';
+  const ora    = new Date().getHours();
+  const saluto = ora < 12 ? 'Buongiorno' : ora < 18 ? 'Buon pomeriggio' : 'Buonasera';
+  const el     = id => document.getElementById(id);
+  if (el('home-saluto')) el('home-saluto').textContent = nome ? `${saluto}, ${nome}! 👋` : `${saluto}! 👋`;
+  if (el('home-sub'))    el('home-sub').textContent    = gare.length
+    ? `${finisher.length} gare completate · ${Math.round(kmTot).toLocaleString('it')} km percorsi`
+    : 'Inizia ad aggiungere le tue gare!';
+
+  // Empty state
   if (!gare.length) {
-    cont.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🏅</div>
-      <div class="empty-title">Nessuna gara ancora</div>
-      <div class="empty-sub">Aggiungi la tua prima gara per iniziare a costruire la tua storia sportiva.</div>
-      <button class="btn-primary" onclick="openForm()">Aggiungi gara</button>
-    </div>`;
+    ['home-per-sport-wrap','home-regioni-wrap','home-estero-wrap','home-feed-wrap','home-prossima-wrap'].forEach(id=>{
+      const e=el(id); if(e) e.style.display='none';
+    });
+    const emp = el('home-empty'); if(emp) emp.style.display='block';
     return;
   }
-  const gareSorted = [...gare].sort((a,b) => (b.data||'').localeCompare(a.data||''));
-  cont.innerHTML = gareSorted.slice(0,5).map(garaCard).join('');
+  const emp = el('home-empty'); if(emp) emp.style.display='none';
+
+  // Box profilo incompleto
+  const profileOk = utente.citta && utente.peso && utente.sport_preferito;
+  const boxP = el('home-box-profilo');
+  if (boxP) boxP.style.display = profileOk ? 'none' : 'flex';
+
+  // ── PROSSIMA GARA ──
+  const oggi = new Date().toISOString().slice(0,10);
+  const programma = JSON.parse(localStorage.getItem('irun_programma')||'[]')
+    .filter(p => p.data && p.data >= oggi)
+    .sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  const prossima = programma[0];
+  const wrapP = el('home-prossima-wrap');
+  if (wrapP) wrapP.style.display = prossima ? '' : 'none';
+  if (prossima && el('home-prossima-card')) {
+    const diff = Math.ceil((new Date(prossima.data)-new Date())/(1000*60*60*24));
+    el('home-prossima-card').innerHTML = `
+      <div style="background:linear-gradient(135deg,rgba(255,87,34,0.12),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="font-size:36px;">${sportIcon(prossima.sport)}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:800;font-size:18px;margin-bottom:2px;">${prossima.nome||prossima.tipo_gara||''}</div>
+          <div style="font-size:13px;color:var(--text2);">${prossima.sport||''} · ${prossima.luogo||''} · ${fmtDataIT(prossima.data)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:var(--accent);">${diff}</div>
+          <div style="font-size:12px;color:var(--text3);">giorni al via</div>
+        </div>
+      </div>`;
+  }
+
+  // ── ULTIMA GARA PER SPORT ──
+  const perSport = {};
+  [...gare].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).forEach(g=>{
+    const s = sportgruppo(g.sport);
+    if (!perSport[s]) perSport[s] = g;
+  });
+  const wrapS = el('home-per-sport-wrap');
+  if (wrapS) wrapS.style.display = Object.keys(perSport).length ? '' : 'none';
+  if (el('home-per-sport')) {
+    el('home-per-sport').innerHTML = Object.entries(perSport).map(([sport, g]) => {
+      const color = getSportColor(sport);
+      const tempo = g.tempo ? ` · ${g.tempo}` : '';
+      const pb    = g.pb ? ' <span style="color:#ffd54f;font-size:11px;">★ PB</span>' : '';
+      return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;transition:border-color 0.2s;" onclick="openDetail(${g.id})" onmouseenter="this.style.borderColor='${color}'" onmouseleave="this.style.borderColor='var(--border)'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:24px;">${sportIcon(sport)}</span>
+          <div>
+            <div style="font-weight:800;font-size:15px;color:${color};">${sportLabel(sport)}</div>
+            <div style="font-size:11px;color:var(--text3);">${fmtDataIT(g.data)}</div>
+          </div>
+        </div>
+        <div style="font-weight:600;font-size:14px;margin-bottom:3px;">${g.nome||g.tipo_gara||''}${pb}</div>
+        <div style="font-size:12px;color:var(--text2);">${g.luogo||''}${g.distanza?' · '+g.distanza+' km':''}${tempo}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── REGIONI CONQUISTATE ──
+  const wrapR = el('home-regioni-wrap');
+  if (wrapR) wrapR.style.display = regioni.length ? '' : 'none';
+  if (el('home-regioni-chips') && regioni.length) {
+    const regiCount = {};
+    gare.forEach(g=>{ if(g.regione&&MAP_SEEDS.hasOwnProperty(g.regione)) regiCount[g.regione]=(regiCount[g.regione]||0)+1; });
+    el('home-regioni-chips').innerHTML = regioni
+      .sort((a,b) => (regiCount[b]||0)-(regiCount[a]||0))
+      .map(r => `<div style="background:rgba(255,87,34,0.12);border:1px solid rgba(255,87,34,0.3);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;" onclick="showPage('mappa')" title="${regiCount[r]} gare">
+        📍 ${r} <span style="color:var(--accent);font-size:11px;">${regiCount[r]}</span>
+      </div>`).join('');
+  }
+
+  // ── GARE ESTERO ──
+  const estero = gare.filter(g => g.nazione && g.nazione.toUpperCase() !== 'ITALIA' && g.nazione.trim());
+  const nazioniEstero = [...new Set(estero.map(g=>g.nazione))];
+  const wrapE = el('home-estero-wrap');
+  if (wrapE) wrapE.style.display = nazioniEstero.length ? '' : 'none';
+  if (el('home-estero-chips') && nazioniEstero.length) {
+    const nazCount = {};
+    estero.forEach(g=>{ nazCount[g.nazione]=(nazCount[g.nazione]||0)+1; });
+    el('home-estero-chips').innerHTML = nazioniEstero
+      .sort((a,b)=>(nazCount[b]||0)-(nazCount[a]||0))
+      .map(n => `<div style="background:rgba(33,150,243,0.12);border:1px solid rgba(33,150,243,0.3);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;">
+        🌍 ${n} <span style="color:#42a5f5;font-size:11px;">${nazCount[n]}</span>
+      </div>`).join('');
+  }
+
+  // ── FEED ULTIME GARE ──
+  const wrapF = el('home-feed-wrap');
+  if (wrapF) wrapF.style.display = gare.length ? '' : 'none';
+  const cont = el('home-gare-list');
+  if (cont) {
+    const sorted = [...gare].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+    cont.innerHTML = sorted.slice(0,5).map(garaCard).join('');
+  }
+
   updateProfileStats();
   renderUltimeRecensioni();
 }
+
 
 async function renderLanding() {
   // Carica dati community in background
