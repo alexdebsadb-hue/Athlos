@@ -3264,7 +3264,7 @@ function salvaGara() {
       const chiave  = (gara.sport||'') + '|' + (gara.tipo_gara||gara.nome||'');
       const vecchie  = gare.filter(g => String(g.id) !== String(gara.id) &&
                         g.esito === 'finisher' && garaTempoSecs(g) > 0 &&
-                        (g.sport||'')+' |'+(g.tipo_gara||g.nome||'') === chiave);
+                        (g.sport||'')+'|'+(g.tipo_gara||g.nome||'') === chiave);
       const vecchioPB = vecchie.length ? Math.min(...vecchie.map(g => garaTempoSecs(g))) : 0;
       const nuovoPB   = garaTempoSecs(gara);
       const diff      = vecchioPB > 0 ? vecchioPB - nuovoPB : 0;
@@ -3292,7 +3292,29 @@ function salvaGara() {
   if (currentPage === 'mappa') renderMappa();
   if (getUtenteId()) {
     const action = (isEdit && gara.id && gara.id !== '__archivia__') ? 'updateGara' : 'saveGara';
-    gsPost(action, gara).then(r => { if (r) showSyncBadge('ok'); });
+    // Normalizza payload per il server (campi piatti, no oggetti annidati)
+    const garaPayload = {
+      id:           gara.id,
+      utente_id:    gara.utente_id,
+      sport:        gara.sport        || '',
+      tipo_gara:    gara.tipo_gara    || '',
+      data:         gara.data         || '',
+      luogo:        gara.luogo        || '',
+      regione:      gara.regione      || '',
+      distanza:     gara.distanza     || 0,
+      tempo:        gara.tempo        || '',
+      esito:        gara.esito        || '',
+      frazioni:     gara.frazioni ? JSON.stringify(gara.frazioni) : '',
+      rating_gara:  gara.rating ? (gara.rating.percorso||0) : 0,
+      hotel:        gara.hotel        || '',
+      hotel_tipo:   gara.hotelTipo    || '',
+      rating_hotel: gara.ratingHotel ? (gara.ratingHotel.pulizia||0) : 0,
+      note:         gara.note         || '',
+      nome_gara:    gara.nome         || gara.tipo_gara || '',
+      nazione:      gara.nazione      || '',
+      continente:   gara.continente   || '',
+    };
+    gsPost(action, garaPayload).then(r => { if (r) showSyncBadge('ok'); }).catch(() => showSyncBadge('err'));
 
     // Controlla regione conquistata (solo inserimento manuale, non edit)
     if (!isEdit && gara.regione && gara.regione !== 'Estero') {
@@ -7486,6 +7508,11 @@ async function init() {
 async function renderSocial() {
   document.getElementById('social-loading').style.display = 'block';
   document.getElementById('social-content').style.display = 'none';
+  // Se la cache non include stats, invalida e ricarica
+  try {
+    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    if (sc && !sc.stats) { localStorage.removeItem('irun_social_cache'); }
+  } catch(e) {}
 
   // Cache Social 30 minuti
   let _socialCache = null;
@@ -7513,8 +7540,9 @@ async function renderSocial() {
       })); } catch(e) {}
     }
   }
-  const statsCom = (statsRes && statsRes.status==='fulfilled' && statsRes.value?.ok)
+  const statsCom = (statsRes && statsRes.status==='fulfilled' && statsRes.value && statsRes.value.ok)
     ? statsRes.value : null;
+  if (statsCom) console.log('[Social] Stats community caricate dal foglio:', statsCom.gare_tot, 'gare');
 
   let utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
   const gare = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
