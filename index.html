@@ -1163,21 +1163,30 @@
         <div id="home-pianeta-wrap" style="margin-bottom:28px;">
           <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 La tua missione spaziale</div>
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;">
-            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
-              <canvas id="planet-canvas" width="120" height="120" style="flex-shrink:0;"></canvas>
-              <div style="flex:1;min-width:200px;">
-                <div id="planet-label" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;margin-bottom:4px;"></div>
-                <div id="planet-km" style="font-size:13px;color:var(--text3);margin-bottom:10px;"></div>
-                <div style="background:var(--bg3);border-radius:8px;height:12px;overflow:hidden;margin-bottom:6px;">
-                  <div id="planet-bar" style="height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),#ff8a65);transition:width 1s ease;width:0%;"></div>
+            <!-- COMPLETATI a sinistra -->
+            <div id="planet-done-list" style="display:flex;flex-direction:column;gap:8px;min-width:130px;max-width:150px;"></div>
+
+            <!-- IN CORSO al centro -->
+            <div style="flex:1;min-width:220px;">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+                <canvas id="planet-canvas" width="110" height="110" style="flex-shrink:0;"></canvas>
+                <div style="flex:1;">
+                  <div id="planet-label" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1.1;margin-bottom:4px;"></div>
+                  <div id="planet-km" style="font-size:12px;color:var(--text3);margin-bottom:8px;"></div>
+                  <div style="background:var(--bg3);border-radius:6px;height:10px;overflow:hidden;margin-bottom:4px;">
+                    <div id="planet-bar" style="height:100%;border-radius:6px;transition:width 1.2s ease;width:0%;"></div>
+                  </div>
+                  <div id="planet-pct" style="font-size:11px;color:var(--text3);"></div>
                 </div>
-                <div id="planet-pct" style="font-size:12px;color:var(--text3);"></div>
               </div>
-              <div id="planet-next" style="text-align:center;padding:12px 16px;background:var(--bg3);border-radius:12px;min-width:100px;display:none;">
-                <div style="font-size:24px;margin-bottom:4px;" id="planet-next-icon"></div>
-                <div style="font-size:11px;color:var(--text3);">prossimo</div>
-                <div style="font-size:13px;font-weight:700;" id="planet-next-name"></div>
-              </div>
+            </div>
+
+            <!-- PROSSIMO a destra -->
+            <div id="planet-next" style="display:none;text-align:center;padding:14px 16px;background:var(--bg3);border-radius:12px;min-width:110px;border:1px solid var(--border);">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Prossimo</div>
+              <div style="font-size:32px;margin-bottom:4px;" id="planet-next-icon"></div>
+              <div style="font-size:12px;font-weight:700;line-height:1.2;" id="planet-next-name"></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px;" id="planet-next-km"></div>
             </div>
           </div>
         </div>
@@ -3843,6 +3852,21 @@ function renderHome() {
 
   // Missione spaziale
   const kmTotPianeta = gare.reduce((s,g) => s+(g.distanza||0), 0);
+  // Controlla se è stato completato un nuovo obiettivo
+  const prevKm = parseFloat(localStorage.getItem('athlos_planet_km') || '0');
+  if (kmTotPianeta !== prevKm) {
+    localStorage.setItem('athlos_planet_km', kmTotPianeta);
+    // Verifica se abbiamo superato la soglia di un obiettivo
+    let cumPrev = 0, cumNew = 0;
+    for (const t of PLANET_TARGETS) {
+      cumPrev += t.km;
+      cumNew  += t.km;
+      if (prevKm < cumPrev && kmTotPianeta >= cumNew) {
+        setTimeout(() => mostraPianetaConquistato(t), 1000);
+        break;
+      }
+    }
+  }
   setTimeout(() => initPlanetCanvas(kmTotPianeta), 100);
 }
 
@@ -4797,124 +4821,179 @@ function showPBModal(tipoGara, tempo, miglioramento, haVecchioPB) {
 // MISSIONE SPAZIALE — canvas omino
 // ════════════════════════════════════
 const PLANET_TARGETS = [
-  { nome: 'Giro della Terra', emoji: '🌍', km: 40075,      color: '#4caf50', bgColor: '#1b5e20' },
-  { nome: 'Luna',             emoji: '🌙', km: 384400,     color: '#b0bec5', bgColor: '#263238' },
-  { nome: 'Venere',           emoji: '✨', km: 41400000,   color: '#ffd54f', bgColor: '#e65100' },
+  { nome: "Giro dell'Italia",        emoji: '🥾', km: 7456,   color: '#4caf50', bgColor: '#1b5e20' },
+  { nome: "Giro d'Europa",           emoji: '🇪🇺', km: 68000,  color: '#2196f3', bgColor: '#0d47a1' },
+  { nome: "Giro dell'Africa",        emoji: '🌍', km: 30500,  color: '#ff9800', bgColor: '#e65100' },
+  { nome: "Giro dell'Australia",     emoji: '🦘', km: 25760,  color: '#00bcd4', bgColor: '#006064' },
+  { nome: "Giro del Nord America",   emoji: '🦅', km: 77800,  color: '#9c27b0', bgColor: '#4a148c' },
+  { nome: "Giro del Sud America",    emoji: '🌎', km: 28700,  color: '#8bc34a', bgColor: '#33691e' },
+  { nome: "Giro dell'Asia",          emoji: '🌏', km: 62800,  color: '#f44336', bgColor: '#b71c1c' },
 ];
 
 let _planetAnim = null;
 let _planetAngle = 0;
 
+
+function mostraPianetaConquistato(target) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:2px solid ${target.color};border-radius:24px;padding:48px 40px;max-width:460px;width:90%;text-align:center;box-shadow:0 0 80px ${target.color}44;animation:pbPop 0.4s cubic-bezier(0.34,1.56,0.64,1);">
+      <div style="font-size:80px;margin-bottom:12px;">${target.emoji}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:${target.color};letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;">Obiettivo completato!</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:#f5f5f5;margin-bottom:12px;line-height:1.1;">${target.nome}</div>
+      <div style="font-size:15px;color:var(--text2);margin-bottom:8px;line-height:1.7;">
+        Con le tue gare hai percorso abbastanza km da completare il<br>
+        <strong style="color:${target.color};">${target.nome}</strong>!<br>
+        <span style="font-size:13px;color:var(--text3);">${target.km.toLocaleString('it')} km percorsi</span>
+      </div>
+      <div style="font-size:28px;margin:16px 0;">🎉🏅🎉</div>
+      <button onclick="this.closest('[style*=fixed]').remove()"
+        style="background:${target.color};color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+        Incredibile! 🚀
+      </button>
+    </div>`;
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  document.body.appendChild(modal);
+}
+
 function initPlanetCanvas(kmTot) {
   const canvas = document.getElementById('planet-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const W = 120, H = 120, cx = W/2, cy = H/2, R = 44;
+  const W=110, H=110, cx=W/2, cy=H/2, R=38;
 
-  // Trova obiettivo attuale
-  let targetIdx = 0;
-  let kmAccum = 0;
+  // Calcola obiettivo attuale e completati
+  let kmRimanenti = kmTot;
+  let targetIdx   = PLANET_TARGETS.length - 1;
+  let kmInTarget  = 0;
+  const completati = [];
+
   for (let i = 0; i < PLANET_TARGETS.length; i++) {
-    if (kmTot < kmAccum + PLANET_TARGETS[i].km) { targetIdx = i; break; }
-    kmAccum += PLANET_TARGETS[i].km;
-    targetIdx = i;
+    if (kmRimanenti < PLANET_TARGETS[i].km) {
+      targetIdx  = i;
+      kmInTarget = kmRimanenti;
+      break;
+    }
+    completati.push(i);
+    kmRimanenti -= PLANET_TARGETS[i].km;
+    if (i === PLANET_TARGETS.length - 1) {
+      targetIdx  = i;
+      kmInTarget = PLANET_TARGETS[i].km;
+    }
   }
-  const target = PLANET_TARGETS[targetIdx];
-  const kmInTarget = kmTot - kmAccum;
-  const pct = Math.min(kmInTarget / target.km, 1);
 
-  // Aggiorna testo
-  const lbl = document.getElementById('planet-label');
+  const target = PLANET_TARGETS[targetIdx];
+  const pct    = Math.min(kmInTarget / target.km, 1);
+
+  // ── Completati a sinistra ──
+  const doneEl = document.getElementById('planet-done-list');
+  if (doneEl) {
+    doneEl.innerHTML = completati.length
+      ? completati.map(i => `
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;
+            background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);
+            border-radius:10px;">
+            <span style="font-size:20px;">${PLANET_TARGETS[i].emoji}</span>
+            <div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${PLANET_TARGETS[i].nome.replace('Giro ','').replace("dell'","").replace('del ','').replace('d\'','')}</div>
+              <div style="font-size:10px;color:#4caf50;">✅ completato</div>
+            </div>
+          </div>`).join('')
+      : '<div style="font-size:12px;color:var(--text3);padding:8px;">Nessun obiettivo completato ancora</div>';
+  }
+
+  // ── In corso ──
+  const lbl  = document.getElementById('planet-label');
   const kmEl = document.getElementById('planet-km');
   const bar  = document.getElementById('planet-bar');
   const pctEl= document.getElementById('planet-pct');
-  const nextEl = document.getElementById('planet-next');
-
-  if (lbl) lbl.textContent = target.emoji + ' ' + target.nome;
-  if (kmEl) kmEl.textContent = Math.round(kmInTarget).toLocaleString('it') + ' / ' + target.km.toLocaleString('it') + ' km';
-  if (bar)  bar.style.width = Math.round(pct*100) + '%';
+  if (lbl)   lbl.textContent  = target.emoji + ' ' + target.nome;
+  if (kmEl)  kmEl.textContent = Math.round(kmInTarget).toLocaleString('it') + ' / ' + target.km.toLocaleString('it') + ' km';
+  if (bar)   { bar.style.width = Math.round(pct*100)+'%'; bar.style.background = `linear-gradient(90deg,${target.color},${target.color}aa)`; }
   if (pctEl) pctEl.textContent = Math.round(pct*100) + '% completato';
 
-  // Mostra prossimo obiettivo
-  if (targetIdx < PLANET_TARGETS.length - 1 && nextEl) {
+  // ── Prossimo ──
+  const nextWrap = document.getElementById('planet-next');
+  const nextIcon = document.getElementById('planet-next-icon');
+  const nextName = document.getElementById('planet-next-name');
+  const nextKm   = document.getElementById('planet-next-km');
+  if (targetIdx < PLANET_TARGETS.length - 1 && nextWrap) {
     const next = PLANET_TARGETS[targetIdx + 1];
-    nextEl.style.display = 'block';
-    const ni = document.getElementById('planet-next-icon');
-    const nn = document.getElementById('planet-next-name');
-    if (ni) ni.textContent = next.emoji;
-    if (nn) nn.textContent = next.nome;
+    nextWrap.style.display = 'block';
+    if (nextIcon) nextIcon.textContent = next.emoji;
+    if (nextName) nextName.textContent = next.nome.replace('Giro ','').replace("dell'","").replace('del ','').replace("d'","");
+    if (nextKm)   nextKm.textContent   = next.km.toLocaleString('it') + ' km';
+  } else if (nextWrap) {
+    nextWrap.style.display = 'none';
   }
 
-  // Animazione canvas
+  // ── Canvas animato ──
   if (_planetAnim) cancelAnimationFrame(_planetAnim);
 
   function drawFrame() {
-    ctx.clearRect(0, 0, W, H);
-
-    // Sfondo spazio
-    ctx.fillStyle = '#0a0a1a';
-    ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,0,W,H);
 
     // Stelle
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    [[15,20],[95,15],[108,60],[8,80],[60,8],[100,95],[20,100]].forEach(([sx,sy]) => {
-      ctx.beginPath(); ctx.arc(sx,sy,0.8,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)';
+    [[10,15],[95,12],[105,55],[5,70],[55,5],[100,90],[18,95]].forEach(([sx,sy])=>{
+      ctx.beginPath(); ctx.arc(sx,sy,0.7,0,Math.PI*2); ctx.fill();
     });
 
     // Pianeta
-    const grad = ctx.createRadialGradient(cx-8,cy-8,4,cx,cy,R);
-    grad.addColorStop(0, target.bgColor);
+    const grad = ctx.createRadialGradient(cx-6,cy-6,3,cx,cy,R);
+    grad.addColorStop(0, target.bgColor+'cc');
     grad.addColorStop(1, '#000');
     ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
-    ctx.fillStyle = grad; ctx.fill();
+    ctx.fillStyle=grad; ctx.fill();
 
-    // Emoji pianeta al centro
-    ctx.font = '28px serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    // Emoji pianeta
+    ctx.font='22px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(target.emoji, cx, cy);
 
     // Arco progresso
-    ctx.beginPath();
-    ctx.arc(cx, cy, R+8, -Math.PI/2, -Math.PI/2 + pct*Math.PI*2);
-    ctx.strokeStyle = target.color;
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    if (pct > 0) {
+      ctx.beginPath();
+      ctx.arc(cx,cy,R+7,-Math.PI/2,-Math.PI/2+pct*Math.PI*2);
+      ctx.strokeStyle=target.color; ctx.lineWidth=3; ctx.stroke();
+    }
+
+    // Traccia orbita
+    ctx.beginPath(); ctx.arc(cx,cy,R+7,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
 
     // Omino che corre
-    _planetAngle += 0.02;
-    const runR = R + 8;
-    const rx = cx + runR * Math.cos(_planetAngle);
-    const ry = cy + runR * Math.sin(_planetAngle);
-
-    // Corpo omino
+    _planetAngle += 0.025;
+    const runR=R+7;
+    const rx=cx+runR*Math.cos(_planetAngle);
+    const ry=cy+runR*Math.sin(_planetAngle);
     ctx.save();
-    ctx.translate(rx, ry);
-    ctx.rotate(_planetAngle + Math.PI/2);
+    ctx.translate(rx,ry);
+    ctx.rotate(_planetAngle+Math.PI/2);
 
     // Testa
-    ctx.beginPath(); ctx.arc(0,-8,4,0,Math.PI*2);
-    ctx.fillStyle = '#ffeb3b'; ctx.fill();
-    ctx.strokeStyle = '#f57f17'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,-7,3.5,0,Math.PI*2);
+    ctx.fillStyle='#ffeb3b'; ctx.fill();
+    ctx.strokeStyle='#f57f17'; ctx.lineWidth=0.8; ctx.stroke();
 
     // Corpo
-    ctx.strokeStyle = '#ffeb3b'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(0,4); ctx.stroke();
+    ctx.strokeStyle='#ffeb3b'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.moveTo(0,-3.5); ctx.lineTo(0,3.5); ctx.stroke();
 
-    // Gambe animate
-    const legSwing = Math.sin(_planetAngle * 8) * 5;
-    ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(-legSwing,10); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(legSwing,10); ctx.stroke();
+    // Gambe
+    const leg=Math.sin(_planetAngle*10)*4;
+    ctx.beginPath(); ctx.moveTo(0,3.5); ctx.lineTo(-leg,9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,3.5); ctx.lineTo(leg,9); ctx.stroke();
 
-    // Braccia animate
-    const armSwing = Math.sin(_planetAngle * 8) * 4;
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-armSwing-3,-2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(armSwing+3,-2); ctx.stroke();
+    // Braccia
+    const arm=Math.sin(_planetAngle*10)*3;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-arm-2.5,-1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(arm+2.5,-1); ctx.stroke();
 
     ctx.restore();
-
     _planetAnim = requestAnimationFrame(drawFrame);
   }
-
   drawFrame();
 }
 
