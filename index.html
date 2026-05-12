@@ -1180,12 +1180,12 @@
             </div>
 
             <!-- PROSSIMO a destra -->
-            <div id="planet-next" style="display:none;text-align:center;padding:16px;background:var(--bg3);border-radius:12px;min-width:130px;border:1px solid var(--border);">
-              <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Il prossimo obiettivo sarà...</div>
-              <div style="font-size:36px;margin-bottom:6px;" id="planet-next-icon">🗺️</div>
-              <div style="font-size:13px;font-weight:700;line-height:1.3;margin-bottom:4px;">fare il</div>
-              <div style="font-size:14px;font-weight:900;color:var(--accent);line-height:1.2;" id="planet-next-name"></div>
-              <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="planet-next-km"></div>
+            <div id="planet-next" style="display:none;text-align:center;padding:12px;background:var(--bg3);border-radius:12px;width:120px;flex-shrink:0;border:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">Prossimo</div>
+              <div style="font-size:28px;margin-bottom:4px;" id="planet-next-icon">🗺️</div>
+              <div style="font-size:10px;color:var(--text3);">fare il</div>
+              <div style="font-size:12px;font-weight:800;color:var(--accent);line-height:1.3;word-break:break-word;" id="planet-next-name"></div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px;" id="planet-next-km"></div>
             </div>
           </div>
         </div>
@@ -3308,9 +3308,13 @@ function salvaGara() {
       const diff      = vecchioPB > 0 ? vecchioPB - nuovoPB : 0;
       const diffStr   = diff > 0 ? secsToHMS(diff) : '';
       const tipoGara  = gara.tipo_gara || gara.nome || '';
-      setTimeout(() => {
-        showPBModal(sportIcon(gara.sport) + ' ' + tipoGara, secsToHMS(nuovoPB), diffStr, vecchioPB > 0);
-      }, 800);
+      const _pbFn = () => showPBModal(sportIcon(gara.sport) + ' ' + tipoGara, secsToHMS(nuovoPB), diffStr, vecchioPB > 0);
+      if (window._conquistaCallback) {
+        const prevCb = window._conquistaCallback;
+        window._conquistaCallback = () => { prevCb(); setTimeout(_pbFn, 400); };
+      } else {
+        setTimeout(_pbFn, 800);
+      }
     }
   }
   // Se stavamo archiviando una gara in programma, rimuovila ora
@@ -3366,33 +3370,21 @@ function salvaGara() {
     }).catch(e => { showSyncBadge('err'); });
 
     // Controlla regione conquistata (solo inserimento manuale, non edit)
+    // Coda messaggi conquista — uno alla volta, ognuno aspetta conferma
+    const _conquiste = [];
     if (!isEdit && gara.regione && MAP_SEEDS.hasOwnProperty(gara.regione)) {
-      const regioniPrecedenti = new Set(
-        getGare().filter(g => g.id !== gara.id).map(g => g.regione).filter(Boolean)
-      );
-      if (!regioniPrecedenti.has(gara.regione)) {
-        setTimeout(() => mostraRegionConquistata(gara.regione), 800);
-      }
+      const regioniPrecedenti = new Set(getGare().filter(g => g.id !== gara.id).map(g => g.regione).filter(Boolean));
+      if (!regioniPrecedenti.has(gara.regione)) _conquiste.push(() => mostraRegionConquistata(gara.regione));
     }
-    // Prima gara in una nazione estera
     if (!isEdit && gara.nazione && gara.nazione.toUpperCase() !== 'ITALIA') {
-      const nazioniPrecedenti = new Set(
-        getGare().filter(g => g.id !== gara.id && g.nazione).map(g => g.nazione.toUpperCase()).filter(Boolean)
-      );
-      if (!nazioniPrecedenti.has(gara.nazione.toUpperCase())) {
-        setTimeout(() => mostraNazioneConquistata(gara.nazione), 1200);
-      }
+      const nazioniPrecedenti = new Set(getGare().filter(g => g.id !== gara.id && g.nazione).map(g => g.nazione.toUpperCase()).filter(Boolean));
+      if (!nazioniPrecedenti.has(gara.nazione.toUpperCase())) _conquiste.push(() => mostraNazioneConquistata(gara.nazione));
     }
-    // Prima gara in un continente extra-Europa
     if (!isEdit && gara.continente && gara.continente.toLowerCase() !== 'europa') {
-      const continentiPrecedenti = new Set(
-        getGare().filter(g => g.id !== gara.id && g.continente &&
-          g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean)
-      );
-      if (!continentiPrecedenti.has(gara.continente.toLowerCase())) {
-        setTimeout(() => mostraContinenteConquistato(gara.continente), 1600);
-      }
+      const continentiPrecedenti = new Set(getGare().filter(g => g.id !== gara.id && g.continente && g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean));
+      if (!continentiPrecedenti.has(gara.continente.toLowerCase())) _conquiste.push(() => mostraContinenteConquistato(gara.continente));
     }
+    if (_conquiste.length) setTimeout(() => mostraCodaConquiste(_conquiste, 0), 800);
 
     // Segnala gara non censita all'admin
     // Segnala qualsiasi campo inserito manualmente (non da elenco)
@@ -4807,7 +4799,7 @@ function showPBModal(tipoGara, tempo, miglioramento, haVecchioPB) {
       <div style="font-size:16px;color:var(--text2);margin-bottom:20px;">${tipoGara}</div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--accent);line-height:1;">${tempo}</div>
       ${miglioramento && haVecchioPB ? `<div style="font-size:18px;color:#81c784;font-weight:700;margin-top:8px;">⬇️ ${miglioramento} rispetto al precedente</div>` : '<div style="font-size:15px;color:var(--text3);margin-top:8px;">Prima gara di questo tipo — PB stabilito!</div>'}
-      <button class="btn-primary" style="margin-top:24px;width:100%;font-size:16px;" onclick="this.closest('[style*=fixed]').remove();showToast('Gara salvata con nuovo PB! 🏆');">Fantastico! 🎉</button>
+      <button class="btn-primary" style="margin-top:24px;width:100%;font-size:16px;" onclick="this.closest('[style*=fixed]').remove();showToast('Gara salvata con nuovo PB! 🏆');if(window._conquistaCallback){const cb=window._conquistaCallback;window._conquistaCallback=null;setTimeout(cb,400);}">Fantastico! 🎉</button>
     </div>`;
   modal.onclick = e => { if (e.target === modal) { modal.remove(); showToast('Gara salvata con nuovo PB! 🏆'); } };
   document.body.appendChild(modal);
@@ -4919,7 +4911,7 @@ function initPlanetCanvas(kmTot) {
     const next = PLANET_TARGETS[targetIdx + 1];
     nextWrap.style.display = 'block';
     if (nextIcon) nextIcon.textContent = next.emoji;
-    if (nextName) nextName.textContent = next.nome.replace('Giro ','').replace("dell'","").replace('del ','').replace("d'","");
+    if (nextName) nextName.textContent = next.nome.replace('Giro ','');
     if (nextKm)   nextKm.textContent   = next.km.toLocaleString('it') + ' km';
   } else if (nextWrap) {
     nextWrap.style.display = 'none';
@@ -7305,23 +7297,36 @@ function closeLoginModal() {
 
 // Bandiere nazioni — emoji flag dal codice ISO
 function getFlagEmoji(nazione) {
-  const FLAGS = {
-    'FRANCIA':'🇫🇷','SPAGNA':'🇪🇸','GERMANIA':'🇩🇪','PORTOGALLO':'🇵🇹',
-    'AUSTRIA':'🇦🇹','SVIZZERA':'🇨🇭','BELGIO':'🇧🇪','OLANDA':'🇳🇱',
-    'PAESI BASSI':'🇳🇱','GRECIA':'🇬🇷','CROAZIA':'🇭🇷','SLOVENIA':'🇸🇮',
-    'UK':'🇬🇧','REGNO UNITO':'🇬🇧','INGHILTERRA':'🇬🇧','IRLANDA':'🇮🇪',
-    'SVEZIA':'🇸🇪','NORVEGIA':'🇳🇴','DANIMARCA':'🇩🇰','FINLANDIA':'🇫🇮',
-    'POLONIA':'🇵🇱','REP. CECA':'🇨🇿','SLOVACCHIA':'🇸🇰','UNGHERIA':'🇭🇺',
-    'ROMANIA':'🇷🇴','BULGARIA':'🇧🇬','SERBIA':'🇷🇸','ALBANIA':'🇦🇱',
-    'MALTA':'🇲🇹','CIPRO':'🇨🇾','MONACO':'🇲🇨','LUSSEMBURGO':'🇱🇺',
-    'USA':'🇺🇸','STATI UNITI':'🇺🇸','CANADA':'🇨🇦','MESSICO':'🇲🇽',
-    'BRASILE':'🇧🇷','ARGENTINA':'🇦🇷','CILE':'🇨🇱','COLOMBIA':'🇨🇴',
-    'GIAPPONE':'🇯🇵','CINA':'🇨🇳','COREA':'🇰🇷','AUSTRALIA':'🇦🇺',
-    'NUOVA ZELANDA':'🇳🇿','SUDAFRICA':'🇿🇦','MAROCCO':'🇲🇦',
-    'EMIRATI ARABI':'🇦🇪','ISRAELE':'🇮🇱','TURCHIA':'🇹🇷',
-    'TAILANDIA':'🇹🇭','INDONESIA':'🇮🇩','INDIA':'🇮🇳',
+  const n = (nazione||'').toUpperCase().trim();
+  // Converti nome italiano → codice ISO2 → emoji flag
+  const ISO = {
+    'ALBANIA':'AL','ALGERIA':'DZ','ARGENTINA':'AR','AUSTRALIA':'AU',
+    'AUSTRIA':'AT','BELGIO':'BE','BIELORUSSIA':'BY','BOLIVIA':'BO',
+    'BRASILE':'BR','BULGARIA':'BG','CANADA':'CA','CILE':'CL',
+    'CINA':'CN','CIPRO':'CY','COLOMBIA':'CO','COREA DEL SUD':'KR',
+    'COREA':'KR','CROAZIA':'HR','DANIMARCA':'DK','ECUADOR':'EC',
+    'EGITTO':'EG','EMIRATI ARABI':'AE','ESTONIA':'EE','ETIOPIA':'ET',
+    'FILIPPINE':'PH','FINLANDIA':'FI','FRANCIA':'FR','GERMANIA':'DE',
+    'GIAMAICA':'JM','GIAPPONE':'JP','GRECIA':'GR','INDIA':'IN',
+    'INDONESIA':'ID','INGHILTERRA':'GB','IRLANDA':'IE','ISLANDA':'IS',
+    'ISRAELE':'IL','KENYA':'KE','LETTONIA':'LV','LITUANIA':'LT',
+    'LUSSEMBURGO':'LU','MALTA':'MT','MAROCCO':'MA','MESSICO':'MX',
+    'MONACO':'MC','NORVEGIA':'NO','NUOVA ZELANDA':'NZ','OLANDA':'NL',
+    'PAESI BASSI':'NL','PERU':'PE','POLONIA':'PL','PORTOGALLO':'PT',
+    'REGNO UNITO':'GB','REP. CECA':'CZ','REPUBBLICA CECA':'CZ',
+    'ROMANIA':'RO','RUSSIA':'RU','SERBIA':'RS','SINGAPORE':'SG',
+    'SLOVACCHIA':'SK','SLOVENIA':'SI','SPAGNA':'ES','SRI LANKA':'LK',
+    'STATI UNITI':'US','SUDAFRICA':'ZA','SVEZIA':'SE','SVIZZERA':'CH',
+    'TAILANDIA':'TH','TANZANIA':'TZ','TURCHIA':'TR','UK':'GB',
+    'UCRAINA':'UA','UNGHERIA':'HU','URUGUAY':'UY','USA':'US',
+    'VENEZUELA':'VE','VIETNAM':'VN',
   };
-  return FLAGS[(nazione||'').toUpperCase()] || '🌍';
+  const code = ISO[n];
+  if (code) {
+    // Converti codice ISO2 in emoji flag (regional indicator symbols)
+    return String.fromCodePoint(...[...code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+  }
+  return '🌍';
 }
 
 function mostraNazioneConquistata(nazione) {
@@ -7340,8 +7345,8 @@ function mostraNazioneConquistata(nazione) {
       </button>
     </div>`;
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.querySelector('button').onclick = () => { modal.remove(); if(window._conquistaCallback){const cb=window._conquistaCallback;window._conquistaCallback=null;setTimeout(cb,400);} };
   document.body.appendChild(modal);
-  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 8000);
 }
 
 const REGIONI_FLAG = {
@@ -7395,8 +7400,15 @@ function mostraContinenteConquistato(continente) {
       </button>
     </div>`;
   modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  modal.querySelector('button').onclick = () => { modal.remove(); if(window._conquistaCallback){const cb=window._conquistaCallback;window._conquistaCallback=null;setTimeout(cb,400);} };
   document.body.appendChild(modal);
-  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 8000);
+}
+
+function mostraCodaConquiste(lista, idx) {
+  if (idx >= lista.length) return;
+  lista[idx](); // mostra il modal corrente
+  // Il modal chiama mostraCodaConquiste(lista, idx+1) quando viene confermato
+  window._conquistaCallback = () => mostraCodaConquiste(lista, idx + 1);
 }
 
 function mostraRegionConquistata(regione) {
