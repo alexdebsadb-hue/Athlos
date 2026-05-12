@@ -3731,8 +3731,6 @@ function renderHome() {
   // Stats veloci
   document.getElementById('home-n-gare').textContent = finisher.length;
   document.getElementById('home-km').textContent      = Math.round(kmTot).toLocaleString('it');
-  document.getElementById('home-regioni').textContent = regioni.length;
-  document.getElementById('home-sport').textContent   = sport.length;
 
   // Saluto personalizzato
   const utente = JSON.parse(localStorage.getItem('irun_utente')||'{}');
