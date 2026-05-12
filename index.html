@@ -3254,29 +3254,27 @@ function salvaGara() {
   }
   saveGare(gare);
   closeForm();
+  showToast(isEdit ? 'Gara aggiornata! ✅' : 'Gara salvata! 🎉');
 
-  // ── Controlla se è un nuovo PB ──
+  // ── Controlla se è un nuovo PB (DOPO sync) ──
   if (!isEdit && gara.esito === 'finisher' && garaTempoSecs(gara) > 0) {
     const gareConPB = calcolaPBAutomatici(gare);
     const garaConPB = gareConPB.find(g => String(g.id) === String(gara.id));
     if (garaConPB && garaConPB.pb) {
-      // Trova il vecchio PB per calcolare il miglioramento
-      const chiave  = (gara.sport||'') + '|' + (gara.tipo_gara||gara.nome||'');
+      const chiave   = (gara.sport||'') + '|' + (gara.tipo_gara||gara.nome||'');
       const vecchie  = gare.filter(g => String(g.id) !== String(gara.id) &&
                         g.esito === 'finisher' && garaTempoSecs(g) > 0 &&
                         (g.sport||'')+'|'+(g.tipo_gara||g.nome||'') === chiave);
       const vecchioPB = vecchie.length ? Math.min(...vecchie.map(g => garaTempoSecs(g))) : 0;
       const nuovoPB   = garaTempoSecs(gara);
       const diff      = vecchioPB > 0 ? vecchioPB - nuovoPB : 0;
-      const diffStr   = diff > 0 ? ` (-${secsToHMS(diff)})` : '';
+      const diffStr   = diff > 0 ? secsToHMS(diff) : '';
       const tipoGara  = gara.tipo_gara || gara.nome || '';
       setTimeout(() => {
         showPBModal(sportIcon(gara.sport) + ' ' + tipoGara, secsToHMS(nuovoPB), diffStr, vecchioPB > 0);
-      }, 600);
-      return;
+      }, 800);
     }
   }
-  showToast(isEdit ? 'Gara aggiornata! ✅' : 'Gara salvata! 🎉');
   // Se stavamo archiviando una gara in programma, rimuovila ora
   if (_archiviandoProgrammaId) {
     const pid = _archiviandoProgrammaId;
@@ -3314,7 +3312,11 @@ function salvaGara() {
       nazione:      gara.nazione      || '',
       continente:   gara.continente   || '',
     };
-    gsPost(action, garaPayload).then(r => { if (r) showSyncBadge('ok'); }).catch(() => showSyncBadge('err'));
+    console.log('[saveGara] action:', action, 'payload:', JSON.stringify(garaPayload).slice(0,300));
+    gsPost(action, garaPayload).then(r => {
+      console.log('[saveGara] risposta:', JSON.stringify(r));
+      if (r) showSyncBadge('ok');
+    }).catch(e => { console.error('[saveGara] errore:', e); showSyncBadge('err'); });
 
     // Controlla regione conquistata (solo inserimento manuale, non edit)
     if (!isEdit && gara.regione && gara.regione !== 'Estero') {
