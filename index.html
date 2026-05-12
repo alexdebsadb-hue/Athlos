@@ -7910,12 +7910,16 @@ async function renderSocial() {
   }
 
   // ── TEMPI MEDI PER SESSO — Mezza e Maratona ──
-  function tempiMediPerSesso(gare, filtroFn) {
+  function tempiMediPerSesso(gare, filtroSport, filtroTipo) {
     const acc = { M: [], F: [], A: [] };
-    gare.filter(g => g.esito === 'finisher' && filtroFn((g.nome||g.tipo_gara||'').toLowerCase()))
+    gare.filter(g =>
+        g.esito === 'finisher' &&
+        (g.sport||'').toLowerCase() === filtroSport.toLowerCase() &&
+        filtroTipo((g.tipo_gara||g.nome||'').toLowerCase())
+      )
       .forEach(g => {
         const s = sessoById[String(g.utente_id)];
-        if (!s || s === '—') return;
+        if (!s || !['M','F','A'].includes(s)) return;
         const secs = garaTempoSecs(g);
         if (secs > 0) (acc[s] || []).push(secs);
       });
@@ -7947,8 +7951,9 @@ async function renderSocial() {
   }
 
   // Stesso filtro usato da buildPercorsiVeloci che funziona già
-  const mezzaAcc    = tempiMediPerSesso(gare, t => t.includes('mezza'));
-  const maratonaAcc = tempiMediPerSesso(gare, t => t.includes('maratona') && !t.includes('mezza') && !t.includes('ultra'));
+  // sport='CORSA' (case-insensitive) + tipo_gara esatto
+  const mezzaAcc    = tempiMediPerSesso(gare, 'CORSA', t => t === 'mezza maratona');
+  const maratonaAcc = tempiMediPerSesso(gare, 'CORSA', t => t === 'maratona');
   renderTempiSesso(document.getElementById('social-tempi-mezza'),    mezzaAcc);
   renderTempiSesso(document.getElementById('social-tempi-maratona'), maratonaAcc);
 
