@@ -7494,22 +7494,27 @@ async function renderSocial() {
     if (sc && Date.now() - sc.ts < 1800000) _socialCache = sc;
   } catch(e) {}
 
-  let utentiRes, gareRes;
+  let utentiRes, gareRes, statsRes;
   if (_socialCache) {
     utentiRes = { status:'fulfilled', value: _socialCache.utenti };
     gareRes   = { status:'fulfilled', value: _socialCache.gare };
+    statsRes  = { status:'fulfilled', value: _socialCache.stats };
   } else {
-    [utentiRes, gareRes] = await Promise.allSettled([
-      gsGet({ action: 'getAllUtenti', utente_id: '' }),
-      gsGet({ action: 'getAllGare',   utente_id: '' }),
+    [utentiRes, gareRes, statsRes] = await Promise.allSettled([
+      gsGet({ action: 'getAllUtenti',        utente_id: '' }),
+      gsGet({ action: 'getAllGare',          utente_id: '' }),
+      gsGet({ action: 'getStatsCommunity',   utente_id: '' }),
     ]);
-    // Salva cache
     if (utentiRes.status==='fulfilled' && gareRes.status==='fulfilled') {
       try { localStorage.setItem('irun_social_cache', JSON.stringify({
-        utenti: utentiRes.value, gare: gareRes.value, ts: Date.now()
+        utenti: utentiRes.value, gare: gareRes.value,
+        stats:  statsRes.status==='fulfilled' ? statsRes.value : null,
+        ts: Date.now()
       })); } catch(e) {}
     }
   }
+  const statsCom = (statsRes && statsRes.status==='fulfilled' && statsRes.value?.ok)
+    ? statsRes.value : null;
 
   let utenti = (utentiRes.status === 'fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
   const gare = (gareRes.status === 'fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
@@ -7581,53 +7586,54 @@ async function renderSocial() {
       <div style="color:var(--accent);font-weight:600;min-width:20px;text-align:right;">${n}</div>
     </div>`).join('');
 
-  // ── SESSO ──
-  const perSesso = { M:0, F:0, A:0, '—':0 };
-  utenti.forEach(u => {
-    const s = u.sesso || '—';
-    perSesso[s] = (perSesso[s]||0) + 1;
-  });
+  // ── SESSO — usa foglio se disponibile ──
   const sessoLabels = { M:'♂ M', F:'♀ F', A:'⚧ Altro', '—':'Non specificato' };
   const sessoColors = { M:'#2196f3', F:'#e91e63', A:'#9c27b0', '—':'#666' };
-  const totSesso = utenti.length || 1;
-  document.getElementById('social-sesso').innerHTML = Object.entries(perSesso)
-    .filter(([,n]) => n > 0)
-    .sort((a,b) => b[1]-a[1])
-    .map(([s,n]) => `
+  let sessoData;
+  if (statsCom && statsCom.sesso) {
+    sessoData = statsCom.sesso.filter(s => s.n > 0)
+      .sort((a,b) => b.n - a.n);
+    document.getElementById('social-sesso').innerHTML = sessoData.map(({sesso:s, n, pct}) => `
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
-        <div style="width:90px;color:var(--text2);">${sessoLabels[s]}</div>
+        <div style="width:90px;color:var(--text2);">${sessoLabels[s]||s}</div>
         <div style="flex:1;background:var(--bg4);border-radius:4px;height:8px;overflow:hidden;">
-          <div style="width:${Math.round(n/totSesso*100)}%;background:${sessoColors[s]};height:100%;border-radius:4px;transition:width 0.5s;"></div>
+          <div style="width:${parseFloat(pct)||0}%;background:${sessoColors[s]||'#888'};height:100%;border-radius:4px;transition:width 0.5s;"></div>
         </div>
         <div style="color:var(--text2);min-width:30px;text-align:right;">${n}</div>
-        <div style="color:var(--text3);min-width:36px;">${Math.round(n/totSesso*100)}%</div>
+        <div style="color:var(--text3);min-width:36px;">${pct}</div>
       </div>`).join('');
+  } else {
+    const perSesso = { M:0, F:0, A:0 };
+    utenti.forEach(u => { const s=u.sesso||'A'; if(perSesso[s]!==undefined) perSesso[s]++; });
+    const tot = utenti.length || 1;
+    document.getElementById('social-sesso').innerHTML = Object.entries(perSesso)
+      .filter(([,n]) => n > 0).sort((a,b) => b[1]-a[1])
+      .map(([s,n]) => `
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+          <div style="width:90px;color:var(--text2);">${sessoLabels[s]||s}</div>
+          <div style="flex:1;background:var(--bg4);border-radius:4px;height:8px;overflow:hidden;">
+            <div style="width:${Math.round(n/tot*100)}%;background:${sessoColors[s]||'#888'};height:100%;"></div>
+          </div>
+          <div style="color:var(--text2);min-width:30px;text-align:right;">${n}</div>
+          <div style="color:var(--text3);min-width:36px;">${Math.round(n/tot*100)}%</div>
+        </div>`).join('');
+  }
 
-  // ── ETÀ MEDIA (calcolata sopra in utenti-cards) ──
-  document.getElementById('social-eta').textContent = etaMediaU ? etaMediaU : '—';
+  // ── ETÀ MEDIA ──
+  document.getElementById('social-eta').textContent =
+    (statsCom && statsCom.eta_media) ? statsCom.eta_media : (etaMediaU || '—');
 
-  // ── STATS GARE ──
-  const nGareTot  = gare.length;
-  const nFinisher = gare.filter(g => g.esito === 'finisher').length;
-  const kmTot     = Math.round(gare.reduce((s,g) => s+(g.distanza||0), 0));
-
-  // Breakdown per sport
-  const perSportSocial = {};
-  gare.forEach(g => {
-    const s = (g.sport || 'altro').toLowerCase();
-    perSportSocial[s] = (perSportSocial[s]||0) + 1;
-  });
-  const sportSorted = Object.entries(perSportSocial).sort((a,b) => b[1]-a[1]);
-
-  const nCitta   = [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
-  const nRegioni = [...new Set(gare.map(g=>g.regione).filter(r => r && MAP_SEEDS.hasOwnProperty(r)))].length;
+  // ── STATS GARE — usa foglio Statistiche Community se disponibile ──
+  const nGareTot = statsCom ? statsCom.gare_tot  : gare.length;
+  const kmTot    = statsCom ? statsCom.km_tot     : Math.round(gare.reduce((s,g)=>s+(g.distanza||0),0));
+  const nCitta   = statsCom ? statsCom.citta_tot  : [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
+  const nRegioni = statsCom ? statsCom.regioni_tot: [...new Set(gare.map(g=>g.regione).filter(r=>r&&MAP_SEEDS.hasOwnProperty(r)))].length;
 
   document.getElementById('social-gare-cards').innerHTML = [
-    { n: nGareTot.toLocaleString('it'), label: 'Gare registrate', icon: '🏅',
-      sub: sportSorted.map(([s,n])=>`${sportIcon(s)} ${n}`).join('  ') },
-    { n: kmTot.toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km gareggiati' },
-    { n: nCitta,                        label: 'Città gareggiate', icon: '📍', sub: '' },
-    { n: nRegioni,                      label: 'Regioni italiane', icon: '🗺️', sub: 'su 20 regioni' },
+    { n: Number(nGareTot).toLocaleString('it'), label: 'Gare registrate', icon: '🏅', sub: '' },
+    { n: Number(kmTot).toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km gareggiati' },
+    { n: nCitta,                                label: 'Città gareggiate', icon: '📍', sub: '' },
+    { n: nRegioni,                              label: 'Regioni italiane', icon: '🗺️', sub: 'su 20 regioni' },
   ].map(({n, label, icon, sub}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
       <div style="font-size:32px;margin-bottom:8px;">${icon}</div>
@@ -7666,16 +7672,31 @@ async function renderSocial() {
 
     const regioniGareSorted = Object.entries(garePerRegione).sort((a,b)=>b[1]-a[1]);
   const maxGR = regioniGareSorted[0]?.[1] || 1;
+  // ── REGIONI GARE — usa foglio se disponibile, altrimenti calcola ──
   const elRG = document.getElementById('social-regioni-gare');
   if (elRG) {
-    elRG.innerHTML = regioniGareSorted.map(([r,n]) => `
-      <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
-        <div style="flex:1;color:var(--text2);">${r}</div>
-        <div style="width:80px;background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;">
-          <div style="width:${Math.round(n/maxGR*100)}%;background:var(--accent);height:100%;border-radius:4px;"></div>
-        </div>
-        <div style="color:var(--accent);font-weight:600;min-width:24px;text-align:right;">${n}</div>
-      </div>`).join('') || '<div style="color:var(--text3);font-size:13px;">Nessuna gara in Italia</div>';
+    if (statsCom && statsCom.regioni && statsCom.regioni.length) {
+      const maxRG = Math.max(...statsCom.regioni.map(r => r.gare || 0)) || 1;
+      elRG.innerHTML = statsCom.regioni
+        .filter(r => r.gare > 0)
+        .sort((a,b) => b.gare - a.gare)
+        .map(r => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+          <div style="flex:1;color:var(--text2);">${r.regione}</div>
+          <div style="width:80px;background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;">
+            <div style="width:${Math.round(r.gare/maxRG*100)}%;background:var(--accent);height:100%;border-radius:4px;"></div>
+          </div>
+          <div style="color:var(--accent);font-weight:600;min-width:20px;text-align:right;">${r.gare}</div>
+        </div>`).join('');
+    } else {
+      elRG.innerHTML = regioniGareSorted.map(([r,n]) => `
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+          <div style="flex:1;color:var(--text2);">${r}</div>
+          <div style="width:80px;background:var(--bg4);border-radius:4px;height:6px;overflow:hidden;">
+            <div style="width:${Math.round(n/maxGR*100)}%;background:var(--accent);height:100%;border-radius:4px;"></div>
+          </div>
+          <div style="color:var(--accent);font-weight:600;min-width:24px;text-align:right;">${n}</div>
+        </div>`).join('') || '<div style="color:var(--text3);font-size:13px;">Nessuna gara in Italia</div>';
+    }
   }
 
   // Gare estero per continente
