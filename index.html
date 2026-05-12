@@ -3352,6 +3352,16 @@ function salvaGara() {
         setTimeout(() => mostraNazioneConquistata(gara.nazione), 1200);
       }
     }
+    // Prima gara in un continente extra-Europa
+    if (!isEdit && gara.continente && gara.continente.toLowerCase() !== 'europa') {
+      const continentiPrecedenti = new Set(
+        getGare().filter(g => g.id !== gara.id && g.continente &&
+          g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean)
+      );
+      if (!continentiPrecedenti.has(gara.continente.toLowerCase())) {
+        setTimeout(() => mostraContinenteConquistato(gara.continente), 1600);
+      }
+    }
 
     // Segnala gara non censita all'admin
     // Segnala qualsiasi campo inserito manualmente (non da elenco)
@@ -7127,6 +7137,38 @@ const REGIONI_FLAG = {
   "Sicilia": "🌋",
   "Sardegna": "🐴",
 };
+
+const CONTINENTI_FLAG = {
+  "AMERICA": { emoji:"🌎", nome:"Le Americhe", color:"#ff9800" },
+  "AMERICAS": { emoji:"🌎", nome:"Le Americhe", color:"#ff9800" },
+  "AMERICA DEL NORD": { emoji:"🌎", nome:"Nord America", color:"#ff9800" },
+  "AMERICA DEL SUD": { emoji:"🌎", nome:"Sud America", color:"#ff9800" },
+  "ASIA": { emoji:"🌏", nome:"Asia", color:"#9c27b0" },
+  "AFRICA": { emoji:"🌍", nome:"Africa", color:"#4caf50" },
+  "OCEANIA": { emoji:"🦘", nome:"Oceania", color:"#00bcd4" },
+  "ANTARTICA": { emoji:"🧊", nome:"Antartide", color:"#90caf9" },
+};
+
+function mostraContinenteConquistato(continente) {
+  const info = CONTINENTI_FLAG[(continente||'').toUpperCase()] ||
+               { emoji:'🌍', nome: continente, color:'#2196f3' };
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
+  modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:2px solid ${info.color};border-radius:24px;padding:48px 40px;max-width:440px;text-align:center;box-shadow:0 0 60px ${info.color}55;">
+      <div style="font-size:80px;margin-bottom:8px;">${info.emoji}</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:600;color:${info.color};letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;">Nuovo continente!</div>
+      <div style="font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:900;color:#f5f5f5;margin-bottom:8px;">${info.nome}</div>
+      <div style="font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.6;">Hai gareggiato per la prima volta in un nuovo continente.<br>Sei un atleta senza confini! 🌐</div>
+      <button onclick="this.closest('div[style]').remove()"
+        style="background:${info.color};color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+        Incredibile! 🚀
+      </button>
+    </div>`;
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+  document.body.appendChild(modal);
+  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 8000);
+}
 
 function mostraRegionConquistata(regione) {
   const modal = document.createElement('div');
