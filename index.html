@@ -2647,7 +2647,7 @@ function popolaSelectConfig() {
     fSport.innerHTML = '<option value="">⏳ Caricamento dal foglio...</option>';
     (c.sport || []).forEach(s => {
       const o = document.createElement('option');
-      o.value = s.toLowerCase(); o.textContent = s;
+      o.value = s; o.textContent = s;
       fSport.appendChild(o);
     });
   }
@@ -2657,7 +2657,7 @@ function popolaSelectConfig() {
     pSport.innerHTML = '<option value="">Seleziona sport...</option>';
     (c.sport || []).forEach(s => {
       const o = document.createElement('option');
-      o.value = s.toLowerCase(); o.textContent = s;
+      o.value = s; o.textContent = s;
       pSport.appendChild(o);
     });
   }
@@ -3315,7 +3315,7 @@ function salvaGara() {
       hotel_tipo:   gara.hotelTipo    || '',
       rating_hotel: gara.ratingHotel ? (gara.ratingHotel.pulizia||0) : 0,
       note:         gara.note         || '',
-      nome_gara:    gara.nome         || gara.tipo_gara || '',
+      nome_gara:    (gara.nome && gara.nome !== gara.tipo_gara) ? gara.nome : '',
       nazione:      gara.nazione      || '',
       continente:   gara.continente   || '',
     };
