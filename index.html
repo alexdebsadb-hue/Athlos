@@ -5118,7 +5118,7 @@ function logoff() {
   if (!confirm('Vuoi uscire dal tuo account?')) return;
   // Registra logout sul foglio ACCESSI
   const uid = getUtenteId();
-  if (uid) gsPost('registraLogout', { utente_id: uid }).catch(() => {});
+  if (uid) gsPost('registraAccesso', { utente_id: uid, tipo: 'logout' }).catch(() => {});
   localStorage.removeItem('athlos_utente_id');
   setAdmin(false);
   localStorage.removeItem('athlos_profilo_remoto');
@@ -7531,6 +7531,8 @@ async function confermaLogin() {
     const profilo = res;
     setUtenteId(profilo.utente_id);
     localStorage.setItem('athlos_profilo_remoto', JSON.stringify(profilo));
+    // Registra login con utente_id (non email)
+    gsPost('registraAccesso', { utente_id: profilo.utente_id, tipo: 'login' }).catch(() => {});
     renderNavUser();
     verificaAdmin();
     closeLoginModal();
