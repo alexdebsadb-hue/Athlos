@@ -3862,14 +3862,14 @@ function renderHome() {
   if (kmTotPianeta !== prevKm) {
     localStorage.setItem('athlos_planet_km', kmTotPianeta);
     // Verifica se abbiamo superato la soglia di un obiettivo
-    let cumPrev = 0, cumNew = 0;
+    let cumKm = 0;
     for (const t of getPlanetTargets()) {
-      cumPrev += t.km;
-      cumNew  += t.km;
-      if (prevKm < cumPrev && kmTotPianeta >= cumNew) {
+      const soglia = cumKm + t.km;
+      if (prevKm < soglia && kmTotPianeta >= soglia) {
         setTimeout(() => mostraPianetaConquistato(t), 1000);
         break;
       }
+      cumKm += t.km;
     }
   }
   setTimeout(() => initPlanetCanvas(kmTotPianeta), 100);
@@ -4925,7 +4925,7 @@ function initPlanetCanvas(kmTot) {
             border-radius:10px;">
             <span style="font-size:20px;">${targets[i].emoji}</span>
             <div>
-              <div style="font-size:11px;font-weight:700;line-height:1.2;">${PLANET_TARGETS[i].nome.replace('Giro ','').replace("dell'","").replace('del ','').replace('d\'','')}</div>
+              <div style="font-size:11px;font-weight:700;line-height:1.2;">${targets[i].nome}</div>
               <div style="font-size:10px;color:#4caf50;">✅ completato</div>
             </div>
           </div>`).join('')
