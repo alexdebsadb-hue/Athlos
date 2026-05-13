@@ -7407,43 +7407,41 @@ function closeLoginModal() {
 // ── REGIONE CONQUISTATA ──
 
 // Bandiere nazioni — emoji flag dal codice ISO
-function getFlagEmoji(nazione) {
-  const n = (nazione||'').trim();
-  // Converti nome italiano → codice ISO2 → emoji flag
+function getFlagEmoji(nazione, size) {
   const ISO = {
-    'ALBANIA':'AL','ALGERIA':'DZ','ARGENTINA':'AR','AUSTRALIA':'AU',
-    'AUSTRIA':'AT','BELGIO':'BE','BIELORUSSIA':'BY','BOLIVIA':'BO',
-    'BRASILE':'BR','BULGARIA':'BG','CANADA':'CA','CILE':'CL',
-    'CINA':'CN','CIPRO':'CY','COLOMBIA':'CO','COREA DEL SUD':'KR',
-    'COREA':'KR','CROAZIA':'HR','DANIMARCA':'DK','ECUADOR':'EC',
-    'EGITTO':'EG','EMIRATI ARABI':'AE','ESTONIA':'EE','ETIOPIA':'ET',
-    'FILIPPINE':'PH','FINLANDIA':'FI','FRANCIA':'FR','GERMANIA':'DE',
-    'GIAMAICA':'JM','GIAPPONE':'JP','GRECIA':'GR','INDIA':'IN',
-    'INDONESIA':'ID','INGHILTERRA':'GB','IRLANDA':'IE','ISLANDA':'IS',
-    'ISRAELE':'IL','KENYA':'KE','LETTONIA':'LV','LITUANIA':'LT',
-    'LUSSEMBURGO':'LU','MALTA':'MT','MAROCCO':'MA','MESSICO':'MX',
-    'MONACO':'MC','NORVEGIA':'NO','NUOVA ZELANDA':'NZ','OLANDA':'NL',
-    'PAESI BASSI':'NL','PERU':'PE','POLONIA':'PL','PORTOGALLO':'PT',
-    'REGNO UNITO':'GB','REP. CECA':'CZ','REPUBBLICA CECA':'CZ',
-    'ROMANIA':'RO','RUSSIA':'RU','SERBIA':'RS','SINGAPORE':'SG',
-    'SLOVACCHIA':'SK','SLOVENIA':'SI','SPAGNA':'ES','SRI LANKA':'LK',
-    'STATI UNITI':'US','SUDAFRICA':'ZA','SVEZIA':'SE','SVIZZERA':'CH',
-    'TAILANDIA':'TH','TANZANIA':'TZ','TURCHIA':'TR','UK':'GB',
-    'UCRAINA':'UA','UNGHERIA':'HU','URUGUAY':'UY','USA':'US',
-    'VENEZUELA':'VE','VIETNAM':'VN',
+    'ALBANIA':'al','ALGERIA':'dz','ARGENTINA':'ar','AUSTRALIA':'au',
+    'AUSTRIA':'at','BELGIO':'be','BIELORUSSIA':'by','BOLIVIA':'bo',
+    'BRASILE':'br','BULGARIA':'bg','CANADA':'ca','CILE':'cl',
+    'CINA':'cn','CIPRO':'cy','COLOMBIA':'co','COREA DEL SUD':'kr',
+    'COREA':'kr','CROAZIA':'hr','DANIMARCA':'dk','ECUADOR':'ec',
+    'EGITTO':'eg','EMIRATI ARABI':'ae','ESTONIA':'ee','ETIOPIA':'et',
+    'FILIPPINE':'ph','FINLANDIA':'fi','FRANCIA':'fr','GERMANIA':'de',
+    'GIAMAICA':'jm','GIAPPONE':'jp','GRECIA':'gr','INDIA':'in',
+    'INDONESIA':'id','INGHILTERRA':'gb','IRLANDA':'ie','ISLANDA':'is',
+    'ISRAELE':'il','KENYA':'ke','LETTONIA':'lv','LITUANIA':'lt',
+    'LUSSEMBURGO':'lu','MALTA':'mt','MAROCCO':'ma','MESSICO':'mx',
+    'MONACO':'mc','NORVEGIA':'no','NUOVA ZELANDA':'nz','OLANDA':'nl',
+    'PAESI BASSI':'nl','PERU':'pe','POLONIA':'pl','PORTOGALLO':'pt',
+    'REGNO UNITO':'gb','REP. CECA':'cz','REPUBBLICA CECA':'cz',
+    'ROMANIA':'ro','RUSSIA':'ru','SERBIA':'rs','SINGAPORE':'sg',
+    'SLOVACCHIA':'sk','SLOVENIA':'si','SPAGNA':'es','SRI LANKA':'lk',
+    'STATI UNITI':'us','SUDAFRICA':'za','SVEZIA':'se','SVIZZERA':'ch',
+    'TAILANDIA':'th','TANZANIA':'tz','TURCHIA':'tr','UK':'gb',
+    'UCRAINA':'ua','UNGHERIA':'hu','URUGUAY':'uy','USA':'us',
+    'VENEZUELA':'ve','VIETNAM':'vn',
   };
-  // Lookup case-insensitive
-  const code = ISO[n.toUpperCase()] || ISO[n] ||
-    Object.entries(ISO).find(([k]) => k.toLowerCase() === n.toLowerCase())?.[1];
-  if (code) {
-    // Converti codice ISO2 in emoji flag (regional indicator symbols)
-    return String.fromCodePoint(...[...code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
-  }
-  return '🌍';
+  const code = ISO[(nazione||'').toUpperCase().trim()];
+  if (!code) return '<span style="font-size:16px;">🌍</span>';
+  const h = size || 18, w = Math.round(h * 4/3);
+  return `<img src="https://flagcdn.com/${w}x${h}/${code}.png" `
+       + `width="${w}" height="${h}" alt="${nazione}" `
+       + `style="border-radius:2px;vertical-align:middle;display:inline-block;" `
+       + `onerror="this.style.display='none'">`;
 }
 
+
 function mostraNazioneConquistata(nazione) {
-  const flag = getFlagEmoji(nazione);
+  const flag = getFlagEmoji(nazione, 48);
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
   modal.innerHTML = `
