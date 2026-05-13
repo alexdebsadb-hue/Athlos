@@ -7998,7 +7998,9 @@ async function renderSocial() {
   // Se la cache non include stats, invalida e ricarica
   try {
     const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
-    if (sc && !sc.stats) { localStorage.removeItem('irun_social_cache'); }
+    if (sc && (!sc.stats || sc.stats.utenti_loggati === undefined)) {
+      localStorage.removeItem('irun_social_cache');
+    }
   } catch(e) {}
 
   // Cache Social 30 minuti
@@ -8060,9 +8062,8 @@ async function renderSocial() {
 
   // ── STATS UTENTI ──
   const nUtenti = utenti.length;
-  // "Online" = utenti che hanno effettuato il login nelle ultime 2 ore (simulato con timestamp)
-  // Usiamo una stima basata su utenti con attività recente — non abbiamo sessioni reali
-  const nOnline = Math.max(1, Math.floor(nUtenti * 0.08)); // stima ~8% online
+  // Utenti loggati — letto dal foglio Statistiche Community (colonna P2)
+  const nOnline = statsCom ? (Number(statsCom.utenti_loggati) || 0) : 0;
 
   // Età media per sub-info
   const annoOggiU = new Date().getFullYear();
@@ -8075,7 +8076,7 @@ async function renderSocial() {
 
   document.getElementById('social-utenti-cards').innerHTML = [
     { n: nUtenti,  label: 'Utenti registrati', icon: '👥', sub: '' },
-    { n: nOnline,  label: 'Online ora',         icon: '🟢', sub: '' },
+    { n: nOnline,  label: 'Utenti loggati',     icon: '🟢', sub: '' },
   ].map(({n, label, icon, sub}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
       <div style="font-size:32px;margin-bottom:8px;">${icon}</div>
