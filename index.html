@@ -5007,13 +5007,14 @@ function initPlanetCanvas(kmTot) {
     ctx.translate(rx,ry);
     ctx.rotate(_planetAngle+Math.PI/2);
 
+    const rc = getRunnerColor();
     // Testa
     ctx.beginPath(); ctx.arc(0,-7,3.5,0,Math.PI*2);
-    ctx.fillStyle='#ffeb3b'; ctx.fill();
-    ctx.strokeStyle='#f57f17'; ctx.lineWidth=0.8; ctx.stroke();
+    ctx.fillStyle=rc.head; ctx.fill();
+    ctx.strokeStyle=rc.outline; ctx.lineWidth=0.8; ctx.stroke();
 
     // Corpo
-    ctx.strokeStyle='#ffeb3b'; ctx.lineWidth=1.8;
+    ctx.strokeStyle=rc.body; ctx.lineWidth=1.8;
     ctx.beginPath(); ctx.moveTo(0,-3.5); ctx.lineTo(0,3.5); ctx.stroke();
 
     // Gambe
@@ -7402,24 +7403,92 @@ function mostraCodaConquiste(lista, idx) {
 }
 
 function mostraRegionConquistata(regione) {
+  const flagReg = REGIONI_FLAG[regione] || '🏅';
+  const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || localStorage.getItem('athlos_profilo') || '{}');
+  const regionePartenza = profilo.regione || profilo.REGIONE || '';
+
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
-  const flagReg = REGIONI_FLAG[regione] || '🏅';
   modal.innerHTML = `
-    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:2px solid var(--accent);border-radius:24px;padding:48px 40px;max-width:440px;text-align:center;box-shadow:0 0 60px rgba(255,87,34,0.3);">
-      <div style="font-size:80px;margin-bottom:8px;">${flagReg}</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:14px;font-weight:600;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;">Nuova regione conquistata!</div>
-      <div style="font-family:Barlow Condensed,sans-serif;font-size:42px;font-weight:900;color:#f5f5f5;margin-bottom:8px;">${regione}</div>
-      <div style="font-size:15px;color:var(--text2);margin-bottom:28px;line-height:1.6;">Hai gareggiato per la prima volta in questa regione.<br>Una nuova terra conquistata! 🎉</div>
-      <button onclick="this.closest('div[style]').remove()"
-        style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+    <div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border:2px solid var(--accent);border-radius:24px;padding:32px;max-width:480px;width:90%;text-align:center;box-shadow:0 0 60px rgba(255,87,34,0.3);">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--accent);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;">Nuova regione conquistata!</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:28px;">${REGIONI_FLAG[regionePartenza]||'📍'}</div>
+          <div style="font-size:11px;color:var(--text3);max-width:60px;">${regionePartenza||'Partenza'}</div>
+        </div>
+        <canvas id="conquista-canvas" width="160" height="160" style="border-radius:12px;background:#0a0a1a;flex-shrink:0;"></canvas>
+        <div style="text-align:center;">
+          <div style="font-size:28px;">${flagReg}</div>
+          <div style="font-size:11px;color:var(--text3);max-width:60px;">${regione}</div>
+        </div>
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:#f5f5f5;margin-bottom:6px;">${regione}</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;">Hai gareggiato per la prima volta in questa regione!<br>Una nuova terra conquistata! 🎉</div>
+      <button id="conquista-btn" style="background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
         Vai! 💪
       </button>
     </div>`;
+  modal.onclick = e => { if(e.target===modal){modal.remove();if(window._conquistaCallback){const cb=window._conquistaCallback;window._conquistaCallback=null;setTimeout(cb,400);}}};
+  modal.querySelector('#conquista-btn').onclick = () => { modal.remove(); if(window._conquistaCallback){const cb=window._conquistaCallback;window._conquistaCallback=null;setTimeout(cb,400);} };
   document.body.appendChild(modal);
-  // Auto-chiudi dopo 8 secondi
-  setTimeout(() => { if (modal.parentNode) modal.remove(); }, 8000);
+  setTimeout(() => animaConquistaRegione('conquista-canvas', regionePartenza, regione), 100);
 }
+
+
+function getRunnerColor() {
+  const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || localStorage.getItem('athlos_profilo') || '{}');
+  const sesso = (profilo.sesso || profilo.SESSO || '').toUpperCase();
+  if (sesso === 'F') return { body: '#f48fb1', head: '#f06292', outline: '#c2185b' };
+  if (sesso === 'M') return { body: '#ffeb3b', head: '#ffeb3b', outline: '#f57f17' };
+  return { body: '#80cbc4', head: '#4db6ac', outline: '#00796b' };
+}
+
+function animaConquistaRegione(canvasId, da, a) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=160, H=160, scaleX=W/460, scaleY=H/620;
+  function getPos(reg) {
+    const s = MAP_SEEDS[reg];
+    return s ? { x: s[0]*scaleX, y: s[1]*scaleY } : { x: W/2, y: H/2 };
+  }
+  const posStart=getPos(da||a), posEnd=getPos(a), rc=getRunnerColor();
+  let progress=0, angle=0, anim;
+  function draw() {
+    ctx.clearRect(0,0,W,H); ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,0,W,H);
+    Object.entries(MAP_SEEDS).forEach(([reg,[cx,cy]])=>{
+      ctx.beginPath(); ctx.arc(cx*scaleX,cy*scaleY,reg===a?5:reg===da?4:2,0,Math.PI*2);
+      ctx.fillStyle=reg===a?'#ff5722':reg===da?'#4caf50':'rgba(255,255,255,0.12)'; ctx.fill();
+    });
+    ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(posStart.x,posStart.y); ctx.lineTo(posEnd.x,posEnd.y);
+    ctx.strokeStyle='rgba(255,87,34,0.25)'; ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
+    const p=Math.min(progress,1), curX=posStart.x+(posEnd.x-posStart.x)*p, curY=posStart.y+(posEnd.y-posStart.y)*p;
+    ctx.beginPath(); ctx.moveTo(posStart.x,posStart.y); ctx.lineTo(curX,curY);
+    ctx.strokeStyle='var(--accent)'; ctx.lineWidth=2; ctx.stroke();
+    if (progress<1) {
+      angle+=0.2;
+      const rot=Math.atan2(posEnd.y-posStart.y,posEnd.x-posStart.x)+Math.PI/2;
+      ctx.save(); ctx.translate(curX,curY); ctx.rotate(rot);
+      ctx.beginPath(); ctx.arc(0,-6,3,0,Math.PI*2); ctx.fillStyle=rc.head; ctx.fill();
+      ctx.strokeStyle=rc.outline; ctx.lineWidth=0.6; ctx.stroke();
+      ctx.strokeStyle=rc.body; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(0,-3); ctx.lineTo(0,3); ctx.stroke();
+      const l=Math.sin(angle*8)*3, ar=Math.sin(angle*8)*2;
+      ctx.beginPath(); ctx.moveTo(0,3); ctx.lineTo(-l,8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,3); ctx.lineTo(l,8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-ar-2,-1); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(ar+2,-1); ctx.stroke();
+      ctx.restore(); progress+=0.006; anim=requestAnimationFrame(draw);
+    } else {
+      ctx.font='18px serif'; ctx.textAlign='center'; ctx.fillText('🎉',posEnd.x,posEnd.y-12);
+    }
+  }
+  draw();
+  const obs=new MutationObserver(()=>{if(!document.getElementById(canvasId)){cancelAnimationFrame(anim);obs.disconnect();}});
+  obs.observe(document.body,{childList:true,subtree:true});
+}
+
 
 function svuotaCacheConfig() {
   localStorage.removeItem('athlos_config');
