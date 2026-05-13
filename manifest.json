@@ -1,0 +1,24 @@
+{
+  "name": "Athlos — Your Race Diary",
+  "short_name": "Athlos",
+  "description": "Il tuo diario sportivo personale",
+  "start_url": "/I-Run/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ff5722",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "athlos_icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "athlos_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
