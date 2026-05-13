@@ -6942,8 +6942,10 @@ function esportaExcel() {
   const data = new Date().toISOString().slice(0,10);
   a.href     = url;
   a.download = `athlos_gare_${nome}_${data}.xls`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
   showToast(`✅ Esportate ${gare.length} gare in Excel!`);
 }
 
