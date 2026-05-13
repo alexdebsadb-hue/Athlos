@@ -2324,6 +2324,11 @@
 <div class="toast toast-success" id="toast">&#x2705; Gara salvata con successo!</div>
 
 <script>
+// ============================================
+// ATHLOS — Your Race Diary
+// Versione: 10.0 — 13/05/2026
+// ============================================
+
 // ============ STATE ============
 const MAP_SEEDS = {
   "Valle d'Aosta": [77, 72], "Piemonte": [81, 133], "Liguria": [171, 192],
@@ -2388,7 +2393,7 @@ function setConfig(c) {
 // Cache configurazione in localStorage (aggiornata ogni ora)
 function getCachedConfig() {
   try {
-    const raw = localStorage.getItem('irun_config');
+    const raw = localStorage.getItem('athlos_config');
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
     if (Date.now() - ts > 3600000) return null; // scaduta dopo 1h
@@ -2398,7 +2403,7 @@ function getCachedConfig() {
   } catch(e) { return null; }
 }
 function setCachedConfig(data) {
-  localStorage.setItem('irun_config', JSON.stringify({ data, ts: Date.now() }));
+  localStorage.setItem('athlos_config', JSON.stringify({ data, ts: Date.now() }));
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
@@ -2414,28 +2419,28 @@ const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 let _syncInProgress = false;
 
 function getGare() {
-  try { return JSON.parse(localStorage.getItem('irun_gare') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem('athlos_gare') || '[]'); } catch(e) { return []; }
 }
-function saveGare(g) { localStorage.setItem('irun_gare', JSON.stringify(g)); }
+function saveGare(g) { localStorage.setItem('athlos_gare', JSON.stringify(g)); }
 function getProgramma() {
-  try { return JSON.parse(localStorage.getItem('irun_programma') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem('athlos_programma') || '[]'); } catch(e) { return []; }
 }
-function saveProgramma(p) { localStorage.setItem('irun_programma', JSON.stringify(p)); }
+function saveProgramma(p) { localStorage.setItem('athlos_programma', JSON.stringify(p)); }
 function getProfilo() {
   // Usa profilo remoto (dal foglio) se disponibile
   try {
-    const remoto = JSON.parse(localStorage.getItem('irun_profilo_remoto') || 'null');
+    const remoto = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || 'null');
     if (remoto && remoto.utente_id) return remoto;
   } catch(e) {}
-  return JSON.parse(localStorage.getItem('irun_profilo') || '{}');
+  return JSON.parse(localStorage.getItem('athlos_profilo') || '{}');
 }
 
 // ── utente_id: è il "nome utente" che identifica le righe nel foglio
 function getUtenteId() {
-  return localStorage.getItem('irun_utente_id') || '';
+  return localStorage.getItem('athlos_utente_id') || '';
 }
 function setUtenteId(id) {
-  localStorage.setItem('irun_utente_id', id);
+  localStorage.setItem('athlos_utente_id', id);
 }
 
 // ── chiamate al foglio Google ──────────────────────────────
@@ -3766,7 +3771,7 @@ function renderHome() {
 
   // ── PROSSIMA GARA ──
   const oggi = new Date().toISOString().slice(0,10);
-  const programma = JSON.parse(localStorage.getItem('irun_programma')||'[]')
+  const programma = JSON.parse(localStorage.getItem('athlos_programma')||'[]')
     .filter(p => p.data && p.data >= oggi)
     .sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   const prossima = programma[0];
@@ -3881,7 +3886,7 @@ async function renderLanding() {
   // Riusa cache Social se disponibile
   let _lsCache = null;
   try {
-    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    const sc = JSON.parse(localStorage.getItem('athlos_social_cache')||'null');
     if (sc && Date.now() - sc.ts < 1800000) _lsCache = sc;
   } catch(e) {}
 
@@ -3897,7 +3902,7 @@ async function renderLanding() {
     utenti = (utentiRes.status==='fulfilled' && Array.isArray(utentiRes.value)) ? utentiRes.value : [];
     gare   = (gareRes.status==='fulfilled'   && Array.isArray(gareRes.value))   ? gareRes.value.map(normalizzaGara) : [];
     if (utenti.length || gare.length) {
-      try { localStorage.setItem('irun_social_cache', JSON.stringify({
+      try { localStorage.setItem('athlos_social_cache', JSON.stringify({
         utenti, gare: gare.map(g=>({...g})), ts: Date.now()
       })); } catch(e) {}
     }
@@ -4513,11 +4518,11 @@ function renderEvoluzioneChart(gare, tipoGara) {
 
 // ============ RENDER MAPPA ============
 // Colore mappa selezionato dall'utente
-let _mapColor = localStorage.getItem('irun_map_color') || '#ff5722';
+let _mapColor = localStorage.getItem('athlos_map_color') || '#ff5722';
 
 function setMapColor(color) {
   _mapColor = color;
-  localStorage.setItem('irun_map_color', color);
+  localStorage.setItem('athlos_map_color', color);
   document.getElementById('map-color-custom').value = color;
   // Aggiorna pulsanti attivi
   document.querySelectorAll('.map-color-btn').forEach(b => {
@@ -4876,7 +4881,7 @@ function mostraPianetaConquistato(target) {
 function getPlanetTargets() {
   // Primo obiettivo: giro della regione dell'utente
   const utente = (typeof getUtente === 'function') ? getUtente() :
-    JSON.parse(localStorage.getItem('irun_profilo_remoto') || localStorage.getItem('irun_profilo') || '{}');
+    JSON.parse(localStorage.getItem('athlos_profilo_remoto') || localStorage.getItem('athlos_profilo') || '{}');
   const regione = utente.regione || utente.REGIONE || '';
   const kmRegione = REGIONI_KM[regione];
   const first = kmRegione
@@ -5113,11 +5118,11 @@ function logoff() {
   // Registra logout sul foglio ACCESSI
   const uid = getUtenteId();
   if (uid) gsPost('registraLogout', { utente_id: uid }).catch(() => {});
-  localStorage.removeItem('irun_utente_id');
+  localStorage.removeItem('athlos_utente_id');
   setAdmin(false);
-  localStorage.removeItem('irun_profilo_remoto');
-  localStorage.removeItem('irun_gare');
-  localStorage.removeItem('irun_programma');
+  localStorage.removeItem('athlos_profilo_remoto');
+  localStorage.removeItem('athlos_gare');
+  localStorage.removeItem('athlos_programma');
   _utentiCache = [];
   _gareCache   = [];
   renderNavUser();
@@ -5163,7 +5168,7 @@ async function salvaProfiloModificato() {
   // Aggiorna localStorage subito
   const pAttuale = getProfilo();
   const pNuovo = { ...pAttuale, ...aggiornamenti };
-  localStorage.setItem('irun_profilo_remoto', JSON.stringify(pNuovo));
+  localStorage.setItem('athlos_profilo_remoto', JSON.stringify(pNuovo));
 
   closeEditProfile();
   renderProfilo();
@@ -5343,7 +5348,7 @@ async function _eseguiRicerca(q) {
   // Cache utenti per 10 minuti
   let cachedUtenti = null;
   try {
-    const cu = JSON.parse(localStorage.getItem('irun_utenti_cache')||'null');
+    const cu = JSON.parse(localStorage.getItem('athlos_utenti_cache')||'null');
     if (cu && Date.now() - cu.ts < 600000) cachedUtenti = cu.data;
   } catch(e) {}
 
@@ -5354,7 +5359,7 @@ async function _eseguiRicerca(q) {
 
   // Salva cache utenti
   if (!cachedUtenti && tuttiUtenti.status === 'fulfilled' && Array.isArray(tuttiUtenti.value)) {
-    try { localStorage.setItem('irun_utenti_cache', JSON.stringify({ data: tuttiUtenti.value, ts: Date.now() })); } catch(e) {}
+    try { localStorage.setItem('athlos_utenti_cache', JSON.stringify({ data: tuttiUtenti.value, ts: Date.now() })); } catch(e) {}
   }
 
   if (tuttiUtenti.status === 'fulfilled' && Array.isArray(tuttiUtenti.value)) {
@@ -6434,7 +6439,6 @@ function confirmImport() {
       nazione:     g.nazione     || '',
       continente:  g.continente  || '',
     }));
-    console.log('[importGare] payload:', JSON.stringify(payload).slice(0,500));
     gsPost('importGare', payload).then(r => {
       console.log('[importGare] risposta:', JSON.stringify(r));
       if (r && r.imported) showToast(`✅ ${r.imported} gare sincronizzate sul foglio!`);
@@ -6764,7 +6768,6 @@ function confirmImportTri() {
       nazione:     g.nazione     || '',
       continente:  g.continente  || '',
     }));
-    console.log('[importGare tri] payload:', JSON.stringify(payload).slice(0,500));
     gsPost('importGare', payload).then(r => {
       console.log('[importGare tri] risposta:', JSON.stringify(r));
       if (r && r.imported) showToast(`✅ ${r.imported} gare triathlon sul foglio!`);
@@ -7026,251 +7029,6 @@ const CHART_DEFAULTS = {
     y: { grid: { color: CHART_COLORS.grid }, ticks: { color: CHART_COLORS.text, font: { family: 'Barlow', size: 11 } } }
   }
 };
-
-function _OLD_renderStats_UNUSED() {
-  const gare = getGare();
-  if (!gare.length) return;
-
-  // ===== SUMMARY CARDS =====
-  const finisher = gare.filter(g => g.esito === 'finisher');
-  const kmTot = gare.reduce((s,g) => s+(g.distanza||0), 0);
-  const pb = gare.filter(g => g.pb).length;
-  const regioni = new Set(gare.map(g=>g.regione).filter(r=>r&&r!=='Estero')).size;
-
-  document.getElementById('stats-summary-cards').innerHTML = [
-    statCard('🏅', 'Gare totali', gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
-    statCard('📏', 'Km gareggiati', Math.round(kmTot).toLocaleString('it'), 'km totali percorsi', '#2196f3'),
-    statCard('⭐', 'Personal Best',  pb, 'gare con miglior tempo', '#ffc107'),
-    statCard('🗺️', 'Regioni coperte', regioni, 'regioni d\u0027Italia', '#4caf50'),
-  ].join('');
-
-  // ===== GRAFICO MARATONE =====
-  const maratone = gare
-    .filter(g => g.sport === 'corsa' && Math.abs(g.distanza - 42.2) < 0.5 && g.tempo)
-    .sort((a,b) => a.data.localeCompare(b.data));
-
-  destroyChart('maratone');
-  if (maratone.length) {
-    const ctx1 = document.getElementById('chart-maratone').getContext('2d');
-    const labels = maratone.map(g => g.data.slice(0,7) + ' ' + g.luogo.split('-')[0]);
-    const data = maratone.map(g => Math.round(garaTempoSecs(g)/60 * 10) / 10);
-    const minVal = Math.min(...data) - 5;
-    const maxVal = Math.max(...data) + 5;
-    chartInstances['maratone'] = new Chart(ctx1, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Minuti',
-          data,
-          borderColor: CHART_COLORS.accent,
-          backgroundColor: 'rgba(255,87,34,0.1)',
-          borderWidth: 2.5,
-          pointBackgroundColor: maratone.map(g => g.pb ? '#ffd54f' : CHART_COLORS.accent),
-          pointRadius: maratone.map(g => g.pb ? 7 : 4),
-          pointHoverRadius: 8,
-          fill: true,
-          tension: 0.3,
-        }]
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          ...CHART_DEFAULTS.scales,
-          y: {
-            ...CHART_DEFAULTS.scales.y,
-            min: minVal, max: maxVal,
-            ticks: {
-              ...CHART_DEFAULTS.scales.y.ticks,
-              callback: v => {
-                // Mostra solo tick ogni 5 minuti (300 secondi)
-                if (v % 300 !== 0) return '';
-                const h = Math.floor(v/3600);
-                const m = Math.floor((v%3600)/60);
-                return `${h}h${String(m).padStart(2,'0')}`;
-              }
-            }
-          }
-        },
-        plugins: {
-          ...CHART_DEFAULTS.plugins,
-          tooltip: {
-            ...CHART_DEFAULTS.plugins.tooltip,
-            callbacks: {
-              label: ctx => {
-                const g = maratone[ctx.dataIndex];
-                const pb = g.pb ? ' ★ PB' : '';
-                return `${secsToHMS(garaTempoSecs(g))}${pb}`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  // ===== GRAFICO KM PER ANNO =====
-  const byYear = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    byYear[y] = (byYear[y]||0) + (g.distanza||0);
-  });
-  const years = Object.keys(byYear).sort();
-
-  // ===== KM PER ANNO — stacked per sport =====
-  const sportOrder = ['corsa','ultra','trail','triathlon','tri703','ironman','duathlon','bici','nuoto'];
-  const sportLabelsFull = { corsa:'Corsa', ultra:'Ultra', trail:'Trail', triathlon:'Triathlon Ol.', tri703:'70.3', ironman:'Ironman', duathlon:'Duathlon', bici:'Bici', nuoto:'Nuoto' };
-  const sportColorsFull = { corsa:'#ff5722', ultra:'#ff8a65', trail:'#4caf50', triathlon:'#2196f3', tri703:'#1565c0', ironman:'#0d47a1', duathlon:'#9c27b0', bici:'#ffc107', nuoto:'#009688' };
-
-  // Calcola km per anno per sport
-  const kmByYearSport = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    const s = g.sport;
-    if (!kmByYearSport[y]) kmByYearSport[y] = {};
-    kmByYearSport[y][s] = (kmByYearSport[y][s]||0) + (g.distanza||0);
-  });
-
-  // Trova sport presenti
-  const sportPresenti = [...new Set(gare.map(g=>g.sport))].sort((a,b) => sportOrder.indexOf(a)-sportOrder.indexOf(b));
-
-  const kmDatasets = sportPresenti.map(s => ({
-    label: sportLabelsFull[s]||s,
-    data: years.map(y => Math.round((kmByYearSport[y]||{})[s]||0)),
-    backgroundColor: sportColorsFull[s]||'#888',
-    borderColor: 'rgba(0,0,0,0.3)',
-    borderWidth: 0.5,
-    borderRadius: 2,
-    stack: 'km',
-  }));
-
-  destroyChart('km-anno');
-  const ctx2 = document.getElementById('chart-km-anno').getContext('2d');
-  chartInstances['km-anno'] = new Chart(ctx2, {
-    type: 'bar',
-    data: { labels: years, datasets: kmDatasets },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        x: { ...CHART_DEFAULTS.scales.x, stacked: true },
-        y: {
-          ...CHART_DEFAULTS.scales.y,
-          stacked: true,
-          ticks: {
-            ...CHART_DEFAULTS.scales.y.ticks,
-            callback: v => (v % 50 === 0) ? v.toLocaleString('it') : ''
-          }
-        }
-      },
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        legend: { labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:11}, boxWidth:12, padding:8 } },
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} km` }
-        }
-      }
-    }
-  });
-
-  
-  // ===== GRAFICO SPORT =====
-  const sportCount = {};
-  gare.forEach(g => {
-    const sg = sportgruppo(g.sport);
-    sportCount[sg] = (sportCount[sg]||0) + 1;
-  });
-  const sportLabels = { corsa:'Corsa', triathlon:'Triathlon', ultra:'Ultra', trail:'Trail', bici:'Bici', nuoto:'Nuoto', duathlon:'Duathlon' };
-  const sportColors = ['#ff5722','#2196f3','#ff8a65','#4caf50','#ffc107','#009688','#9c27b0'];
-
-  destroyChart('sport');
-  const ctx3 = document.getElementById('chart-sport').getContext('2d');
-  const sportKeys = Object.keys(sportCount).sort((a,b) => sportCount[b]-sportCount[a]);
-  chartInstances['sport'] = new Chart(ctx3, {
-    type: 'doughnut',
-    data: {
-      labels: sportKeys.map(k => sportLabels[k]||k),
-      datasets: [{
-        data: sportKeys.map(k => sportCount[k]),
-        backgroundColor: sportColors.slice(0, sportKeys.length),
-        borderColor: '#111',
-        borderWidth: 2,
-        hoverOffset: 8,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { position:'right', labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:12}, boxWidth:14, padding:10 } },
-        tooltip: { ...CHART_DEFAULTS.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} gare` } }
-      }
-    }
-  });
-
-  // ===== GRAFICO GARE PER ANNO =====
-  const garePerAnno = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    garePerAnno[y] = (garePerAnno[y]||0) + 1;
-  });
-
-  destroyChart('gare-anno');
-  const ctx4 = document.getElementById('chart-gare-anno').getContext('2d');
-
-  // Calcola gare per anno per sport
-  const gareByYearSport = {};
-  gare.forEach(g => {
-    const y = g.data.slice(0,4);
-    const s = g.sport;
-    if (!gareByYearSport[y]) gareByYearSport[y] = {};
-    gareByYearSport[y][s] = (gareByYearSport[y][s]||0) + 1;
-  });
-  const yearsGare = Object.keys(gareByYearSport).sort();
-
-  const gareDatasets = sportPresenti.map(s => ({
-    label: sportLabelsFull[s]||s,
-    data: yearsGare.map(y => (gareByYearSport[y]||{})[s]||0),
-    backgroundColor: sportColorsFull[s]||'#888',
-    borderColor: 'rgba(0,0,0,0.3)',
-    borderWidth: 0.5,
-    borderRadius: 2,
-    stack: 'gare',
-  }));
-
-  chartInstances['gare-anno'] = new Chart(ctx4, {
-    type: 'bar',
-    data: { labels: yearsGare, datasets: gareDatasets },
-    options: {
-      ...CHART_DEFAULTS,
-      scales: {
-        x: { ...CHART_DEFAULTS.scales.x, stacked: true },
-        y: {
-          ...CHART_DEFAULTS.scales.y,
-          stacked: true,
-          ticks: {
-            ...CHART_DEFAULTS.scales.y.ticks,
-            stepSize: 1,
-            callback: v => Number.isInteger(v) ? v : ''
-          }
-        }
-      },
-      plugins: {
-        ...CHART_DEFAULTS.plugins,
-        legend: { labels: { color: CHART_COLORS.text, font:{family:'Barlow',size:11}, boxWidth:12, padding:8 } },
-        tooltip: {
-          ...CHART_DEFAULTS.plugins.tooltip,
-          callbacks: {
-            label: ctx => ctx.raw > 0 ? ` ${ctx.dataset.label}: ${ctx.raw} gar${ctx.raw===1?'a':'e'}` : null,
-            filter: item => item.raw > 0
-          }
-        }
-      }
-    }
-  });
-
-  // ===== POPOLA SELECTOR COMPARATORE =====
-  populateComparator(gare);
-}
 
 function populateComparator(gare) {
   const byChiave = {};
@@ -7567,9 +7325,9 @@ function mostraRegionConquistata(regione) {
 }
 
 function svuotaCacheConfig() {
-  localStorage.removeItem('irun_config');
-  localStorage.removeItem('irun_social_cache');
-  localStorage.removeItem('irun_utenti_cache');
+  localStorage.removeItem('athlos_config');
+  localStorage.removeItem('athlos_social_cache');
+  localStorage.removeItem('athlos_utenti_cache');
   _configLoaded = false;
   _config = { sport:[], distanze:[], nazioni:[], regioni:[] };
   console.log('Cache svuotata (config + social + utenti)');
@@ -7675,7 +7433,7 @@ async function confermaLogin() {
     // LOGIN OK
     const profilo = res;
     setUtenteId(profilo.utente_id);
-    localStorage.setItem('irun_profilo_remoto', JSON.stringify(profilo));
+    localStorage.setItem('athlos_profilo_remoto', JSON.stringify(profilo));
     renderNavUser();
     verificaAdmin();
     closeLoginModal();
@@ -8021,16 +7779,16 @@ async function renderSocial() {
   document.getElementById('social-content').style.display = 'none';
   // Se la cache non include stats, invalida e ricarica
   try {
-    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    const sc = JSON.parse(localStorage.getItem('athlos_social_cache')||'null');
     if (sc && (!sc.stats || sc.stats.utenti_loggati === undefined)) {
-      localStorage.removeItem('irun_social_cache');
+      localStorage.removeItem('athlos_social_cache');
     }
   } catch(e) {}
 
   // Cache Social 30 minuti
   let _socialCache = null;
   try {
-    const sc = JSON.parse(localStorage.getItem('irun_social_cache')||'null');
+    const sc = JSON.parse(localStorage.getItem('athlos_social_cache')||'null');
     if (sc && Date.now() - sc.ts < 1800000) _socialCache = sc;
   } catch(e) {}
 
@@ -8046,7 +7804,7 @@ async function renderSocial() {
       gsGet({ action: 'getStatsCommunity',   utente_id: '' }),
     ]);
     if (utentiRes.status==='fulfilled' && gareRes.status==='fulfilled') {
-      try { localStorage.setItem('irun_social_cache', JSON.stringify({
+      try { localStorage.setItem('athlos_social_cache', JSON.stringify({
         utenti: utentiRes.value, gare: gareRes.value,
         stats:  statsRes.status==='fulfilled' ? statsRes.value : null,
         ts: Date.now()
@@ -8062,7 +7820,7 @@ async function renderSocial() {
 
   // Se utenti è vuoto ma cache era presente, invalida cache e ricarica
   if (!utenti.length && _socialCache) {
-    localStorage.removeItem('irun_social_cache');
+    localStorage.removeItem('athlos_social_cache');
     const freshU = await gsGet({ action: 'getAllUtenti', utente_id: '' });
     if (Array.isArray(freshU)) utenti = freshU;
   }
@@ -8070,7 +7828,7 @@ async function renderSocial() {
   // Se entrambi vuoti, mostra errore
   if (!utenti.length && !gare.length) {
     // Invalida cache e riprova una volta
-    localStorage.removeItem('irun_social_cache');
+    localStorage.removeItem('athlos_social_cache');
     document.getElementById('social-loading').innerHTML = `
       <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
       <div style="margin-bottom:12px;">Impossibile caricare i dati social.</div>
@@ -8595,7 +8353,7 @@ function controllaReferral() {
 // ============================================================
 // PANNELLO ADMIN
 // ============================================================
-const ADMIN_PWD = 'irun-admin-2025';
+const ADMIN_PWD = 'athlos-admin-2025';
 let _adminAutenticato = false;
 
 function loginAdmin() {
@@ -8925,7 +8683,7 @@ function mapRegClick(el) {
 
 
 function loadMap() {
-  const saved = localStorage.getItem('irun_map_color') || '#ff5722';
+  const saved = localStorage.getItem('athlos_map_color') || '#ff5722';
   _mapColor = saved;
   const picker = document.getElementById('map-color-custom');
   if (picker) picker.value = saved;
