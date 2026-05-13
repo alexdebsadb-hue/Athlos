@@ -1647,6 +1647,23 @@
           <div id="social-utenti-estero" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
         </div>
 
+        <!-- MISSIONE COMMUNITY -->
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;">🚀 Missione community</div>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <canvas id="community-planet-canvas" width="100" height="100" style="flex-shrink:0;"></canvas>
+            <div style="flex:1;min-width:180px;">
+              <div id="com-planet-label" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;margin-bottom:4px;"></div>
+              <div id="com-planet-km" style="font-size:12px;color:var(--text3);margin-bottom:8px;"></div>
+              <div style="background:var(--bg4);border-radius:6px;height:10px;overflow:hidden;margin-bottom:4px;">
+                <div id="com-planet-bar" style="height:100%;border-radius:6px;transition:width 1s ease;width:0%;"></div>
+              </div>
+              <div id="com-planet-pct" style="font-size:11px;color:var(--text3);"></div>
+            </div>
+            <div id="com-planet-done" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+        </div>
+
         <!-- GARE E TEMPI PER SESSO -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;">
@@ -6746,6 +6763,98 @@ function downloadExcelTemplateTri() {
 }
 
 
+// ════════════════════════════════
+// COMMUNITY PIANETI
+// ════════════════════════════════
+const COMMUNITY_PLANETS = [
+  { nome: 'Giro della Terra', emoji: '🌍', km: 40075,    color: '#4caf50', bgColor: '#1b5e20' },
+  { nome: 'Luna',             emoji: '🌙', km: 384400,   color: '#b0bec5', bgColor: '#263238' },
+  { nome: 'Venere',           emoji: '✨', km: 41400000, color: '#ffd54f', bgColor: '#4a148c' },
+];
+
+let _comPlanetAnim = null;
+let _comPlanetAngle = 0;
+
+function initCommunityPlanet(kmTot) {
+  const canvas = document.getElementById('community-planet-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=100, H=100, cx=W/2, cy=H/2, R=32;
+
+  // Calcola obiettivo attuale
+  let kmRim = kmTot, targetIdx = 0, kmInTarget = 0;
+  const completati = [];
+  for (let i = 0; i < COMMUNITY_PLANETS.length; i++) {
+    if (kmRim < COMMUNITY_PLANETS[i].km) { targetIdx=i; kmInTarget=kmRim; break; }
+    completati.push(i);
+    kmRim -= COMMUNITY_PLANETS[i].km;
+    if (i === COMMUNITY_PLANETS.length-1) { targetIdx=i; kmInTarget=COMMUNITY_PLANETS[i].km; }
+  }
+
+  const target = COMMUNITY_PLANETS[targetIdx];
+  const pct    = Math.min(kmInTarget / target.km, 1);
+
+  // Completati
+  const doneEl = document.getElementById('com-planet-done');
+  if (doneEl) {
+    doneEl.innerHTML = completati.map(i => `
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);border-radius:8px;font-size:12px;">
+        <span>${COMMUNITY_PLANETS[i].emoji}</span>
+        <span style="color:#4caf50;">✅</span>
+        <span>${COMMUNITY_PLANETS[i].nome}</span>
+      </div>`).join('');
+  }
+
+  const lbl   = document.getElementById('com-planet-label');
+  const kmEl  = document.getElementById('com-planet-km');
+  const bar   = document.getElementById('com-planet-bar');
+  const pctEl = document.getElementById('com-planet-pct');
+  if (lbl)   lbl.textContent  = target.emoji + ' ' + target.nome;
+  if (kmEl)  kmEl.textContent = Math.round(kmInTarget).toLocaleString('it') + ' / ' + target.km.toLocaleString('it') + ' km community';
+  if (bar)   { bar.style.width=Math.round(pct*100)+'%'; bar.style.background=`linear-gradient(90deg,${target.color},${target.color}99)`; }
+  if (pctEl) pctEl.textContent = Math.round(pct*100) + '% — insieme ce la facciamo! 💪';
+
+  // Canvas
+  if (_comPlanetAnim) cancelAnimationFrame(_comPlanetAnim);
+  function drawFrame() {
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,0,W,H);
+    [[8,12],[88,10],[95,50],[4,65],[50,4],[92,80],[15,88]].forEach(([sx,sy])=>{
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(sx,sy,0.6,0,Math.PI*2); ctx.fill();
+    });
+    const grad=ctx.createRadialGradient(cx-5,cy-5,3,cx,cy,R);
+    grad.addColorStop(0,target.bgColor+'cc'); grad.addColorStop(1,'#000');
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle=grad; ctx.fill();
+    ctx.font='18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(target.emoji,cx,cy);
+    if (pct>0) {
+      ctx.beginPath(); ctx.arc(cx,cy,R+6,-Math.PI/2,-Math.PI/2+pct*Math.PI*2);
+      ctx.strokeStyle=target.color; ctx.lineWidth=2.5; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(cx,cy,R+6,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke();
+
+    // Omino
+    _comPlanetAngle += 0.03;
+    const rx=cx+(R+6)*Math.cos(_comPlanetAngle), ry=cy+(R+6)*Math.sin(_comPlanetAngle);
+    ctx.save(); ctx.translate(rx,ry); ctx.rotate(_comPlanetAngle+Math.PI/2);
+    ctx.beginPath(); ctx.arc(0,-6,3,0,Math.PI*2); ctx.fillStyle='#ffeb3b'; ctx.fill();
+    ctx.strokeStyle='#ffeb3b'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,-3); ctx.lineTo(0,3); ctx.stroke();
+    const leg=Math.sin(_comPlanetAngle*10)*3.5;
+    ctx.beginPath(); ctx.moveTo(0,3); ctx.lineTo(-leg,8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,3); ctx.lineTo(leg,8); ctx.stroke();
+    const arm=Math.sin(_comPlanetAngle*10)*2.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-arm-2,-1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(arm+2,-1); ctx.stroke();
+    ctx.restore();
+    _comPlanetAnim = requestAnimationFrame(drawFrame);
+  }
+  drawFrame();
+}
+
+
 // ============ STATISTICHE ============
 
 let chartInstances = {};
@@ -7296,7 +7405,7 @@ function closeLoginModal() {
 
 // Bandiere nazioni — emoji flag dal codice ISO
 function getFlagEmoji(nazione) {
-  const n = (nazione||'').toUpperCase().trim();
+  const n = (nazione||'').trim();
   // Converti nome italiano → codice ISO2 → emoji flag
   const ISO = {
     'ALBANIA':'AL','ALGERIA':'DZ','ARGENTINA':'AR','AUSTRALIA':'AU',
@@ -7320,7 +7429,9 @@ function getFlagEmoji(nazione) {
     'UCRAINA':'UA','UNGHERIA':'HU','URUGUAY':'UY','USA':'US',
     'VENEZUELA':'VE','VIETNAM':'VN',
   };
-  const code = ISO[n];
+  // Lookup case-insensitive
+  const code = ISO[n.toUpperCase()] || ISO[n] ||
+    Object.entries(ISO).find(([k]) => k.toLowerCase() === n.toLowerCase())?.[1];
   if (code) {
     // Converti codice ISO2 in emoji flag (regional indicator symbols)
     return String.fromCodePoint(...[...code].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
@@ -8313,6 +8424,11 @@ async function renderSocial() {
   const maratonaAcc = tempiMediPerSesso(gare, 'CORSA', t => t === 'maratona');
   renderTempiSesso(document.getElementById('social-tempi-mezza'),    mezzaAcc);
   renderTempiSesso(document.getElementById('social-tempi-maratona'), maratonaAcc);
+
+  // Community pianeti — usa km dal foglio Statistiche Community
+  const kmCommunity = statsCom ? Number(statsCom.km_tot) || 0 : 
+    gare.reduce((s,g) => s+(parseFloat(g.distanza)||0), 0);
+  setTimeout(() => initCommunityPlanet(kmCommunity), 200);
 
   document.getElementById('social-loading').style.display = 'none';
   document.getElementById('social-content').style.display = 'block';
