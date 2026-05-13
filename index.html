@@ -3741,7 +3741,7 @@ function renderHome() {
   document.getElementById('home-km').textContent      = Math.round(kmTot).toLocaleString('it');
 
   // Saluto personalizzato
-  const utente = JSON.parse(localStorage.getItem('irun_utente')||'{}');
+  const utente = (typeof getUtente === 'function') ? getUtente() : {};
   const nome   = utente.nome || '';
   const ora    = new Date().getHours();
   const saluto = ora < 12 ? 'Buongiorno' : ora < 18 ? 'Buon pomeriggio' : 'Buonasera';
@@ -4875,8 +4875,9 @@ function mostraPianetaConquistato(target) {
 
 function getPlanetTargets() {
   // Primo obiettivo: giro della regione dell'utente
-  const utente = JSON.parse(localStorage.getItem('irun_utente')||'{}');
-  const regione = utente.regione || '';
+  const utente = (typeof getUtente === 'function') ? getUtente() :
+    JSON.parse(localStorage.getItem('irun_profilo_remoto') || localStorage.getItem('irun_profilo') || '{}');
+  const regione = utente.regione || utente.REGIONE || '';
   const kmRegione = REGIONI_KM[regione];
   const first = kmRegione
     ? [{ nome: 'Giro della ' + regione, emoji: REGIONI_FLAG[regione]||'📍', km: kmRegione, color: '#4caf50', bgColor: '#1b5e20' }]
