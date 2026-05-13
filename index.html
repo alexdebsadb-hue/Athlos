@@ -7491,8 +7491,8 @@ function animaConquistaRegione(canvasId, da, a) {
   const ctx = canvas.getContext('2d');
   const W=160, H=160, sx=W/600, sy=H/760;
   function getPos(reg) {
-    const s = MAP_SEEDS[reg];
-    return s ? { x: s[0]*scaleX, y: s[1]*scaleY } : { x: W/2, y: H/2 };
+    const s = MAP_SEEDS[normalizzaRegione(reg)];
+    return s ? { x: s[0]*sx, y: s[1]*sy } : { x: W/2, y: H/2 };
   }
   const posStart=getPos(da||a), posEnd=getPos(a), rc=getRunnerColor();
   let progress=0, angle=0, anim;
