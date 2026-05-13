@@ -3353,6 +3353,24 @@ function salvaGara() {
   renderHome();
   if (currentPage === 'gare') renderGare('tutte');
   if (currentPage === 'mappa') renderMappa();
+
+  // ── Conquiste — eseguite sempre, indipendentemente dal sync ──
+  const _conquiste = [];
+  if (!isEdit && gara.regione && MAP_SEEDS.hasOwnProperty(gara.regione)) {
+    const regioniPrecedenti = new Set(getGare().filter(g => String(g.id) !== String(gara.id)).map(g => g.regione).filter(Boolean));
+    if (!regioniPrecedenti.has(gara.regione)) _conquiste.push(() => mostraRegionConquistata(gara.regione));
+  }
+  if (!isEdit && gara.nazione && gara.nazione.toUpperCase() !== 'ITALIA') {
+    const nazioniPrecedenti = new Set(getGare().filter(g => String(g.id) !== String(gara.id) && g.nazione).map(g => g.nazione.toUpperCase()).filter(Boolean));
+    if (!nazioniPrecedenti.has(gara.nazione.toUpperCase())) _conquiste.push(() => mostraNazioneConquistata(gara.nazione));
+  }
+  if (!isEdit && gara.continente && gara.continente.toLowerCase() !== 'europa') {
+    const continentiPrecedenti = new Set(getGare().filter(g => String(g.id) !== String(gara.id) && g.continente && g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean));
+    if (!continentiPrecedenti.has(gara.continente.toLowerCase())) _conquiste.push(() => mostraContinenteConquistato(gara.continente));
+  }
+  console.log('[CONQUISTE] lista:', _conquiste.length, 'regione:', gara.regione, 'isEdit:', isEdit);
+  if (_conquiste.length) setTimeout(() => mostraCodaConquiste(_conquiste, 0), 800);
+
   if (getUtenteId()) {
     const action = (isEdit && gara.id && gara.id !== '__archivia__') ? 'updateGara' : 'saveGara';
     // Normalizza payload per il server (campi piatti, no oggetti annidati)
@@ -3392,23 +3410,7 @@ function salvaGara() {
       }
     }).catch(e => { showSyncBadge('err'); });
 
-    // Controlla regione conquistata (solo inserimento manuale, non edit)
-    // Coda messaggi conquista — uno alla volta, ognuno aspetta conferma
-    const _conquiste = [];
-    if (!isEdit && gara.regione && MAP_SEEDS.hasOwnProperty(gara.regione)) {
-      const regioniPrecedenti = new Set(getGare().filter(g => g.id !== gara.id).map(g => g.regione).filter(Boolean));
-      if (!regioniPrecedenti.has(gara.regione)) _conquiste.push(() => mostraRegionConquistata(gara.regione));
-    }
-    if (!isEdit && gara.nazione && gara.nazione.toUpperCase() !== 'ITALIA') {
-      const nazioniPrecedenti = new Set(getGare().filter(g => g.id !== gara.id && g.nazione).map(g => g.nazione.toUpperCase()).filter(Boolean));
-      if (!nazioniPrecedenti.has(gara.nazione.toUpperCase())) _conquiste.push(() => mostraNazioneConquistata(gara.nazione));
-    }
-    if (!isEdit && gara.continente && gara.continente.toLowerCase() !== 'europa') {
-      const continentiPrecedenti = new Set(getGare().filter(g => g.id !== gara.id && g.continente && g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean));
-      if (!continentiPrecedenti.has(gara.continente.toLowerCase())) _conquiste.push(() => mostraContinenteConquistato(gara.continente));
-    }
-    console.log('[CONQUISTE] lista:', _conquiste.length, 'regione:', gara.regione, 'isEdit:', isEdit);
-    if (_conquiste.length) setTimeout(() => mostraCodaConquiste(_conquiste, 0), 800);
+
 
     // Segnala gara non censita all'admin
     // Segnala qualsiasi campo inserito manualmente (non da elenco)
