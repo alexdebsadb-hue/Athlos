@@ -8590,7 +8590,7 @@ async function caricaDatiAdmin() {
     { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
     { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
     { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
-    { n: statsCom ? (statsCom.utenti_loggati||0) : (utLoggati||utentiOnline), label: 'Utenti loggati', icon: '🟢' },
+    { n: utentiOnline, label: 'Utenti loggati', icon: '🟢' },
     { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
