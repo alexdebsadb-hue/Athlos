@@ -1,5 +1,5 @@
 const CACHE = 'athlos-v1';
-const ASSETS = ['/I-Run/', '/I-Run/index.html'];
+const ASSETS = ['/Athlos/', '/Athlos/index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -18,7 +18,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Solo GET, solo stesso dominio
   if (e.request.method !== 'GET') return;
   e.respondWith(
     fetch(e.request)
