@@ -2,7 +2,7 @@
   "name": "Athlos — Your Race Diary",
   "short_name": "Athlos",
   "description": "Il tuo diario sportivo personale",
-  "start_url": "/I-Run/",
+  "start_url": "/Athlos/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#ff5722",
