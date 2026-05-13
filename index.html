@@ -8602,7 +8602,13 @@ async function caricaDatiAdmin() {
   const utenti       = (utentiRes.status==='fulfilled'       && Array.isArray(utentiRes.value))       ? utentiRes.value                      : [];
   const gare         = (gareRes.status==='fulfilled'         && Array.isArray(gareRes.value))         ? gareRes.value.map(normalizzaGara)    : [];
   const segnalazioni = (segnalazioniRes.status==='fulfilled' && Array.isArray(segnalazioniRes.value)) ? segnalazioniRes.value                : [];
-  const accessi      = (accessiRes.status==='fulfilled'      && Array.isArray(accessiRes.value))      ? accessiRes.value                     : [];
+  const accessiRaw   = (accessiRes.status==='fulfilled' && Array.isArray(accessiRes.value)) ? accessiRes.value : [];
+  // Normalizza: il foglio ACCESSI ha colonne [UTENTE_ID, TIMESTAMP, TIPO]
+  // Potrebbero arrivare come array o come oggetti
+  const accessi = accessiRaw.map(a => Array.isArray(a)
+    ? { utente_id: String(a[0]||''), ts: String(a[1]||''), tipo: String(a[2]||'login') }
+    : { utente_id: String(a.utente_id||a.UTENTE_ID||''), ts: String(a.ts||a.TIMESTAMP||''), tipo: String(a.tipo||a.TIPO||'login') }
+  ).filter(a => a.utente_id);
 
   const oggi = new Date().toISOString().slice(0,10);
   const ieri = new Date(Date.now() - 86400000).toISOString().slice(0,10);
