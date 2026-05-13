@@ -3330,7 +3330,8 @@ function salvaGara() {
       const diff      = vecchioPB > 0 ? vecchioPB - nuovoPB : 0;
       const diffStr   = diff > 0 ? secsToHMS(diff) : '';
       const tipoGara  = gara.tipo_gara || gara.nome || '';
-      const _pbFn = () => showPBModal(sportIcon(gara.sport) + ' ' + tipoGara, secsToHMS(nuovoPB), diffStr, vecchioPB > 0);
+      console.log('[PB] nuovoPB:', nuovoPB, 'vecchioPB:', vecchioPB, 'garaConPB:', !!garaConPB);
+    const _pbFn = () => showPBModal(sportIcon(gara.sport) + ' ' + tipoGara, secsToHMS(nuovoPB), diffStr, vecchioPB > 0);
       if (window._conquistaCallback) {
         const prevCb = window._conquistaCallback;
         window._conquistaCallback = () => { prevCb(); setTimeout(_pbFn, 400); };
@@ -3406,6 +3407,7 @@ function salvaGara() {
       const continentiPrecedenti = new Set(getGare().filter(g => g.id !== gara.id && g.continente && g.continente.toLowerCase() !== 'europa').map(g => g.continente.toLowerCase()).filter(Boolean));
       if (!continentiPrecedenti.has(gara.continente.toLowerCase())) _conquiste.push(() => mostraContinenteConquistato(gara.continente));
     }
+    console.log('[CONQUISTE] lista:', _conquiste.length, 'regione:', gara.regione, 'isEdit:', isEdit);
     if (_conquiste.length) setTimeout(() => mostraCodaConquiste(_conquiste, 0), 800);
 
     // Segnala gara non censita all'admin
