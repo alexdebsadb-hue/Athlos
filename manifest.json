@@ -3,6 +3,7 @@
   "short_name": "Athlos",
   "description": "Il tuo diario sportivo personale",
   "start_url": "/Athlos/",
+  "scope": "/Athlos/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#ff5722",
