@@ -3839,7 +3839,7 @@ function renderHome() {
     el('home-estero-chips').innerHTML = nazioniEstero
       .sort((a,b)=>(nazCount[b]||0)-(nazCount[a]||0))
       .map(n => `<div style="background:rgba(33,150,243,0.12);border:1px solid rgba(33,150,243,0.3);border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;">
-        🌍 ${n} <span style="color:#42a5f5;font-size:11px;">${nazCount[n]}</span>
+        ${getFlagEmoji(n)} ${n} <span style="color:#42a5f5;font-size:11px;">${nazCount[n]}</span>
       </div>`).join('');
   }
 
@@ -5086,6 +5086,9 @@ function connettStrava() {
 
 function logoff() {
   if (!confirm('Vuoi uscire dal tuo account?')) return;
+  // Registra logout sul foglio ACCESSI
+  const uid = getUtenteId();
+  if (uid) gsPost('registraLogout', { utente_id: uid }).catch(() => {});
   localStorage.removeItem('irun_utente_id');
   setAdmin(false);
   localStorage.removeItem('irun_profilo_remoto');
@@ -8608,8 +8611,17 @@ async function caricaDatiAdmin() {
   const nuoviUtenti = utenti.slice(-10).reverse();
   // Gare inserite oggi
   const nuoveGare = gare.filter(g => (g.data||'').slice(0,10) === oggi).slice(0,20);
-  // Utenti unici che hanno fatto login ieri (dal foglio ACCESSI)
-  const utentiIeri = new Set(
+  // Utenti attualmente connessi = ultimo stato è 'login' (senza logout successivo)
+  const ultimoStato = {};
+  accessi.forEach(a => {
+    const uid = String(a.utente_id||'');
+    if (!uid) return;
+    if (!ultimoStato[uid] || String(a.ts||'') > String(ultimoStato[uid].ts||'')) {
+      ultimoStato[uid] = a;
+    }
+  });
+  const utentiOnline = Object.values(ultimoStato).filter(a => (a.tipo||a.action||'').toLowerCase() === 'login').length;
+  const utentiIeri   = new Set(
     accessi.filter(a => String(a.ts||'').slice(0,10) === ieri).map(a => a.utente_id)
   ).size;
   // Recensioni con rating
@@ -8622,6 +8634,7 @@ async function caricaDatiAdmin() {
     { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
     { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
     { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
+    { n: utentiOnline,     label: 'Utenti online ora',      icon: '🟢' },
     { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
