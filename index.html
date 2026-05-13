@@ -676,7 +676,7 @@
   </div>
   <div class="nav-right">
     <span id="sync-badge" style="font-size:12px;color:var(--text3);min-width:100px;text-align:right;"></span>
-    <button class="btn-secondary" onclick="openImport()" style="font-size:13px;">📋 Importa gare</button>
+    <button class="btn-secondary" onclick="openImport()" style="font-size:13px;">📥 Importa gare</button>
     <button class="btn-secondary" onclick="openForm()">+ Aggiungi gara</button>
     <div id="nav-user-btn" style="cursor:pointer;" onclick="openLoginModal()">
       <!-- Bottone Accedi (non loggato) -->
@@ -1267,7 +1267,8 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
         <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">Le mie gare</h2>
         <div style="display:flex;gap:10px;">
-          <button class="btn-secondary" onclick="openImportModal()">&#x1F4E5; Import CSV</button>
+          <button class="btn-secondary" onclick="openImportModal()">📥 Importa</button>
+          <button class="btn-secondary" onclick="esportaExcel()">📊 Esporta Excel</button>
           <button class="btn-primary" onclick="openForm()">+ Aggiungi gara</button>
         </div>
       </div>
@@ -6882,6 +6883,68 @@ function initCommunityPlanet(kmTot) {
     _comPlanetAnim = requestAnimationFrame(drawFrame);
   }
   drawFrame();
+}
+
+
+// ════════════════════════════════
+// ESPORTA EXCEL
+// ════════════════════════════════
+function esportaExcel() {
+  const gare = getGare();
+  if (!gare.length) { showToast('Nessuna gara da esportare'); return; }
+
+  // Header
+  const header = [
+    'ID', 'Sport', 'Tipo Gara', 'Nome Gara', 'Data',
+    'Città', 'Regione', 'Nazione', 'Continente',
+    'Km', 'Tempo', 'Esito',
+    'Nuoto', 'T1', 'Bici', 'T2', 'Corsa',
+    'Rating Gara', 'Hotel', 'Tipo Alloggio', 'Rating Hotel',
+    'Note'
+  ];
+
+  // Righe
+  const rows = gare.map(g => {
+    let nuoto='', t1='', bici='', t2='', corsa='';
+    if (g.frazioni) {
+      try {
+        const fr = typeof g.frazioni === 'string' ? JSON.parse(g.frazioni) : g.frazioni;
+        nuoto = fr.nuoto||''; t1 = fr.t1||''; bici = fr.bici||''; t2 = fr.t2||''; corsa = fr.corsa||'';
+      } catch(e) {}
+    }
+    const rating = g.rating ? (typeof g.rating === 'object' ?
+      Math.round((Object.values(g.rating).reduce((s,v)=>s+Number(v),0)/Object.values(g.rating).length)||0) : g.rating) : '';
+    const ratingH = g.ratingHotel ? (typeof g.ratingHotel === 'object' ?
+      Math.round((Object.values(g.ratingHotel).reduce((s,v)=>s+Number(v),0)/Object.values(g.ratingHotel).length)||0) : g.ratingHotel) : '';
+    return [
+      g.id||'', g.sport||'', g.tipo_gara||'', g.nome||'',
+      g.data||'', g.luogo||'', g.regione||'', g.nazione||'', g.continente||'',
+      g.distanza||'', g.tempo||'', g.esito||'',
+      nuoto, t1, bici, t2, corsa,
+      rating, g.hotel||'', g.hotelTipo||'', ratingH,
+      g.note||''
+    ];
+  });
+
+  // Genera TSV (apre in Excel come foglio nativo)
+  const tsv = [header, ...rows]
+    .map(row => row.map(cell => {
+      const s = String(cell).replace(/[\t\n\r]/g, ' ');
+      return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join('	'))
+    .join('\n');
+
+  const bom  = '﻿'; // BOM per Excel italiano
+  const blob = new Blob([bom + tsv], { type: 'text/tab-separated-values;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const nome = getUtente().nome || 'atleta';
+  const data = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = `athlos_gare_${nome}_${data}.xls`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`✅ Esportate ${gare.length} gare in Excel!`);
 }
 
 
