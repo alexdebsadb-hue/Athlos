@@ -3882,6 +3882,19 @@ function renderHome() {
   updateProfileStats();
   renderUltimeRecensioni();
 
+  // Aggiorna profilo dal server (per sesso, regione ecc aggiornati)
+  const _uidP = getUtenteId();
+  if (_uidP) {
+    gsGet({ action: 'getProfilo', utente_id: _uidP }).then(p => {
+      if (p && p.utente_id) {
+        localStorage.setItem('athlos_profilo_remoto', JSON.stringify(p));
+        // Ricarica canvas con dati aggiornati
+        const kmTP = getGare().reduce((s,g) => s+(g.distanza||0), 0);
+        initPlanetCanvas(kmTP);
+      }
+    }).catch(() => {});
+  }
+
   // Missione spaziale
   const kmTotPianeta = gare.reduce((s,g) => s+(g.distanza||0), 0);
   // Controlla se è stato completato un nuovo obiettivo
