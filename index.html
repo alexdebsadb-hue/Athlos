@@ -1159,7 +1159,7 @@
 
         <!-- OBIETTIVI PLANETA -->
         <div id="home-pianeta-wrap" style="margin-bottom:28px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🌍 La tua missione spaziale</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:12px;">🎯 Le tue missioni</div>
           <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;">
             <!-- COMPLETATI a sinistra -->
             <div id="planet-done-list" style="display:flex;flex-direction:column;gap:8px;min-width:130px;max-width:150px;"></div>
@@ -3863,7 +3863,7 @@ function renderHome() {
     localStorage.setItem('athlos_planet_km', kmTotPianeta);
     // Verifica se abbiamo superato la soglia di un obiettivo
     let cumPrev = 0, cumNew = 0;
-    for (const t of PLANET_TARGETS) {
+    for (const t of getPlanetTargets()) {
       cumPrev += t.km;
       cumNew  += t.km;
       if (prevKm < cumPrev && kmTotPianeta >= cumNew) {
@@ -4825,6 +4825,17 @@ function showPBModal(tipoGara, tempo, miglioramento, haVecchioPB) {
 // ════════════════════════════════════
 // MISSIONE SPAZIALE — canvas omino
 // ════════════════════════════════════
+
+const REGIONI_KM = {
+  "Valle d'Aosta": 320, "Piemonte": 1060, "Liguria": 350,
+  "Lombardia": 1020, "Trentino-Alto Adige": 740, "Veneto": 900,
+  "Friuli-Venezia Giulia": 420, "Emilia-Romagna": 1050,
+  "Toscana": 1150, "Marche": 530, "Umbria": 580,
+  "Lazio": 930, "Abruzzo": 620, "Molise": 360,
+  "Campania": 750, "Puglia": 980, "Basilicata": 600,
+  "Calabria": 760, "Sicilia": 1080, "Sardegna": 1300,
+};
+
 const PLANET_TARGETS = [
   { nome: "Giro dell'Italia",        emoji: '🥾', km: 7456,   color: '#4caf50', bgColor: '#1b5e20' },
   { nome: "Giro d'Europa",           emoji: '🇪🇺', km: 68000,  color: '#2196f3', bgColor: '#0d47a1' },
@@ -4862,6 +4873,17 @@ function mostraPianetaConquistato(target) {
   document.body.appendChild(modal);
 }
 
+function getPlanetTargets() {
+  // Primo obiettivo: giro della regione dell'utente
+  const utente = JSON.parse(localStorage.getItem('irun_utente')||'{}');
+  const regione = utente.regione || '';
+  const kmRegione = REGIONI_KM[regione];
+  const first = kmRegione
+    ? [{ nome: 'Giro della ' + regione, emoji: REGIONI_FLAG[regione]||'📍', km: kmRegione, color: '#4caf50', bgColor: '#1b5e20' }]
+    : [];
+  return [...first, ...PLANET_TARGETS];
+}
+
 function initPlanetCanvas(kmTot) {
   const canvas = document.getElementById('planet-canvas');
   if (!canvas) return;
@@ -4869,26 +4891,27 @@ function initPlanetCanvas(kmTot) {
   const W=110, H=110, cx=W/2, cy=H/2, R=38;
 
   // Calcola obiettivo attuale e completati
+  const targets = getPlanetTargets();
   let kmRimanenti = kmTot;
-  let targetIdx   = PLANET_TARGETS.length - 1;
+  let targetIdx   = targets.length - 1;
   let kmInTarget  = 0;
   const completati = [];
 
-  for (let i = 0; i < PLANET_TARGETS.length; i++) {
-    if (kmRimanenti < PLANET_TARGETS[i].km) {
+  for (let i = 0; i < targets.length; i++) {
+    if (kmRimanenti < targets[i].km) {
       targetIdx  = i;
       kmInTarget = kmRimanenti;
       break;
     }
     completati.push(i);
-    kmRimanenti -= PLANET_TARGETS[i].km;
-    if (i === PLANET_TARGETS.length - 1) {
+    kmRimanenti -= targets[i].km;
+    if (i === targets.length - 1) {
       targetIdx  = i;
-      kmInTarget = PLANET_TARGETS[i].km;
+      kmInTarget = targets[i].km;
     }
   }
 
-  const target = PLANET_TARGETS[targetIdx];
+  const target = targets[targetIdx];
   const pct    = Math.min(kmInTarget / target.km, 1);
 
   // ── Completati a sinistra ──
@@ -4899,7 +4922,7 @@ function initPlanetCanvas(kmTot) {
           <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;
             background:rgba(76,175,80,0.1);border:1px solid rgba(76,175,80,0.3);
             border-radius:10px;">
-            <span style="font-size:20px;">${PLANET_TARGETS[i].emoji}</span>
+            <span style="font-size:20px;">${targets[i].emoji}</span>
             <div>
               <div style="font-size:11px;font-weight:700;line-height:1.2;">${PLANET_TARGETS[i].nome.replace('Giro ','').replace("dell'","").replace('del ','').replace('d\'','')}</div>
               <div style="font-size:10px;color:#4caf50;">✅ completato</div>
@@ -4923,8 +4946,8 @@ function initPlanetCanvas(kmTot) {
   const nextIcon = document.getElementById('planet-next-icon');
   const nextName = document.getElementById('planet-next-name');
   const nextKm   = document.getElementById('planet-next-km');
-  if (targetIdx < PLANET_TARGETS.length - 1 && nextWrap) {
-    const next = PLANET_TARGETS[targetIdx + 1];
+  if (targetIdx < targets.length - 1 && nextWrap) {
+    const next = targets[targetIdx + 1];
     nextWrap.style.display = 'block';
     if (nextIcon) nextIcon.textContent = next.emoji;
     if (nextName) nextName.textContent = next.nome;
