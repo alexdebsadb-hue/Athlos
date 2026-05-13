@@ -6926,23 +6926,53 @@ function esportaExcel() {
     ];
   });
 
-  // Genera TSV (apre in Excel come foglio nativo)
-  const tsv = [header, ...rows]
+  // Normalizza distanza → numero decimale con virgola (Excel italiano)
+  function normDist(v) {
+    if (!v && v !== 0) return '';
+    const n = parseFloat(String(v).replace(',','.'));
+    return isNaN(n) ? '' : String(n).replace('.',',');
+  }
+  // Normalizza tempo → H:MM:SS
+  function normTempo(v) {
+    if (!v) return '';
+    const s = String(v).trim().replace(/[.,hHmMsS]/g, ':').replace(/:+/g,':').replace(/^:|:$/g,'');
+    const p = s.split(':').map(x => x.padStart(2,'0'));
+    if (p.length === 1) return p[0];
+    if (p.length === 2) return p[0]+':'+p[1]+':00';
+    return p[0]+':'+p[1]+':'+p[2];
+  }
+
+  // Applica normalizzazioni alle righe
+  const rowsNorm = rows.map(r => {
+    const row = [...r];
+    row[9]  = normDist(row[9]);   // Km
+    row[10] = normTempo(row[10]); // Tempo
+    row[12] = normTempo(row[12]); // Nuoto
+    row[13] = normTempo(row[13]); // T1
+    row[14] = normTempo(row[14]); // Bici
+    row[15] = normTempo(row[15]); // T2
+    row[16] = normTempo(row[16]); // Corsa
+    return row;
+  });
+
+  // Genera CSV con ; (separatore Excel italiano) — colonne già separate
+  const csv = [header, ...rowsNorm]
     .map(row => row.map(cell => {
-      const s = String(cell).replace(/[\t\n\r]/g, ' ');
-      return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s;
-    }).join('	'))
+      const s = String(cell === null || cell === undefined ? '' : cell)
+        .replace(/[\n\r]/g, ' ');
+      return s.includes(';') || s.includes('"') ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join(';'))
     .join('\n');
 
-  const bom  = '﻿'; // BOM per Excel italiano
-  const blob = new Blob([bom + tsv], { type: 'text/tab-separated-values;charset=utf-8;' });
+  const bom  = '\uFEFF'; // BOM per Excel italiano
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   const _prof = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || localStorage.getItem('athlos_profilo') || '{}');
   const nome = _prof.nome || 'atleta';
   const data = new Date().toISOString().slice(0,10);
   a.href     = url;
-  a.download = `athlos_gare_${nome}_${data}.xls`;
+  a.download = `athlos_gare_${nome}_${data}.csv`;
   a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
