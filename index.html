@@ -8139,7 +8139,8 @@ async function renderSocial() {
     (statsCom && statsCom.eta_media) ? statsCom.eta_media : (etaMediaU || '—');
 
   // ── STATS GARE — usa foglio Statistiche Community se disponibile ──
-  const nGareTot = statsCom ? statsCom.gare_tot  : gare.length;
+  const nGareTot    = statsCom ? statsCom.gare_tot       : gare.length;
+  const utLoggati   = statsCom ? (statsCom.utenti_loggati || 0) : utentiOnline;
   const kmTot    = statsCom ? statsCom.km_tot     : Math.round(gare.reduce((s,g)=>s+(g.distanza||0),0));
   const nCitta   = statsCom ? statsCom.citta_tot  : [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
   const nRegioni = statsCom ? statsCom.regioni_tot: [...new Set(gare.map(g=>g.regione).filter(r=>r&&MAP_SEEDS.hasOwnProperty(r)))].length;
@@ -8638,7 +8639,7 @@ async function caricaDatiAdmin() {
     { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
     { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
     { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
-    { n: utentiOnline,     label: 'Utenti online ora',      icon: '🟢' },
+    { n: statsCom ? (statsCom.utenti_loggati||0) : (utLoggati||utentiOnline), label: 'Utenti loggati', icon: '🟢' },
     { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
