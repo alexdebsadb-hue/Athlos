@@ -7121,19 +7121,12 @@ async function renderPartner() {
       const id = logoUrl.match(/\/d\/([^\/]+)/);
       if (id) logoUrl = 'https://drive.google.com/uc?export=view&id=' + id[1];
     }
-    // Fallback: mostra badge federazioni se non c'è logo
-    const fedFallback = [
-      p.fidal ? '<div style="background:rgba(0,100,200,0.2);border:2px solid rgba(0,100,200,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#4aa0ff;">FIDAL</div>' : '',
-      p.fitri ? '<div style="background:rgba(200,50,0,0.2);border:2px solid rgba(200,50,0,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#ff6b4a;">FITRI</div>' : '',
-      p.fci   ? '<div style="background:rgba(0,150,0,0.2);border:2px solid rgba(0,150,0,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#4caf50;">FCI</div>'   : '',
-      p.fin   ? '<div style="background:rgba(0,80,200,0.2);border:2px solid rgba(0,80,200,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#42a5f5;">FIN</div>'   : '',
-    ].filter(Boolean).join('');
-    const fedPlaceholder = fedFallback
-      ? '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:16px;height:100%;">'+fedFallback+'</div>'
-      : '<div style="font-size:40px;">🏃</div>';
+    // Placeholder: icona sport in base alla federazione principale
+    const fedIcon = p.fidal ? '🏃' : p.fitri ? '🏊🚴🏃' : p.fci ? '🚴' : p.fin ? '🏊' : '🏅';
+    const placeholder = '<div style="font-size:56px;">'+fedIcon+'</div>';
     const logo = logoUrl
-      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\''+fedPlaceholder.replace(/'/g,"\\'")+'\'">'
-      : fedPlaceholder;
+      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\''+placeholder+'\'">':
+       placeholder;
     const bs = 'display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;';
     const ls = [
       p.sito      ? '<a href="'+p.sito+'"      target="_blank" style="'+bs+'">🌐 <span style="font-size:11px;color:var(--accent);font-weight:600;">Sito</span></a>' : '',
