@@ -7123,10 +7123,10 @@ async function renderPartner() {
     }
     // Placeholder: icona sport in base alla federazione principale
     const fedIcon = p.fidal ? '🏃' : p.fitri ? '🏊🚴🏃' : p.fci ? '🚴' : p.fin ? '🏊' : '🏅';
-    const placeholder = '<div style="font-size:56px;">'+fedIcon+'</div>';
+    const logoId = 'lg'+p.id;
     const logo = logoUrl
-      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\''+placeholder+'\'">':
-       placeholder;
+      ? '<img id="'+logoId+'" src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="(function(e){e.outerHTML=\'<div style=font-size:56px>'+fedIcon+'</div>\';})(this)">'
+      : '<div style="font-size:56px;">'+fedIcon+'</div>';
     const bs = 'display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;';
     const ls = [
       p.sito      ? '<a href="'+p.sito+'"      target="_blank" style="'+bs+'">🌐 <span style="font-size:11px;color:var(--accent);font-weight:600;">Sito</span></a>' : '',
