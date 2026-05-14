@@ -7181,7 +7181,6 @@ function scaricaDiploma() {
     bici:[255,193,7], nuoto:TEAL
   };
   function sportCol(s) { return scols[(s||'').toLowerCase()] || [150,150,150]; }
-  // Etichette sport complete
   function sportLblFull(s) {
     const m = {'corsa':'Corsa','trail':'Trail','ultra':'Ultra','triathlon':'Triathlon',
                'duathlon':'Duathlon','ironman':'Ironman','bici':'Ciclismo','nuoto':'Nuoto'};
@@ -7193,26 +7192,27 @@ function scaricaDiploma() {
   setDraw(...ACC); doc.setLineWidth(1.8); doc.rect(5,5,W-10,H-10);
   doc.setLineWidth(0.4); doc.rect(7.5,7.5,W-15,H-15);
 
-  // ── HEADER ──
-  setFill(30,15,10); doc.rect(9,9,W-18,28,'F');
-  setFill(...ACC); doc.rect(9,9,4,28,'F'); doc.rect(W-13,9,4,28,'F');
-  bold(26); setCol(...ACC); doc.text('ATHLOS', W/2, 21, {align:'center'});
-  normal(7.5); setCol(255,204,188); doc.text('YOUR RACE DIARY', W/2, 27, {align:'center'});
-  setDraw(...ACC); doc.setLineWidth(0.5); doc.line(80,30,W-80,30);
-  bold(18); setCol(245,245,245); doc.text(nome, W/2, 38, {align:'center'});
+  // ── HEADER (ridotto a 25mm invece di 28) ──
+  setFill(30,15,10); doc.rect(9,9,W-18,25,'F');
+  setFill(...ACC); doc.rect(9,9,4,25,'F'); doc.rect(W-13,9,4,25,'F');
+  bold(24); setCol(...ACC); doc.text('ATHLOS', W/2, 19, {align:'center'});
+  normal(7); setCol(255,204,188); doc.text('YOUR RACE DIARY', W/2, 25, {align:'center'});
+  setDraw(...ACC); doc.setLineWidth(0.5); doc.line(80,27,W-80,27);
+  bold(17); setCol(245,245,245); doc.text(nome, W/2, 34, {align:'center'});
   normal(7); setCol(150,150,150);
-  doc.text('Diploma generato il '+new Date().toLocaleDateString('it-IT',{year:'numeric',month:'long',day:'numeric'}), W/2, 43, {align:'center'});
+  doc.text('Diploma generato il '+new Date().toLocaleDateString('it-IT',{year:'numeric',month:'long',day:'numeric'}), W/2, 39, {align:'center'});
 
-  const colW=84, gap=5, startX=10, startY=48, colH=100;
+  // ── COLONNE (più alte: 105 invece di 100) ──
+  const colW=84, gap=5, startX=10, startY=43, colH=105;
   const col1=startX, col2=col1+colW+gap, col3=col2+colW+gap;
 
   function drawColBox(x, title, color) {
     setFill(20,20,20); doc.roundedRect(x,startY,colW,colH,2,2,'F');
     setFill(...color); doc.roundedRect(x,startY,colW,7,2,2,'F');
     doc.rect(x,startY+4,colW,3,'F');
-    bold(8); setCol(255,255,255); doc.text(title, x+colW/2, startY+5.2, {align:'center'});
+    bold(8.5); setCol(255,255,255); doc.text(title, x+colW/2, startY+5.5, {align:'center'});
     setDraw(...color); doc.setLineWidth(0.8); doc.roundedRect(x,startY,colW,colH,2,2,'S');
-    return startY+10;
+    return startY+11;
   }
 
   // ══ COL 1 ══
@@ -7221,13 +7221,13 @@ function scaricaDiploma() {
   if (prog.length) {
     const p = prog[0];
     const diff = Math.ceil((new Date(p.data)-new Date())/86400000);
-    setFill(0,50,55); doc.roundedRect(col1+2,y1-1,colW-4,16,1.5,1.5,'F');
-    setDraw(...TEAL); doc.setLineWidth(0.5); doc.roundedRect(col1+2,y1-1,colW-4,16,1.5,1.5,'S');
-    bold(9); setCol(255,255,255);
-    doc.text((p.nome||p.tipo_gara||'').slice(0,28), col1+4, y1+4);
-    normal(7.5); setCol(200,230,230); doc.text(fmtDataIT(p.data), col1+4, y1+9);
-    bold(8); setCol(...TEAL); doc.text(diff+' giorni al via', col1+colW-4, y1+9, {align:'right'});
-    y1+=20;
+    setFill(0,50,55); doc.roundedRect(col1+2,y1-1,colW-4,17,1.5,1.5,'F');
+    setDraw(...TEAL); doc.setLineWidth(0.5); doc.roundedRect(col1+2,y1-1,colW-4,17,1.5,1.5,'S');
+    bold(9.5); setCol(255,255,255);
+    doc.text((p.nome||p.tipo_gara||'').slice(0,28), col1+4, y1+5);
+    normal(8); setCol(200,230,230); doc.text(fmtDataIT(p.data), col1+4, y1+11);
+    bold(8); setCol(...TEAL); doc.text(diff+' giorni al via', col1+colW-4, y1+11, {align:'right'});
+    y1+=21;
   }
 
   const perSport = {};
@@ -7235,24 +7235,22 @@ function scaricaDiploma() {
     const s=sportgruppo(g.sport); if(!perSport[s]) perSport[s]=g;
   });
 
-  bold(7); setCol(180,220,220); doc.text('Ultima gara per sport', col1+3, y1); y1+=5;
+  bold(7.5); setCol(180,220,220); doc.text('Ultima gara per sport', col1+3, y1); y1+=5.5;
 
-  Object.entries(perSport).slice(0,5).forEach(([sport,g])=>{
+  Object.entries(perSport).slice(0,4).forEach(([sport,g])=>{
     const sc = sportCol(sport);
-    const sLabel = sportLblFull(sport);  // nome completo
-    setFill(...sc); doc.roundedRect(col1+3,y1-3.5,colW-6,5,1,1,'F');
-    bold(6.5); setCol(255,255,255);
-    // Sport a sinistra, data a destra
+    const sLabel = sportLblFull(sport);
+    setFill(...sc); doc.roundedRect(col1+3,y1-3.5,colW-6,5.5,1,1,'F');
+    bold(7); setCol(255,255,255);
     doc.text(sLabel.toUpperCase(), col1+5, y1);
     doc.text(fmtDataIT(g.data||''), col1+colW-5, y1, {align:'right'});
-    normal(6.5); setCol(240,240,240);
-    // Nome gara nella riga sotto
-    doc.text((g.nome||g.tipo_gara||'').slice(0,35), col1+5, y1+4.5);
-    y1+=11;
+    normal(7); setCol(240,240,240);
+    doc.text((g.nome||g.tipo_gara||'').slice(0,34), col1+5, y1+5);
+    y1+=12;
     if(y1>startY+colH-3) return;
   });
 
-  // ══ COL 2: Profilo + PB ══
+  // ══ COL 2 ══
   let y2 = drawColBox(col2, 'PROFILO & PERSONAL BEST', VIOLA);
 
   const regConq = [...new Set(gare.map(g=>normalizzaRegione(g.regione)).filter(r=>r&&MAP_SEEDS.hasOwnProperty(r)))].length;
@@ -7265,38 +7263,36 @@ function scaricaDiploma() {
     ['Regioni',        regConq+' / 20',                  BLU],
   ];
   campi.forEach(([label,val,vc])=>{
-    bold(7); setCol(150,150,150); doc.text(label+':', col2+3, y2);
-    bold(7.5); setCol(...vc); doc.text(val, col2+38, y2);
-    y2+=4.8;
+    bold(7.5); setCol(150,150,150); doc.text(label+':', col2+3, y2);
+    bold(8); setCol(...vc); doc.text(val, col2+40, y2);
+    y2+=5;
   });
 
   y2+=1; setDraw(60,60,60); doc.setLineWidth(0.2); doc.line(col2+3,y2,col2+colW-3,y2); y2+=4;
-  bold(7.5); setCol(...GOLD); doc.text('PERSONAL BEST', col2+3, y2); y2+=5;
+  bold(8); setCol(...GOLD); doc.text('PERSONAL BEST', col2+3, y2); y2+=5.5;
 
-  // Tutti i PB: raggruppa per sport+tipo_gara, prendi il minimo
   const pbMap = {};
   gare.filter(g=>g.esito==='finisher'&&garaTempoSecs(g)>0).forEach(g=>{
-    const chiave = sportgruppo(g.sport)+'|'+(g.tipo_gara||g.nome||'');
-    if(!pbMap[chiave]||garaTempoSecs(g)<garaTempoSecs(pbMap[chiave])) pbMap[chiave]=g;
+    const k=sportgruppo(g.sport)+'|'+(g.tipo_gara||g.nome||'');
+    if(!pbMap[k]||garaTempoSecs(g)<garaTempoSecs(pbMap[k])) pbMap[k]=g;
   });
   const pbList = Object.values(pbMap).sort((a,b)=>garaTempoSecs(a)-garaTempoSecs(b));
 
-  pbList.slice(0,8).forEach(g=>{
+  pbList.slice(0,7).forEach(g=>{
     const sport = sportgruppo(g.sport);
     const sc = sportCol(sport);
-    const sLbl = sportLblFull(sport).slice(0,10).toUpperCase();
-    // Badge sport completo
-    const badgeW = Math.min(22, sLbl.length*1.8+4);
-    setFill(...sc); doc.roundedRect(col2+3,y2-3.5,badgeW,4.5,0.8,0.8,'F');
-    bold(5.5); setCol(255,255,255); doc.text(sLbl, col2+3+badgeW/2, y2-0.8, {align:'center'});
-    normal(7); setCol(245,245,245);
+    const sLbl = sportLblFull(sport).toUpperCase();
+    const badgeW = Math.min(26, sLbl.length*1.9+4);
+    setFill(...sc); doc.roundedRect(col2+3,y2-3.5,badgeW,5,0.8,0.8,'F');
+    bold(6); setCol(255,255,255); doc.text(sLbl, col2+3+badgeW/2, y2-0.5, {align:'center'});
+    normal(7.5); setCol(245,245,245);
     doc.text((g.tipo_gara||g.nome||'').slice(0,17), col2+3+badgeW+2, y2);
-    bold(7.5); setCol(...GOLD); doc.text(g.tempo||'', col2+colW-3, y2, {align:'right'});
+    bold(8); setCol(...GOLD); doc.text(g.tempo||'', col2+colW-3, y2, {align:'right'});
     y2+=5.5;
     if(y2>startY+colH-3) return;
   });
 
-  // ══ COL 3: Regioni ══
+  // ══ COL 3 ══
   let y3 = drawColBox(col3, 'REGIONI CONQUISTATE', VERDE);
 
   const regioniCount = {};
@@ -7307,96 +7303,88 @@ function scaricaDiploma() {
   const regSorted = Object.entries(regioniCount).sort((a,b)=>b[1]-a[1]);
   const maxReg = regSorted[0]?.[1]||1;
 
-  bold(7); setCol(150,200,150);
+  bold(7.5); setCol(150,200,150);
   doc.text('Regione', col3+3, y3); doc.text('Gare', col3+colW-10, y3, {align:'right'});
-  y3+=4; setDraw(60,60,60); doc.setLineWidth(0.2); doc.line(col3+3,y3,col3+colW-3,y3); y3+=3;
+  y3+=4; setDraw(60,60,60); doc.setLineWidth(0.2); doc.line(col3+3,y3,col3+colW-3,y3); y3+=3.5;
 
-  regSorted.slice(0,14).forEach(([reg,n])=>{
+  regSorted.slice(0,13).forEach(([reg,n])=>{
     const barW = Math.max(2,(n/maxReg)*(colW-28));
-    setFill(30,55,35); doc.rect(col3+3,y3-3,colW-18,3.5,'F');
-    setFill(...VERDE); doc.rect(col3+3,y3-3,barW,3.5,'F');
-    normal(6.5); setCol(220,220,220); doc.text(reg.slice(0,20), col3+5, y3);
-    bold(7); setCol(...VERDE); doc.text(n+'', col3+colW-10, y3, {align:'right'});
-    y3+=4.2;
+    setFill(30,55,35); doc.rect(col3+3,y3-3,colW-18,4,'F');
+    setFill(...VERDE); doc.rect(col3+3,y3-3,barW,4,'F');
+    normal(7); setCol(220,220,220); doc.text(reg.slice(0,20), col3+5, y3);
+    bold(7.5); setCol(...VERDE); doc.text(n+'', col3+colW-10, y3, {align:'right'});
+    y3+=4.5;
     if(y3>startY+colH-3) return;
   });
 
-  // ══ STATISTICHE ══
-  const statY = startY+colH+5;
-  const statH = H-statY-12;
-  const secW  = (W-26)/3;
+  // ══ STATISTICHE (usa spazio rimanente) ══
+  const statY = startY+colH+4;
+  const statH = H-statY-8;  // fino a 8mm dal bordo
 
   setFill(20,20,20); doc.roundedRect(10,statY,W-20,statH,2,2,'F');
   setFill(...LIME); doc.roundedRect(10,statY,W-20,7,2,2,'F');
   doc.rect(10,statY+4,W-20,3,'F');
-  bold(8); setCol(20,20,20); doc.text('STATISTICHE', W/2, statY+5.2, {align:'center'});
+  bold(8.5); setCol(20,20,20); doc.text('STATISTICHE', W/2, statY+5.5, {align:'center'});
   setDraw(...LIME); doc.setLineWidth(0.8); doc.roundedRect(10,statY,W-20,statH,2,2,'S');
 
   const sY = statY+12;
   const barH2 = statH-20;
   const barBaseY = sY+barH2;
+  const secW = (W-26)/3;
 
-  // Gare per anno — GOLD
-  bold(7.5); setCol(...GOLD); doc.text('Gare per anno', 13, sY);
+  // Gare per anno
+  bold(8); setCol(...GOLD); doc.text('Gare per anno', 13, sY);
   const garaPerAnno = {};
   gare.forEach(g=>{ const y=(g.data||'').slice(0,4); if(y) garaPerAnno[y]=(garaPerAnno[y]||0)+1; });
   const anni = Object.entries(garaPerAnno).sort((a,b)=>a[0].localeCompare(b[0]));
   const maxAnno = Math.max(...anni.map(a=>a[1]),1);
-  const annoBW = Math.min(14, (secW-6)/Math.max(anni.length,1)-2);
+  const annoBW = Math.min(14,(secW-6)/Math.max(anni.length,1)-2);
   anni.forEach(([anno,n],i)=>{
-    const bx = 13+i*(annoBW+2);
-    const bh = (n/maxAnno)*barH2*0.72;
+    const bx=13+i*(annoBW+2);
+    const bh=(n/maxAnno)*barH2*0.72;
     setFill(...GOLD); doc.roundedRect(bx,barBaseY-bh,annoBW,bh,0.5,0.5,'F');
-    bold(5.5); setCol(20,20,20); doc.text(n+'', bx+annoBW/2, barBaseY-bh-1.5, {align:'center'});
-    normal(5); setCol(180,180,180); doc.text(anno.slice(2), bx+annoBW/2, barBaseY+3, {align:'center'});
+    bold(6); setCol(20,20,20); doc.text(n+'', bx+annoBW/2, barBaseY-bh-1.5, {align:'center'});
+    normal(5.5); setCol(180,180,180); doc.text(anno.slice(2), bx+annoBW/2, barBaseY+3.5, {align:'center'});
   });
 
-  // Gare per sport — colori sport
-  const s2x = 13+secW+3;
-  bold(7.5); setCol(...ACC); doc.text('Gare per sport', s2x, sY);
+  // Gare per sport
+  const s2x=13+secW+3;
+  bold(8); setCol(...ACC); doc.text('Gare per sport', s2x, sY);
   const garaPerSport = {};
   gare.forEach(g=>{ const s=sportgruppo(g.sport); garaPerSport[s]=(garaPerSport[s]||0)+1; });
   const sportArr = Object.entries(garaPerSport).sort((a,b)=>b[1]-a[1]);
   const maxSport = Math.max(...sportArr.map(s=>s[1]),1);
-  const sportBW  = Math.min(20, (secW-6)/Math.max(sportArr.length,1)-2);
+  const sportBW = Math.min(20,(secW-6)/Math.max(sportArr.length,1)-2);
   sportArr.forEach(([sport,n],i)=>{
-    const bx = s2x+i*(sportBW+2);
-    const bh = (n/maxSport)*barH2*0.72;
-    const sc = sportCol(sport);
+    const bx=s2x+i*(sportBW+2);
+    const bh=(n/maxSport)*barH2*0.72;
+    const sc=sportCol(sport);
     setFill(...sc); doc.roundedRect(bx,barBaseY-bh,sportBW,bh,0.5,0.5,'F');
-    bold(5.5); setCol(255,255,255); doc.text(n+'', bx+sportBW/2, barBaseY-bh-1.5, {align:'center'});
-    normal(5); setCol(180,180,180);
-    // Nome sport completo su 2 righe se non ci sta
-    const sl = sportLblFull(sport);
-    doc.text(sl.slice(0,8), bx+sportBW/2, barBaseY+3, {align:'center'});
-    if(sl.length>8) doc.text(sl.slice(8,16), bx+sportBW/2, barBaseY+6, {align:'center'});
+    bold(6); setCol(255,255,255); doc.text(n+'', bx+sportBW/2, barBaseY-bh-1.5, {align:'center'});
+    // Nome sport su una riga sola — max 9 char
+    normal(5.5); setCol(180,180,180);
+    doc.text(sportLblFull(sport).slice(0,9), bx+sportBW/2, barBaseY+3.5, {align:'center'});
   });
 
-  // Top distanze — barre orizzontali, DENTRO il box
-  const s3x = 13+secW*2+6;
-  const s3maxW = W-20-s3x-8; // larghezza massima disponibile
-  bold(7.5); setCol(...VERDE); doc.text('Top distanze', s3x, sY);
+  // Top distanze
+  const s3x=13+secW*2+6;
+  const s3maxW=W-22-s3x;
+  bold(8); setCol(...VERDE); doc.text('Top distanze', s3x, sY);
   const garaPerTipo = {};
   gare.forEach(g=>{ const t=g.tipo_gara||g.nome||''; if(t) garaPerTipo[t]=(garaPerTipo[t]||0)+1; });
-  const tipoArr = Object.entries(garaPerTipo).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const maxTipo = Math.max(...tipoArr.map(t=>t[1]),1);
-  const labelW = 22;  // spazio etichetta
-  const numW   = 6;   // spazio numero
-  const barAvail = s3maxW - labelW - numW - 4;
-  let ty = sY+5;
+  const tipoArr=Object.entries(garaPerTipo).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxTipo=Math.max(...tipoArr.map(t=>t[1]),1);
+  const lblW=24, numW=7;
+  const barAvail=s3maxW-lblW-numW-4;
+  let ty=sY+5;
   tipoArr.forEach(([tipo,n])=>{
-    const bw = (n/maxTipo)*barAvail;
-    setFill(30,55,35); doc.rect(s3x+labelW,ty-3,barAvail,3.5,'F');
-    setFill(...VERDE); doc.rect(s3x+labelW,ty-3,bw,3.5,'F');
-    normal(6.5); setCol(200,200,200); doc.text(tipo.slice(0,13), s3x, ty);
-    bold(6.5); setCol(...VERDE); doc.text(n+'', s3x+labelW+barAvail+2, ty);
-    ty+=5;
+    const bw=(n/maxTipo)*barAvail;
+    setFill(30,55,35); doc.rect(s3x+lblW,ty-3.5,barAvail,4,'F');
+    setFill(...VERDE); doc.rect(s3x+lblW,ty-3.5,bw,4,'F');
+    normal(7); setCol(200,200,200); doc.text(tipo.slice(0,13), s3x, ty);
+    bold(7); setCol(...VERDE); doc.text(n+'', s3x+lblW+barAvail+2, ty);
+    ty+=5.5;
   });
-
-  // ── FOOTER ──
-  setDraw(...ACC); doc.setLineWidth(0.3); doc.line(14,H-10,W-14,H-10);
-  normal(6); setCol(100,100,100);
-  doc.text('Athlos — Your Race Diary  |  Generato automaticamente', W/2, H-6.5, {align:'center'});
 
   doc.save('Athlos_Diploma_'+nome.replace(/ /g,'_')+'_'+new Date().getFullYear()+'.pdf');
   showToast('Diploma scaricato!');
