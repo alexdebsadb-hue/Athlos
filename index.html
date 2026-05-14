@@ -7094,7 +7094,15 @@ async function renderPartner() {
   if (grid) {
     grid.style.display = 'grid';
     grid.innerHTML = partner.map(p => {
-    const logo = p.logo ? '<img src="'+p.logo+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.style.display=\'none\'">' : '<div style="font-size:48px;">🏃</div>';
+    // Converti link Drive in formato diretto se necessario
+    let logoUrl = p.logo || '';
+    if (logoUrl.includes('drive.google.com/file/d/')) {
+      const id = logoUrl.match(/\/d\/([^\/]+)/);
+      if (id) logoUrl = 'https://drive.google.com/uc?export=view&id=' + id[1];
+    }
+    const logo = logoUrl
+      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\'<div style=\\\'font-size:48px;\\\'>🏃</div>\'">'
+      : '<div style="font-size:48px;">🏃</div>';
     const bs = 'display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;';
     const ls = [
       p.sito      ? '<a href="'+p.sito+'"      target="_blank" style="'+bs+'">🌐 <span style="font-size:11px;color:var(--accent);font-weight:600;">Sito</span></a>' : '',
