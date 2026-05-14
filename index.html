@@ -647,6 +647,7 @@
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1320,6 +1321,7 @@
         <div style="display:flex;gap:10px;">
           <button class="btn-secondary" onclick="openImportModal()">📥 Importa</button>
           <button class="btn-secondary" onclick="esportaExcel()">📊 Esporta Excel</button>
+          <button class="btn-secondary" onclick="scaricaDiploma()" style="font-size:13px;">🏆 Scarica Diploma</button>
           <button class="btn-primary" onclick="openForm()">+ Aggiungi gara</button>
         </div>
       </div>
@@ -7136,6 +7138,318 @@ async function renderPartner() {
     return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.15s,border-color 0.2s;" onmouseenter="this.style.borderColor=\'var(--accent)\';this.style.transform=\'translateY(-2px)\'" onmouseleave="this.style.borderColor=\'var(--border)\';this.style.transform=\'\'"><div style="height:140px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;">'+logo+'</div><div style="padding:16px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">'+p.nome+'</div>'+(p.citta?'<div style="font-size:13px;color:var(--text3);margin-bottom:6px;">📍 '+p.citta+'</div>':'')+(p.contatto?'<div style="font-size:13px;color:var(--text2);margin-bottom:8px;">'+(p.contatto.includes('@')?'✉️':'📞')+' '+p.contatto+'</div>':'')+(ls?'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+ls+'</div>':'')+(function(){var fed=[p.fidal?'<span style="background:rgba(0,100,200,0.15);border:1px solid rgba(0,100,200,0.4);color:#4aa0ff;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIDAL '+p.fidal+'</span>':'',p.fitri?'<span style="background:rgba(200,50,0,0.15);border:1px solid rgba(200,50,0,0.4);color:#ff6b4a;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FITRI '+p.fitri+'</span>':'',p.fci?'<span style="background:rgba(0,150,0,0.15);border:1px solid rgba(0,150,0,0.4);color:#4caf50;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FCI '+p.fci+'</span>':'',p.fin?'<span style="background:rgba(0,50,200,0.15);border:1px solid rgba(0,50,200,0.4);color:#42a5f5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIN '+p.fin+'</span>':''].filter(Boolean).join('');return fed?'<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'+fed+'</div>':'';}())+'</div></div>';
   }).join('');
   }
+}
+
+
+// ════════════════════════════════
+// PDF DIPLOMA
+// ════════════════════════════════
+function scaricaDiploma() {
+  const { jsPDF } = window.jspdf;
+  if (!jsPDF) { showToast('Errore: jsPDF non caricato'); return; }
+
+  showToast('Generazione diploma in corso...');
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const W = 297, H = 210;
+  const acc = '#ff5722';
+
+  // Dati atleta
+  const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || '{}');
+  const gare    = calcolaPBAutomatici(getGare());
+  const nome    = (profilo.nome || '') + ' ' + (profilo.cognome || '');
+  const finisher = gare.filter(g => g.esito === 'finisher');
+  const kmTot   = Math.round(gare.reduce((s,g) => s+(g.distanza||0), 0));
+  const prog    = getProgramma().filter(p => p.data >= new Date().toISOString().slice(0,10))
+                    .sort((a,b) => a.data.localeCompare(b.data));
+
+  // ── SFONDO ──
+  doc.setFillColor(10, 10, 10);
+  doc.rect(0, 0, W, H, 'F');
+
+  // Bordo decorativo
+  doc.setDrawColor(255, 87, 34);
+  doc.setLineWidth(1.5);
+  doc.rect(6, 6, W-12, H-12);
+  doc.setLineWidth(0.3);
+  doc.rect(8, 8, W-16, H-16);
+
+  // ── LOGO ATHLOS (testo) ──
+  doc.setTextColor(255, 87, 34);
+  doc.setFontSize(28);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ATHLOS', W/2, 18, { align: 'center' });
+
+  doc.setTextColor(255, 204, 188);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('YOUR RACE DIARY', W/2, 23, { align: 'center' });
+
+  // Linea sotto header
+  doc.setDrawColor(255, 87, 34);
+  doc.setLineWidth(0.5);
+  doc.line(20, 26, W-20, 26);
+
+  // ── NOME ATLETA ──
+  doc.setTextColor(245, 245, 245);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text(nome.trim() || 'Atleta', W/2, 36, { align: 'center' });
+
+  doc.setTextColor(170, 170, 170);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  const dataDiploma = new Date().toLocaleDateString('it-IT', { year:'numeric', month:'long', day:'numeric' });
+  doc.text('Diploma generato il ' + dataDiploma, W/2, 41, { align: 'center' });
+
+  // ═══════════════════════════════════════════
+  // COLONNA 1: HP — Prossima gara + Ultime per sport
+  // ═══════════════════════════════════════════
+  const col1x = 14, colW = 80, rowY = 48;
+
+  // Header colonna
+  doc.setFillColor(255, 87, 34);
+  doc.roundedRect(col1x, rowY, colW, 7, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('📅 PROSSIME GARE & ULTIME PER SPORT', col1x + colW/2, rowY+5, { align: 'center' });
+
+  let y1 = rowY + 11;
+  doc.setFontSize(7.5);
+
+  // Prossima gara
+  if (prog.length) {
+    const p = prog[0];
+    const diff = Math.ceil((new Date(p.data) - new Date()) / 86400000);
+    doc.setTextColor(255, 204, 188);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Prossima gara:', col1x, y1); y1 += 4.5;
+    doc.setTextColor(245, 245, 245);
+    doc.setFont('helvetica', 'normal');
+    doc.text((p.nome || p.tipo_gara || '') + ' — ' + fmtDataIT(p.data), col1x, y1); y1 += 3.5;
+    doc.setTextColor(255, 87, 34);
+    doc.text('⏳ ' + diff + ' giorni al via', col1x, y1); y1 += 6;
+  }
+
+  // Ultima gara per sport
+  const perSport = {};
+  [...gare].sort((a,b) => b.data.localeCompare(a.data)).forEach(g => {
+    const s = sportgruppo(g.sport);
+    if (!perSport[s]) perSport[s] = g;
+  });
+
+  doc.setTextColor(255, 204, 188);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Ultima gara per sport:', col1x, y1); y1 += 4.5;
+
+  Object.entries(perSport).slice(0, 5).forEach(([sport, g]) => {
+    doc.setTextColor(245, 245, 245);
+    doc.setFont('helvetica', 'bold');
+    doc.text(sportLabel(sport), col1x, y1);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(170, 170, 170);
+    const info = (g.tipo_gara || g.nome || '') + (g.distanza ? ' · ' + g.distanza + ' km' : '') + (g.tempo ? ' · ' + g.tempo : '');
+    doc.text(info.slice(0, 45), col1x + 22, y1);
+    y1 += 5;
+  });
+
+  // ═══════════════════════════════════════════
+  // COLONNA 2: Profilo — Dati personali + PB
+  // ═══════════════════════════════════════════
+  const col2x = col1x + colW + 8;
+
+  doc.setFillColor(255, 87, 34);
+  doc.roundedRect(col2x, rowY, colW, 7, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('👤 PROFILO & PERSONAL BEST', col2x + colW/2, rowY+5, { align: 'center' });
+
+  let y2 = rowY + 11;
+  doc.setFontSize(7.5);
+
+  // Dati personali
+  const campi = [
+    ['Città', profilo.citta || '—'],
+    ['Sesso', profilo.sesso || '—'],
+    ['Sport preferito', profilo.sport_preferito || '—'],
+    ['Gare completate', finisher.length.toString()],
+    ['Km totali', kmTot.toLocaleString('it') + ' km'],
+    ['Regioni conquistate', [...new Set(gare.map(g=>normalizzaRegione(g.regione)).filter(r=>r&&MAP_SEEDS.hasOwnProperty(r)))].length + ' / 20'],
+  ];
+  campi.forEach(([label, val]) => {
+    doc.setTextColor(255, 204, 188);
+    doc.setFont('helvetica', 'bold');
+    doc.text(label + ':', col2x, y2);
+    doc.setTextColor(245, 245, 245);
+    doc.setFont('helvetica', 'normal');
+    doc.text(val, col2x + 35, y2);
+    y2 += 5;
+  });
+
+  y2 += 2;
+  doc.setDrawColor(80, 80, 80);
+  doc.setLineWidth(0.2);
+  doc.line(col2x, y2, col2x + colW, y2);
+  y2 += 4;
+
+  // PB
+  doc.setTextColor(255, 204, 188);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.text('Personal Best:', col2x, y2); y2 += 4.5;
+
+  const pbGare = gare.filter(g => g.pb && g.esito === 'finisher' && g.tempo);
+  if (pbGare.length) {
+    pbGare.slice(0, 6).forEach(g => {
+      doc.setTextColor(255, 215, 0);
+      doc.setFont('helvetica', 'bold');
+      doc.text('★', col2x, y2);
+      doc.setTextColor(245, 245, 245);
+      doc.setFont('helvetica', 'normal');
+      const label2 = (g.tipo_gara || g.nome || '').slice(0,20);
+      doc.text(label2, col2x + 5, y2);
+      doc.setTextColor(255, 87, 34);
+      doc.text(g.tempo || '', col2x + 55, y2);
+      y2 += 4.5;
+    });
+  } else {
+    doc.setTextColor(170, 170, 170);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Nessun PB registrato', col2x, y2);
+  }
+
+  // ═══════════════════════════════════════════
+  // COLONNA 3: Mappa — Regioni con gare
+  // ═══════════════════════════════════════════
+  const col3x = col2x + colW + 8;
+
+  doc.setFillColor(255, 87, 34);
+  doc.roundedRect(col3x, rowY, colW, 7, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text('🗺️ REGIONI CONQUISTATE', col3x + colW/2, rowY+5, { align: 'center' });
+
+  let y3 = rowY + 11;
+  doc.setFontSize(7);
+
+  const regioniCount = {};
+  gare.forEach(g => {
+    const r = normalizzaRegione(g.regione);
+    if (r && MAP_SEEDS.hasOwnProperty(r)) regioniCount[r] = (regioniCount[r]||0) + 1;
+  });
+  const regioniSorted = Object.entries(regioniCount).sort((a,b) => b[1]-a[1]);
+
+  if (regioniSorted.length) {
+    doc.setTextColor(255, 204, 188);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Regione', col3x, y3);
+    doc.text('Gare', col3x + 60, y3);
+    y3 += 4;
+    doc.setDrawColor(80,80,80); doc.setLineWidth(0.2);
+    doc.line(col3x, y3, col3x+colW, y3); y3 += 3;
+
+    regioniSorted.forEach(([reg, n]) => {
+      doc.setTextColor(245, 245, 245);
+      doc.setFont('helvetica', 'normal');
+      doc.text(reg.slice(0,22), col3x, y3);
+      doc.setTextColor(255, 87, 34);
+      doc.setFont('helvetica', 'bold');
+      doc.text(n.toString(), col3x + 62, y3);
+      y3 += 4;
+      if (y3 > H - 20) return;
+    });
+  } else {
+    doc.setTextColor(170, 170, 170);
+    doc.text('Nessuna regione ancora', col3x, y3);
+  }
+
+  // ═══════════════════════════════════════════
+  // RIGA INFERIORE: Statistiche
+  // ═══════════════════════════════════════════
+  const statY = Math.max(y1, y2, y3) + 6;
+  const statLineY = Math.min(statY, H - 45);
+
+  doc.setDrawColor(255, 87, 34);
+  doc.setLineWidth(0.4);
+  doc.line(14, statLineY, W-14, statLineY);
+
+  doc.setFillColor(255, 87, 34);
+  doc.roundedRect(14, statLineY+3, W-28, 6, 1, 1, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('📊 STATISTICHE', W/2, statLineY+7.5, { align: 'center' });
+
+  const statDataY = statLineY + 13;
+
+  // Gare per anno
+  const garaPerAnno = {};
+  gare.forEach(g => {
+    const y = (g.data||'').slice(0,4);
+    if (y) garaPerAnno[y] = (garaPerAnno[y]||0)+1;
+  });
+  const anni = Object.entries(garaPerAnno).sort((a,b) => a[0].localeCompare(b[0]));
+
+  doc.setTextColor(255, 204, 188);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Gare per anno:', 14, statDataY);
+  let sx = 14;
+  anni.forEach(([anno, n]) => {
+    doc.setTextColor(245,245,245); doc.setFont('helvetica','normal');
+    doc.text(anno + ': ' + n, sx + 32, statDataY);
+    sx += 25;
+  });
+
+  // Gare per sport
+  const garaPerSport = {};
+  gare.forEach(g => { const s=sportgruppo(g.sport); garaPerSport[s]=(garaPerSport[s]||0)+1; });
+  const sportSorted = Object.entries(garaPerSport).sort((a,b)=>b[1]-a[1]);
+
+  doc.setTextColor(255, 204, 188);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Gare per sport:', 14, statDataY+6);
+  let sx2 = 14;
+  sportSorted.forEach(([sport, n]) => {
+    doc.setTextColor(245,245,245); doc.setFont('helvetica','normal');
+    doc.text(sportLabel(sport)+': '+n, sx2+32, statDataY+6);
+    sx2 += 32;
+  });
+
+  // Top tipo gara
+  const garaPerTipo = {};
+  gare.forEach(g => {
+    const t = g.tipo_gara || g.nome || '';
+    if (t) garaPerTipo[t] = (garaPerTipo[t]||0)+1;
+  });
+  const tipoSorted = Object.entries(garaPerTipo).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  doc.setTextColor(255, 204, 188);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Top distanze:', 14, statDataY+12);
+  let sx3 = 14;
+  tipoSorted.forEach(([tipo, n]) => {
+    doc.setTextColor(245,245,245); doc.setFont('helvetica','normal');
+    doc.text(tipo.slice(0,15)+': '+n, sx3+32, statDataY+12);
+    sx3 += 38;
+  });
+
+  // ── FOOTER ──
+  doc.setDrawColor(255, 87, 34);
+  doc.setLineWidth(0.3);
+  doc.line(14, H-12, W-14, H-12);
+  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(6.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Athlos — Your Race Diary  |  athlos.community', W/2, H-8, { align: 'center' });
+
+  // ── SALVA ──
+  const nomefile = 'Athlos_Diploma_' + (profilo.nome||'atleta') + '_' + new Date().getFullYear() + '.pdf';
+  doc.save(nomefile);
+  showToast('✅ Diploma scaricato!');
 }
 
 
