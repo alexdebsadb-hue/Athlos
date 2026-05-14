@@ -1248,6 +1248,19 @@
       <!-- Grid partner -->
       <div id="partner-grid" style="display:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
 
+      <!-- Box diventa partner -->
+      <div style="margin-top:40px;background:linear-gradient(135deg,rgba(255,87,34,0.1),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);border-radius:16px;padding:28px 32px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:12px;">🤝</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;">Vuoi diventare partner?</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.7;">
+          Se vuoi contribuire alla crescita della community di Athlos,<br>
+          contattaci via email:
+        </div>
+        <a id="partner-contact-email" href="#" style="display:inline-block;background:var(--accent);color:white;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:15px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">
+          ✉️ Scrivici
+        </a>
+      </div>
+
     </div>
   </div>
 
@@ -2469,6 +2482,7 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
+const CONTACT_EMAIL = 'alexdebs.adb@gmail.com';
 const GS_URL   = 'https://script.google.com/macros/s/AKfycbyulhPWlAnh_ueNDMct2GB0TtXhAeTeEKLImHixergrZYb3X468EhlIf59eSSbcQBnq/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
 
@@ -7086,6 +7100,13 @@ async function renderPartner() {
 
   if (loading) loading.style.display = 'none';
 
+  // Aggiorna email contatto dinamicamente
+  const emailEl = document.getElementById('partner-contact-email');
+  if (emailEl) {
+    emailEl.href = 'mailto:' + CONTACT_EMAIL;
+    emailEl.title = CONTACT_EMAIL;
+  }
+
   if (!partner || !partner.length) {
     if (empty) empty.style.display = 'block';
     return;
@@ -7100,9 +7121,19 @@ async function renderPartner() {
       const id = logoUrl.match(/\/d\/([^\/]+)/);
       if (id) logoUrl = 'https://drive.google.com/uc?export=view&id=' + id[1];
     }
+    // Fallback: mostra badge federazioni se non c'è logo
+    const fedFallback = [
+      p.fidal ? '<div style="background:rgba(0,100,200,0.2);border:2px solid rgba(0,100,200,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#4aa0ff;">FIDAL</div>' : '',
+      p.fitri ? '<div style="background:rgba(200,50,0,0.2);border:2px solid rgba(200,50,0,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#ff6b4a;">FITRI</div>' : '',
+      p.fci   ? '<div style="background:rgba(0,150,0,0.2);border:2px solid rgba(0,150,0,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#4caf50;">FCI</div>'   : '',
+      p.fin   ? '<div style="background:rgba(0,80,200,0.2);border:2px solid rgba(0,80,200,0.5);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:#42a5f5;">FIN</div>'   : '',
+    ].filter(Boolean).join('');
+    const fedPlaceholder = fedFallback
+      ? '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:16px;height:100%;">'+fedFallback+'</div>'
+      : '<div style="font-size:40px;">🏃</div>';
     const logo = logoUrl
-      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\'<div style=\\\'font-size:48px;\\\'>🏃</div>\'">'
-      : '<div style="font-size:48px;">🏃</div>';
+      ? '<img src="'+logoUrl+'" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;" onerror="this.parentElement.innerHTML=\''+fedPlaceholder.replace(/'/g,"\\'")+'\'">'
+      : fedPlaceholder;
     const bs = 'display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;';
     const ls = [
       p.sito      ? '<a href="'+p.sito+'"      target="_blank" style="'+bs+'">🌐 <span style="font-size:11px;color:var(--accent);font-weight:600;">Sito</span></a>' : '',
@@ -9140,7 +9171,7 @@ function updateMapColors() {
 <!-- PIÈ DI PAGINA -->
 <footer style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:13px;color:var(--text3);margin-top:60px;">
   <span>Athlos © 2026 &nbsp;·&nbsp;</span>
-  <a href="mailto:alexdebs.adb@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:500;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">✉️ Contattaci</a>
+  <a href="mailto:alexdebs.adb@gmail.com" id="footer-email" style="color:var(--accent);text-decoration:none;font-weight:500;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">✉️ Contattaci</a>
   <span> &nbsp;·&nbsp; alexdebs.adb@gmail.com</span>
   <span> &nbsp;·&nbsp; </span>
   <a href="#" onclick="apriConsigli();return false;" style="color:var(--accent);text-decoration:none;font-weight:500;">💬 I tuoi consigli</a>
