@@ -661,6 +661,7 @@
     <button class="nav-link" onclick="showPage('programma',this)">In programma</button>
     <button class="nav-link" onclick="showPage('stats',this)">Statistiche</button>
     <button class="nav-link" onclick="showPage('social',this)">🌍 Social</button>
+    <button class="nav-link" onclick="showPage('partner',this)">🤝 Partner</button>
     <button class="nav-link" id="nav-admin-btn" onclick="showPage('admin',this)"
       style="display:none;background:linear-gradient(135deg,rgba(255,87,34,0.15),rgba(255,87,34,0.05));border:1px solid rgba(255,87,34,0.3);color:var(--accent);">
       ⚙️ Admin
@@ -1218,6 +1219,36 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- PARTNER -->
+  <div id="page-partner" class="page">
+    <div style="max-width:960px;margin:0 auto;padding:24px 16px;">
+
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;margin-bottom:6px;">
+        🤝 Partner & Società sportive
+      </div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:28px;">
+        Le società sportive e i partner che supportano la community Athlos
+      </div>
+
+      <!-- Loading -->
+      <div id="partner-loading" style="text-align:center;padding:60px 20px;color:var(--text3);">
+        <div style="font-size:32px;margin-bottom:12px;">⏳</div>
+        <div>Caricamento partner...</div>
+      </div>
+
+      <!-- Empty -->
+      <div id="partner-empty" style="display:none;text-align:center;padding:60px 20px;">
+        <div style="font-size:48px;margin-bottom:12px;">🤝</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;">Nessun partner ancora</div>
+        <div style="color:var(--text3);">I partner verranno aggiunti presto!</div>
+      </div>
+
+      <!-- Grid partner -->
+      <div id="partner-grid" style="display:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
+
+    </div>
   </div>
 
   <!-- PROFILO -->
@@ -3034,6 +3065,7 @@ function showPage(page, btn) {
   if (page === 'profilo') renderProfilo();
   if (page === 'programma') renderProgramma();
   if (page === 'stats')   { setTimeout(() => renderStats(), 50); }
+  if (page === 'partner') { renderPartner(); return; }
   if (page === 'social')  { renderSocial(); }
 }
 
@@ -7027,6 +7059,77 @@ function esportaExcel() {
   a.click();
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
   showToast(`✅ Esportate ${gare.length} gare in Excel!`);
+}
+
+
+// ════════════════════════════════
+// PARTNER
+// ════════════════════════════════
+let _partnerCache = null;
+
+async function renderPartner() {
+  const loading = document.getElementById('partner-loading');
+  const empty   = document.getElementById('partner-empty');
+  const grid    = document.getElementById('partner-grid');
+  if (loading) loading.style.display = 'block';
+  if (empty)   empty.style.display   = 'none';
+  if (grid)    grid.style.display    = 'none';
+
+  // Usa cache se disponibile
+  let partner = _partnerCache;
+  if (!partner) {
+    try {
+      partner = await gsGet({ action: 'getPartner', utente_id: '' });
+      if (Array.isArray(partner)) _partnerCache = partner;
+    } catch(e) { partner = []; }
+  }
+
+  if (loading) loading.style.display = 'none';
+
+  if (!partner || !partner.length) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+
+  if (grid) {
+    grid.style.display = 'grid';
+    grid.innerHTML = partner.map(p => `
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.15s,border-color 0.2s;"
+        onmouseenter="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
+        onmouseleave="this.style.borderColor='var(--border)';this.style.transform=''">
+
+        <!-- Logo -->
+        <div style="height:140px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          ${p.logo
+            ? `<img src="${p.logo}" alt="${p.nome}" style="max-width:100%;max-height:130px;object-fit:contain;padding:12px;"
+                onerror="this.parentElement.innerHTML='<div style=\'font-size:48px;\'>🏃</div>'">`
+            : '<div style="font-size:48px;">🏃</div>'
+          }
+        </div>
+
+        <!-- Info -->
+        <div style="padding:16px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">${p.nome}</div>
+          ${p.citta ? `<div style="font-size:13px;color:var(--text3);margin-bottom:8px;">📍 ${p.citta}</div>` : ''}
+          ${p.contatto ? `<div style="font-size:13px;color:var(--text2);margin-bottom:8px;">📞 ${p.contatto}</div>` : ''}
+          ${p.link ? `
+            <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+              ${p.sito ? `<a href="${p.sito}" target="_blank" style="display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;">
+                <span style="font-size:16px;">🌐</span>
+                <span style="font-size:11px;color:var(--accent);font-weight:600;">Sito</span>
+              </a>` : ''}
+              ${p.facebook ? `<a href="${p.facebook}" target="_blank" style="display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;">
+                <span style="font-size:16px;">👤</span>
+                <span style="font-size:11px;color:#4267B2;font-weight:600;">Facebook</span>
+              </a>` : ''}
+              ${p.instagram ? `<a href="${p.instagram}" target="_blank" style="display:flex;align-items:center;gap:4px;text-decoration:none;background:var(--bg3);border-radius:8px;padding:4px 10px;">
+                <span style="font-size:16px;">📸</span>
+                <span style="font-size:11px;color:#E1306C;font-weight:600;">Instagram</span>
+              </a>` : ''}
+            </div>` : ''}
+        </div>
+      </div>`).join('');
+  }
 }
 
 
