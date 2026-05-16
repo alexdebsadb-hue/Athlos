@@ -978,6 +978,7 @@
       <div id="landing-community" style="max-width:900px;margin:0 auto;padding:40px 24px;">
         <div style="text-align:center;margin-bottom:28px;">
           <div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:900;">La community <em style="color:var(--accent)">Athlos</em></div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">ℹ️ I dati vengono aggiornati ogni ora — potrebbero non riflettere le ultime attività</div>
           <div style="font-size:14px;color:var(--text3);margin-top:6px;">Dati aggregati e anonimi della nostra community di atleti</div>
         </div>
 
@@ -996,12 +997,12 @@
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
             <div style="font-size:20px;margin-bottom:4px;">📏</div>
             <div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:900;color:var(--accent);" id="landing-n-km">—</div>
-            <div style="font-size:12px;color:var(--text3);">Km gareggiati</div>
+            <div style="font-size:12px;color:var(--text3);">Km percorsi</div>
           </div>
           <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
             <div style="font-size:20px;margin-bottom:4px;">📍</div>
             <div style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:900;color:var(--accent);" id="landing-n-citta">—</div>
-            <div style="font-size:12px;color:var(--text3);">Città coperte</div>
+            <div style="font-size:12px;color:var(--text3);">Città conquistate</div>
           </div>
         </div>
 
@@ -3347,7 +3348,7 @@ function salvaGara() {
     rating: { ...ratings },
     ratingHotel: { posizione: ratings.posizione, pulizia: ratings.pulizia, colazione: ratings.colazione },
     note: document.getElementById('f-note').value,
-    foto: document.getElementById('f-foto-url')?.value || '',
+    foto: (() => { const v = document.getElementById('f-foto-url')?.value||''; console.log('[FOTO-GARA] url=',v); return v; })(),
     hotel: document.getElementById('f-hotel').value,
     hotelTipo: document.getElementById('f-hotel-tipo').value,
   };
@@ -3918,7 +3919,11 @@ function renderHome() {
   if (_uidP) {
     gsGet({ action: 'getUtente', utente_id: _uidP }).then(p => {
       if (p && p.utente_id) {
+        // Mantieni la foto se già salvata localmente
+        const _profiloAttuale = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || '{}');
+        if (_profiloAttuale.foto && !p.foto) p.foto = _profiloAttuale.foto;
         localStorage.setItem('athlos_profilo_remoto', JSON.stringify(p));
+        aggiornaAvatarFoto();
         // Ricarica canvas con dati aggiornati
         const kmTP = getGare().reduce((s,g) => s+(g.distanza||0), 0);
         initPlanetCanvas(kmTP);
@@ -4335,7 +4340,7 @@ function renderStats() {
 
   document.getElementById('stats-summary-cards').innerHTML = [
     statCard('🏅', 'Gare totali', gare.length, `${finisher.length} finisher · ${gare.length-finisher.length} DNF`),
-    statCard('📏', 'Km gareggiati', Math.round(kmTot).toLocaleString('it'), 'km totali percorsi', '#2196f3'),
+    statCard('📏', 'Km percorsi', Math.round(kmTot).toLocaleString('it'), 'km totali percorsi', '#2196f3'),
     statCard('🗺️', 'Regioni coperte', regioni, 'regioni d\u0027Italia', '#4caf50'),
     statCard('⚡', 'Finish Rate', (gare.length ? Math.round(finisher.length/gare.length*100) : 100) + '%', `${pb} Personal Best`, '#9c27b0'),
   ].join('');
@@ -8637,10 +8642,10 @@ async function renderSocial() {
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
         <div style="width:90px;color:var(--text2);">${sessoLabels[s]||s}</div>
         <div style="flex:1;background:var(--bg4);border-radius:4px;height:8px;overflow:hidden;">
-          <div style="width:${parseFloat(pct)||0}%;background:${sessoColors[s]||'#888'};height:100%;border-radius:4px;transition:width 0.5s;"></div>
+          <div style="width:${Math.round(parseFloat(pct)||0)}%;background:${sessoColors[s]||'#888'};height:100%;border-radius:4px;transition:width 0.5s;"></div>
         </div>
         <div style="color:var(--text2);min-width:30px;text-align:right;">${n}</div>
-        <div style="color:var(--text3);min-width:36px;">${pct}</div>
+        <div style="color:var(--text3);min-width:36px;">${Math.round(parseFloat(pct)||0)}%</div>
       </div>`).join('');
   } else {
     const perSesso = { M:0, F:0, A:0 };
@@ -8672,7 +8677,7 @@ async function renderSocial() {
 
   document.getElementById('social-gare-cards').innerHTML = [
     { n: Number(nGareTot).toLocaleString('it'), label: 'Gare registrate', icon: '🏅', sub: '' },
-    { n: Number(kmTot).toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km gareggiati' },
+    { n: Number(kmTot).toLocaleString('it'),    label: 'Km totali',        icon: '📏', sub: 'km percorsi' },
     { n: nCitta,                                label: 'Città gareggiate', icon: '📍', sub: '' },
     { n: nRegioni,                              label: 'Regioni italiane', icon: '🗺️', sub: 'su 20 regioni' },
   ].map(({n, label, icon, sub}) => `
