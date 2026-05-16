@@ -3443,6 +3443,7 @@ function salvaGara() {
       nome_gara:    (gara.nome && gara.nome !== gara.tipo_gara) ? gara.nome : '',
       nazione:      gara.nazione      || '',
       continente:   gara.continente   || '',
+      foto:         gara.foto         || '',
     };
     gsPost(action, garaPayload).then(r => {
       if (r && r.saved) {
