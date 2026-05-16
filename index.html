@@ -2611,6 +2611,7 @@ function normalizzaGara(g) {
     hotel: g.hotel || '',
     hotelTipo: g.hotelTipo || '',
     note: g.note || '',
+    foto: g.foto || '',
     pb: g.pb === true || g.pb === 'TRUE',
     risultato: g.risultato || '',
   };
@@ -3121,6 +3122,13 @@ function openForm(garaEdit) {
     document.getElementById('f-esito').value    = g.esito    || 'finisher';
     document.getElementById('f-tempo').value    = g.tempo    || '';
     document.getElementById('f-note').value     = g.note     || '';
+    document.getElementById('f-foto-url').value  = g.foto     || '';
+    if (g.foto) {
+      document.getElementById('foto-gara-img').src = g.foto;
+      document.getElementById('foto-gara-preview').style.display = 'flex';
+    } else {
+      rimuoviFotoGara();
+    }
     document.getElementById('f-hotel').value    = g.hotel    || '';
     document.getElementById('f-hotel-tipo').value = g.hotelTipo || '';
     if (g.frazioni) {
@@ -7054,14 +7062,14 @@ async function renderPartner() {
   if (empty)   empty.style.display   = 'none';
   if (grid)    grid.style.display    = 'none';
 
-  // Usa cache se disponibile
-  let partner = _partnerCache;
-  if (!partner) {
-    try {
-      partner = await gsGet({ action: 'getPartner', utente_id: '' });
-      if (Array.isArray(partner)) _partnerCache = partner;
-    } catch(e) { partner = []; }
-  }
+  // Ricarica sempre (no cache) per avere dati aggiornati
+  _partnerCache = null;
+  let partner = [];
+  try {
+    partner = await gsGet({ action: 'getPartner', utente_id: '' });
+    if (Array.isArray(partner)) _partnerCache = partner;
+    else partner = [];
+  } catch(e) { partner = []; }
 
   if (loading) loading.style.display = 'none';
 
