@@ -1244,9 +1244,10 @@
       <div id="profile-header" style="background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px;">
         <!-- Riga 1: Avatar + Nome + Status + Azioni -->
         <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:18px;">
-          <div class="avatar" onclick="editProfile()" style="flex-shrink:0;">
+          <div class="avatar" style="flex-shrink:0;position:relative;" onclick="cambiaFotoProfilo()">
+            <img id="avatar-foto" src="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;">
             <span id="avatar-initials">?</span>
-            <div class="avatar-edit">✏️</div>
+            <div class="avatar-edit">📷</div>
           </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
@@ -1898,6 +1899,16 @@
       <div class="form-group">
         <label class="form-label">Note sulla gara</label>
         <textarea class="form-textarea" id="f-note" placeholder="Come è andata? Aneddoti, impressioni, consigli per chi vuole parteciparci..."></textarea>
+
+        <label class="form-label" style="margin-top:12px;">📸 Foto della gara <span style="font-size:11px;color:var(--text3);font-weight:400;">(opzionale)</span></label>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <button type="button" onclick="uploadFotoGara()" class="btn-secondary" style="font-size:13px;">📷 Scegli foto</button>
+          <div id="foto-gara-preview" style="display:none;align-items:center;gap:8px;">
+            <img id="foto-gara-img" src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+            <button type="button" onclick="rimuoviFotoGara()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;">✕</button>
+          </div>
+        </div>
+        <input type="hidden" id="f-foto-url" value="">
       </div>
 
       <hr class="form-divider" />
@@ -2430,6 +2441,9 @@ function setCachedConfig(data) {
 }
 
 // ============ CONFIG GOOGLE SHEETS ============
+const CLOUDINARY_CLOUD = 'dz6sfmek6';
+const CLOUDINARY_PRESET = 'athlosdiary';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload';
 const CONTACT_EMAIL = 'info@athlosdiary.com';
 const GS_URL   = 'https://script.google.com/macros/s/AKfycbyulhPWlAnh_ueNDMct2GB0TtXhAeTeEKLImHixergrZYb3X468EhlIf59eSSbcQBnq/exec';
 const GS_TOKEN = '8Kt4aAIE-Unqql3EPo8tM3pXBxy2NVqdAUT8DUpLRrI';
@@ -3325,6 +3339,7 @@ function salvaGara() {
     rating: { ...ratings },
     ratingHotel: { posizione: ratings.posizione, pulizia: ratings.pulizia, colazione: ratings.colazione },
     note: document.getElementById('f-note').value,
+    foto: document.getElementById('f-foto-url')?.value || '',
     hotel: document.getElementById('f-hotel').value,
     hotelTipo: document.getElementById('f-hotel-tipo').value,
   };
@@ -4782,6 +4797,7 @@ function renderProfilo(profiloEsterno) {
   const initials = nome.split(' ').map(p=>p[0]).filter(Boolean).join('').slice(0,2).toUpperCase() || '?';
   const avatarEl = document.getElementById('avatar-initials');
   if (avatarEl) avatarEl.textContent = initials;
+  aggiornaAvatarFoto();
   renderNavUser();
 
   // Profilo privato altrui
@@ -6363,7 +6379,8 @@ function parseStandardRow(cols) {
 
   return { sport, tipo_gara: tipoGara, nome, data: dataISO, luogo, regione, distanza,
     esito, tempo, frazioni: null, risultato: '',
-    note, hotel, hotelTipo };
+    note,
+    foto: fotoUrl, hotel, hotelTipo };
 }
 
 function renderImportPreview(errCount, fileName) {
@@ -7081,7 +7098,7 @@ async function renderPartner() {
       p.facebook  ? '<a href="'+p.facebook+'"  target="_blank" style="'+bs+'">👤 <span style="font-size:11px;color:#4267B2;font-weight:600;">Facebook</span></a>' : '',
       p.instagram ? '<a href="'+p.instagram+'" target="_blank" style="'+bs+'">📸 <span style="font-size:11px;color:#E1306C;font-weight:600;">Instagram</span></a>' : '',
     ].filter(Boolean).join('');
-    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.15s,border-color 0.2s;" onmouseenter="this.style.borderColor=\'var(--accent)\';this.style.transform=\'translateY(-2px)\'" onmouseleave="this.style.borderColor=\'var(--border)\';this.style.transform=\'\'"><div style="height:140px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;">'+logo+'</div><div style="padding:16px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">'+p.nome+'</div>'+(p.citta?'<div style="font-size:13px;color:var(--text3);margin-bottom:2px;">📍 '+p.citta+'</div>':''+(p.regione?'<div style="font-size:12px;color:var(--text3);margin-bottom:6px;padding-left:18px;opacity:0.8;">'+p.regione+'</div>':''))+(p.contatto?'<div style="font-size:13px;color:var(--text2);margin-bottom:8px;">'+(p.contatto.includes('@')?'✉️':'📞')+' '+p.contatto+'</div>':'')+(ls?'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+ls+'</div>':'')+(function(){var fed=[p.fidal?'<span style="background:rgba(0,100,200,0.15);border:1px solid rgba(0,100,200,0.4);color:#4aa0ff;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIDAL '+p.fidal+'</span>':'',p.fitri?'<span style="background:rgba(200,50,0,0.15);border:1px solid rgba(200,50,0,0.4);color:#ff6b4a;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FITRI '+p.fitri+'</span>':'',p.fci?'<span style="background:rgba(0,150,0,0.15);border:1px solid rgba(0,150,0,0.4);color:#4caf50;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FCI '+p.fci+'</span>':'',p.fin?'<span style="background:rgba(0,50,200,0.15);border:1px solid rgba(0,50,200,0.4);color:#42a5f5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIN '+p.fin+'</span>':''].filter(Boolean).join('');return fed?'<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'+fed+'</div>':'';}())+'</div></div>';
+    return '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.15s,border-color 0.2s;" onmouseenter="this.style.borderColor=\'var(--accent)\';this.style.transform=\'translateY(-2px)\'" onmouseleave="this.style.borderColor=\'var(--border)\';this.style.transform=\'\'"><div style="height:140px;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;">'+logo+'</div><div style="padding:16px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">'+p.nome+'</div>'+(p.citta?'<div style="font-size:13px;color:var(--text3);margin-bottom:2px;">📍 '+p.citta+'</div>':'')+(p.regione?'<div style="font-size:12px;color:var(--text3);margin-bottom:6px;padding-left:18px;opacity:0.8;">'+p.regione+'</div>':'')+(p.contatto?'<div style="font-size:13px;color:var(--text2);margin-bottom:8px;">'+(p.contatto.includes('@')?'✉️':'📞')+' '+p.contatto+'</div>':'')+(ls?'<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+ls+'</div>':'')+(function(){var fed=[p.fidal?'<span style="background:rgba(0,100,200,0.15);border:1px solid rgba(0,100,200,0.4);color:#4aa0ff;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIDAL '+p.fidal+'</span>':'',p.fitri?'<span style="background:rgba(200,50,0,0.15);border:1px solid rgba(200,50,0,0.4);color:#ff6b4a;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FITRI '+p.fitri+'</span>':'',p.fci?'<span style="background:rgba(0,150,0,0.15);border:1px solid rgba(0,150,0,0.4);color:#4caf50;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FCI '+p.fci+'</span>':'',p.fin?'<span style="background:rgba(0,50,200,0.15);border:1px solid rgba(0,50,200,0.4);color:#42a5f5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">FIN '+p.fin+'</span>':''].filter(Boolean).join('');return fed?'<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'+fed+'</div>':'';}())+'</div></div>';
   }).join('');
   }
 }
@@ -7334,6 +7351,88 @@ function scaricaDiploma() {
   showToast('Diploma scaricato!');
 }
 
+
+
+// ════════════════════════════════
+// CLOUDINARY UPLOAD
+// ════════════════════════════════
+async function uploadFotoCloudinary(file, folder) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  fd.append('folder', 'athlosdiary/' + (folder||'misc'));
+  const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload fallito: ' + res.status);
+  const data = await res.json();
+  return data.secure_url;
+}
+
+// Crea input file nascosto e torna l'URL Cloudinary
+function scegliEUploadFoto(folder) {
+  return new Promise((resolve, reject) => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = async () => {
+      const file = inp.files[0];
+      if (!file) return reject('Nessun file');
+      if (file.size > 5 * 1024 * 1024) return reject('File troppo grande (max 5MB)');
+      try {
+        showToast('Caricamento foto...');
+        const url = await uploadFotoCloudinary(file, folder);
+        resolve(url);
+      } catch(e) { reject(e.message); }
+    };
+    inp.click();
+  });
+}
+
+
+// ── Foto gara ──
+async function uploadFotoGara() {
+  try {
+    const url = await scegliEUploadFoto('gare');
+    document.getElementById('f-foto-url').value = url;
+    document.getElementById('foto-gara-img').src = url;
+    document.getElementById('foto-gara-preview').style.display = 'flex';
+    showToast('Foto caricata!');
+  } catch(e) { showToast('Errore: ' + e); }
+}
+function rimuoviFotoGara() {
+  document.getElementById('f-foto-url').value = '';
+  document.getElementById('foto-gara-img').src = '';
+  document.getElementById('foto-gara-preview').style.display = 'none';
+}
+
+// ── Foto profilo ──
+async function cambiaFotoProfilo() {
+  try {
+    const url = await scegliEUploadFoto('profili');
+    // Aggiorna avatar
+    const imgEl = document.getElementById('avatar-foto');
+    const initEl = document.getElementById('avatar-initials');
+    if (imgEl) { imgEl.src = url; imgEl.style.display = 'block'; }
+    if (initEl) initEl.style.display = 'none';
+    // Salva nel profilo locale e remoto
+    const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || '{}');
+    profilo.foto = url;
+    localStorage.setItem('athlos_profilo_remoto', JSON.stringify(profilo));
+    // Salva su Apps Script
+    const uid = getUtenteId();
+    if (uid) gsPost('updateProfilo', { utente_id: uid, foto: url }).catch(()=>{});
+    showToast('Foto profilo aggiornata!');
+  } catch(e) { showToast('Errore: ' + e); }
+}
+
+// Mostra foto profilo se disponibile
+function aggiornaAvatarFoto() {
+  const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || '{}');
+  if (profilo.foto) {
+    const imgEl = document.getElementById('avatar-foto');
+    const initEl = document.getElementById('avatar-initials');
+    if (imgEl) { imgEl.src = profilo.foto; imgEl.style.display = 'block'; }
+    if (initEl) initEl.style.display = 'none';
+  }
+}
 
 
 // ============ STATISTICHE ============
