@@ -8283,6 +8283,19 @@ async function verificaOTPeRegistra() {
   const tsConsenso= (tsEl && tsEl.value) ? tsEl.value : new Date().toISOString();
   const uid       = (nome + cognome).toLowerCase().replace(/\s/g,'') + '_' + Date.now().toString().slice(-4);
 
+  // Raccoglie dati audit consenso
+  const _auditConsenso = [
+    'ts:'       + tsConsenso,
+    'policy:v1.0',
+    'ua:'       + (navigator.userAgent || '').slice(0, 120),
+    'lang:'     + (navigator.language || ''),
+    'platform:' + (navigator.platform || ''),
+    'tz:'       + Intl.DateTimeFormat().resolvedOptions().timeZone,
+    'url:'      + window.location.href.split('?')[0],
+    'privacy:accepted',
+    'termini:accepted',
+  ].join(' | ');
+
   const utente = {
     utente_id: uid, nome, cognome, email,
     data_nascita: dataNasc, sesso: sessoVal, peso: pesoVal,
@@ -8291,7 +8304,8 @@ async function verificaOTPeRegistra() {
     profilo: profiloVal === 'pubblico' ? 'PUBBLICO' : 'PRIVATO',
     password: pwd, citta: cittaVal, regione: regioneVal,
     timestamp_consenso: tsConsenso,
-    otp_code: otp, // il GS verifica l'OTP prima di creare l'account
+    consenso_data: _auditConsenso,
+    otp_code: otp,
   };
 
   const res = await gsPost('registraUtente', utente);
