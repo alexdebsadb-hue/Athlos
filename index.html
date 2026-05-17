@@ -8698,7 +8698,7 @@ async function renderSocial() {
     (statsCom && statsCom.eta_media) ? statsCom.eta_media : (etaMediaU || '—');
 
   // ── STATS GARE — usa foglio Statistiche Community se disponibile ──
-  const nGareTot2   = statsCom ? statsCom.gare_tot       : gare.length;
+  const nGareTot    = statsCom ? statsCom.gare_tot       : gare.length;
   const utLoggati   = statsCom ? (statsCom.utenti_loggati || 0) : utentiOnline;
   const kmTot    = statsCom ? statsCom.km_tot     : Math.round(gare.reduce((s,g)=>s+(g.distanza||0),0));
   const nCitta   = statsCom ? statsCom.citta_tot  : [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
