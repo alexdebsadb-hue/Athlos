@@ -830,6 +830,13 @@
           <!-- Popolato dal foglio CONFIGURAZIONE -->
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Nazione</label>
+        <select class="form-select" id="reg-nazione">
+          <option value="">⏳ Caricamento...</option>
+          <!-- Popolato dal foglio CONFIGURAZIONE -->
+        </select>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Password <span style="color:var(--accent)">*</span></label>
@@ -2792,6 +2799,11 @@ function popolaSelectConfig() {
   if (rRegSel && c.regioni && c.regioni.length) {
     rRegSel.innerHTML = '<option value="">Seleziona regione...</option>'
       + (c.regioni||[]).map(r => `<option value="${r}">${r}</option>`).join('');
+  }
+  const rNazSel = document.getElementById('reg-nazione');
+  if (rNazSel && c.nazioni && c.nazioni.length) {
+    rNazSel.innerHTML = '<option value="">Seleziona nazione...</option>'
+      + (c.nazioni||[]).map(n => `<option value="${n}">${n}</option>`).join('');
   }
 }
 
@@ -4864,7 +4876,7 @@ function renderProfilo(profiloEsterno) {
     else if (nGare >= 10)  { status = '🏅 Finisher';     color = '#2196f3'; }
     else if (nGare >= 1)   { status = '🌱 Rookie';       color = '#ff8a65'; }
     else                   { status = '👟 Alle prime armi'; color = 'var(--text3)'; }
-    statusEl.innerHTML = `<span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">${status}</span>`;
+    statusEl.innerHTML = `<span style="background:${color}22;color:${color};border:1px solid ${color}44;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;">${status}</span> <span onclick="document.getElementById('leggenda-livelli').style.display='block';document.getElementById('leggenda-overlay').style.display='block';" style="cursor:pointer;font-size:13px;color:var(--text3);margin-left:6px;" title="Vedi scala livelli">ℹ️</span>`;
   }
 
   // Sport preferito
@@ -7883,7 +7895,9 @@ function giroRegione(regione) {
 function mostraRegionConquistata(regione) {
   const flagReg = REGIONI_FLAG[regione] || '🏅';
   const profilo = JSON.parse(localStorage.getItem('athlos_profilo_remoto') || localStorage.getItem('athlos_profilo') || '{}');
-  const regionePartenza = profilo.regione || profilo.REGIONE || '';
+  // Se la regione di partenza è uguale all'arrivo, usa stringa vuota (centro Italia)
+  const _regP = normalizzaRegione(profilo.regione || profilo.REGIONE || '');
+  const regionePartenza = (_regP && _regP !== normalizzaRegione(regione)) ? _regP : '';
 
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s ease;';
@@ -8010,7 +8024,7 @@ function animaConquistaRegione(canvasId, da, a) {
   const posStart = getPos(da || a);
   const posEnd   = getPos(a);
   const rc = getRunnerColor();
-  let progress = 0, angle = 0, anim;
+  let progress = 0.001, angle = 0, anim; // parte quasi da 0 per mostrare omino in partenza
 
   function draw() {
     ctx.clearRect(0,0,W,H);
@@ -8278,6 +8292,7 @@ async function verificaOTPeRegistra() {
   const pesoVal   = (document.getElementById('reg-peso').value    || '').trim();
   const cittaVal  = (document.getElementById('reg-citta').value   || '').trim();
   const regioneVal= (document.getElementById('reg-regione').value || '').trim();
+  const nazioneVal= (document.getElementById('reg-nazione')?.value || '').trim();
   const profiloVal= profilo ? profilo.value : 'pubblico';
   const tsEl      = document.getElementById('reg-timestamp-consenso');
   const tsConsenso= (tsEl && tsEl.value) ? tsEl.value : new Date().toISOString();
@@ -8302,7 +8317,7 @@ async function verificaOTPeRegistra() {
     sport_preferito: sportPref,
     profilo_pubblico: profiloVal === 'pubblico',
     profilo: profiloVal === 'pubblico' ? 'PUBBLICO' : 'PRIVATO',
-    password: pwd, citta: cittaVal, regione: regioneVal,
+    password: pwd, citta: cittaVal, regione: regioneVal, nazione: nazioneVal,
     timestamp_consenso: tsConsenso,
     consenso_data: _auditConsenso,
     otp_code: otp,
@@ -9567,5 +9582,49 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+      <!-- Leggenda livelli -->
+      <div id="leggenda-livelli" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;">🏆 Scala livelli</div>
+          <button onclick="document.getElementById('leggenda-livelli').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;">✕</button>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Il livello si basa sul numero di gare completate come Finisher</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:var(--text3)22;color:var(--text3);border:1px solid var(--text3)44;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">👟 Alle prime armi</span>
+            <span style="font-size:13px;color:var(--text2);">0 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#ff8a6522;color:#ff8a65;border:1px solid #ff8a6544;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">🌱 Rookie</span>
+            <span style="font-size:13px;color:var(--text2);">1–9 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#2196f322;color:#2196f3;border:1px solid #2196f344;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">🏅 Finisher</span>
+            <span style="font-size:13px;color:var(--text2);">10–24 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#4caf5022;color:#4caf50;border:1px solid #4caf5044;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">🎖️ Veterano</span>
+            <span style="font-size:13px;color:var(--text2);">25–49 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#9c27b022;color:#9c27b0;border:1px solid #9c27b044;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">⚡ Esperto</span>
+            <span style="font-size:13px;color:var(--text2);">50–74 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#ff572222;color:#ff5722;border:1px solid #ff572244;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">🔥 Campione</span>
+            <span style="font-size:13px;color:var(--text2);">75–99 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#00bcd422;color:#00bcd4;border:1px solid #00bcd444;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">💎 Elite</span>
+            <span style="font-size:13px;color:var(--text2);">100–199 gare</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--bg3);border-radius:8px;">
+            <span style="background:#ffd70022;color:#ffd700;border:1px solid #ffd70044;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;min-width:110px;text-align:center;">🏆 Leggenda</span>
+            <span style="font-size:13px;color:var(--text2);">200+ gare</span>
+          </div>
+        </div>
+      </div>
+      <div id="leggenda-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;" onclick="document.getElementById('leggenda-livelli').style.display='none';this.style.display='none';"></div>
 </body>
 </html>
