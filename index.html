@@ -1582,7 +1582,7 @@
     <div class="profile-wrap" style="max-width:1000px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <h2 style="font-family:Barlow Condensed,sans-serif;font-size:32px;font-weight:800;">Community <span style="color:var(--accent)">Athlos</span></h2>
-        <span style="font-size:12px;color:var(--text3);">Dati anonimi e aggregati — aggiornati in tempo reale</span>
+        <span style="font-size:12px;color:var(--text3);">Dati anonimi e aggregati — aggiornati ogni ora (potrebbero non riflettere le ultime attività)</span>
       </div>
       <p style="font-size:13px;color:var(--text3);margin-bottom:28px;">Statistiche della community. I dati non rivelano informazioni personali.</p>
 
@@ -1599,7 +1599,7 @@
         <div style="font-family:Barlow Condensed,sans-serif;font-size:22px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
           👥 Utenti registrati
         </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;" id="social-utenti-cards"></div>
+        <div style="display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:28px;" id="social-utenti-cards"></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:32px;">
           <!-- Per regione -->
@@ -8634,8 +8634,7 @@ async function renderSocial() {
   const etaMediaU = etaArr.length ? Math.round(etaArr.reduce((s,e)=>s+e,0)/etaArr.length) : null;
 
   document.getElementById('social-utenti-cards').innerHTML = [
-    { n: nUtenti,  label: 'Utenti registrati', icon: '👥', sub: '' },
-    { n: nOnline,  label: 'Utenti loggati',     icon: '🟢', sub: '' },
+    { n: nUtenti, label: 'Utenti registrati', icon: '👥', sub: '' },
   ].map(({n, label, icon, sub}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;">
       <div style="font-size:32px;margin-bottom:8px;">${icon}</div>
@@ -8699,7 +8698,7 @@ async function renderSocial() {
     (statsCom && statsCom.eta_media) ? statsCom.eta_media : (etaMediaU || '—');
 
   // ── STATS GARE — usa foglio Statistiche Community se disponibile ──
-  const nGareTot    = statsCom ? statsCom.gare_tot       : gare.length;
+  const nGareTot2   = statsCom ? statsCom.gare_tot       : gare.length;
   const utLoggati   = statsCom ? (statsCom.utenti_loggati || 0) : utentiOnline;
   const kmTot    = statsCom ? statsCom.km_tot     : Math.round(gare.reduce((s,g)=>s+(g.distanza||0),0));
   const nCitta   = statsCom ? statsCom.citta_tot  : [...new Set(gare.map(g=>g.luogo).filter(Boolean))].length;
@@ -9199,7 +9198,7 @@ async function caricaDatiAdmin() {
     { n: gare.length,      label: 'Gare totali',            icon: '🏅' },
     { n: nuoveGare.length, label: 'Gare inserite oggi',     icon: '📅' },
     { n: segnalazioni.length, label: 'Inserimenti manuali', icon: '📋' },
-    { n: utentiOnline, label: 'Utenti loggati', icon: '🟢' },
+
     { n: utentiIeri,       label: 'Login ieri',             icon: '🔑' },
   ].map(({n,label,icon}) => `
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center;">
